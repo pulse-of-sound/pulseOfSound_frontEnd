@@ -1,41 +1,42 @@
 import 'package:flutter/material.dart';
-import 'modelSpecialists.dart';
 
-class AddSpecialistPage extends StatefulWidget {
-  const AddSpecialistPage({super.key});
+import 'modelAdmin.dart';
 
-  @override
-  State<AddSpecialistPage> createState() => _AddSpecialistPageState();
-}
-
-class _AddSpecialistPageState extends State<AddSpecialistPage> {
-  final nameController = TextEditingController();
-  final ageController = TextEditingController();
-  final phoneController = TextEditingController();
+class AddAdminPage extends StatelessWidget {
+  const AddAdminPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final nameController = TextEditingController();
+    final phoneController = TextEditingController();
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+
     return Scaffold(
-      appBar: AppBar(title: const Text("إضافة أخصائي جديد"), centerTitle: true),
+      appBar: AppBar(title: const Text("إضافة أدمن جديد"), centerTitle: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             _buildField("الاسم الكامل", nameController),
             const SizedBox(height: 15),
-            _buildField("العمر", ageController, keyboard: TextInputType.number),
-            const SizedBox(height: 15),
             _buildField("رقم الموبايل", phoneController,
                 keyboard: TextInputType.phone),
+            const SizedBox(height: 15),
+            _buildField("البريد الإلكتروني", emailController,
+                keyboard: TextInputType.emailAddress),
+            const SizedBox(height: 15),
+            _buildField("كلمة المرور", passwordController, obscure: true),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                final specialist = Specialist(
+                final newAdmin = Admin(
                   name: nameController.text,
-                  age: ageController.text,
                   phone: phoneController.text,
+                  email: emailController.text,
+                  password: passwordController.text,
                 );
-                Navigator.pop(context, specialist);
+                Navigator.pop(context, newAdmin);
               },
               child: const Text("إضافة"),
             ),
@@ -46,9 +47,10 @@ class _AddSpecialistPageState extends State<AddSpecialistPage> {
   }
 
   Widget _buildField(String label, TextEditingController controller,
-      {TextInputType keyboard = TextInputType.text}) {
+      {bool obscure = false, TextInputType keyboard = TextInputType.text}) {
     return TextField(
       controller: controller,
+      obscureText: obscure,
       keyboardType: keyboard,
       decoration: InputDecoration(
         labelText: label,

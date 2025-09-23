@@ -1,50 +1,57 @@
 import 'package:flutter/material.dart';
-import 'modelSpecialists.dart';
 
-class EditSpecialistPage extends StatefulWidget {
-  final Specialist specialist;
+import 'modelAdmin.dart';
 
-  const EditSpecialistPage({super.key, required this.specialist});
+class EditAdminPage extends StatefulWidget {
+  final Admin admin;
+
+  const EditAdminPage({super.key, required this.admin});
 
   @override
-  State<EditSpecialistPage> createState() => _EditSpecialistPageState();
+  State<EditAdminPage> createState() => _EditAdminPageState();
 }
 
-class _EditSpecialistPageState extends State<EditSpecialistPage> {
+class _EditAdminPageState extends State<EditAdminPage> {
   late TextEditingController nameController;
-  late TextEditingController ageController;
   late TextEditingController phoneController;
+  late TextEditingController emailController;
+  late TextEditingController passwordController;
 
   @override
   void initState() {
     super.initState();
-    nameController = TextEditingController(text: widget.specialist.name);
-    ageController = TextEditingController(text: widget.specialist.age);
-    phoneController = TextEditingController(text: widget.specialist.phone);
+    nameController = TextEditingController(text: widget.admin.name);
+    phoneController = TextEditingController(text: widget.admin.phone);
+    emailController = TextEditingController(text: widget.admin.email);
+    passwordController = TextEditingController(text: widget.admin.password);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar:
-          AppBar(title: const Text("تعديل بيانات الأخصائي"), centerTitle: true),
+          AppBar(title: const Text("تعديل بيانات الأدمن"), centerTitle: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             _buildField("الاسم الكامل", nameController),
             const SizedBox(height: 15),
-            _buildField("العمر", ageController, keyboard: TextInputType.number),
-            const SizedBox(height: 15),
             _buildField("رقم الموبايل", phoneController,
                 keyboard: TextInputType.phone),
+            const SizedBox(height: 15),
+            _buildField("البريد الإلكتروني", emailController,
+                keyboard: TextInputType.emailAddress),
+            const SizedBox(height: 15),
+            _buildField("كلمة المرور", passwordController, obscure: true),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                final updated = Specialist(
+                final updated = Admin(
                   name: nameController.text,
-                  age: ageController.text,
                   phone: phoneController.text,
+                  email: emailController.text,
+                  password: passwordController.text,
                 );
                 Navigator.pop(context, updated);
               },
@@ -53,10 +60,10 @@ class _EditSpecialistPageState extends State<EditSpecialistPage> {
             const SizedBox(height: 10),
             OutlinedButton(
               onPressed: () {
-                Navigator.pop(context, null); // null = حذف
+                Navigator.pop(context, null);
               },
               style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text("حذف الأخصائي"),
+              child: const Text("حذف الأدمن"),
             ),
           ],
         ),
@@ -65,9 +72,10 @@ class _EditSpecialistPageState extends State<EditSpecialistPage> {
   }
 
   Widget _buildField(String label, TextEditingController controller,
-      {TextInputType keyboard = TextInputType.text}) {
+      {bool obscure = false, TextInputType keyboard = TextInputType.text}) {
     return TextField(
       controller: controller,
+      obscureText: obscure,
       keyboardType: keyboard,
       decoration: InputDecoration(
         labelText: label,

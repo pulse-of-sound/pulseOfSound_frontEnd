@@ -1,50 +1,52 @@
 import 'package:flutter/material.dart';
-import 'modelSpecialists.dart';
 
-class EditSpecialistPage extends StatefulWidget {
-  final Specialist specialist;
+import 'modelChild.dart';
 
-  const EditSpecialistPage({super.key, required this.specialist});
+class EditChildPage extends StatefulWidget {
+  final Child child;
+
+  const EditChildPage({super.key, required this.child});
 
   @override
-  State<EditSpecialistPage> createState() => _EditSpecialistPageState();
+  State<EditChildPage> createState() => _EditChildPageState();
 }
 
-class _EditSpecialistPageState extends State<EditSpecialistPage> {
+class _EditChildPageState extends State<EditChildPage> {
   late TextEditingController nameController;
   late TextEditingController ageController;
-  late TextEditingController phoneController;
+  late TextEditingController parentPhoneController;
 
   @override
   void initState() {
     super.initState();
-    nameController = TextEditingController(text: widget.specialist.name);
-    ageController = TextEditingController(text: widget.specialist.age);
-    phoneController = TextEditingController(text: widget.specialist.phone);
+    nameController = TextEditingController(text: widget.child.name);
+    ageController = TextEditingController(text: widget.child.age);
+    parentPhoneController =
+        TextEditingController(text: widget.child.parentPhone);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar:
-          AppBar(title: const Text("تعديل بيانات الأخصائي"), centerTitle: true),
+          AppBar(title: const Text("تعديل بيانات الطفل"), centerTitle: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            _buildField("الاسم الكامل", nameController),
+            _buildField("اسم الطفل", nameController),
             const SizedBox(height: 15),
             _buildField("العمر", ageController, keyboard: TextInputType.number),
             const SizedBox(height: 15),
-            _buildField("رقم الموبايل", phoneController,
+            _buildField("هاتف ولي الأمر", parentPhoneController,
                 keyboard: TextInputType.phone),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                final updated = Specialist(
+                final updated = Child(
                   name: nameController.text,
                   age: ageController.text,
-                  phone: phoneController.text,
+                  parentPhone: parentPhoneController.text,
                 );
                 Navigator.pop(context, updated);
               },
@@ -56,7 +58,7 @@ class _EditSpecialistPageState extends State<EditSpecialistPage> {
                 Navigator.pop(context, null); // null = حذف
               },
               style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text("حذف الأخصائي"),
+              child: const Text("حذف الطفل"),
             ),
           ],
         ),

@@ -1,100 +1,102 @@
 import 'package:flutter/material.dart';
 
-class EditDoctorPage extends StatelessWidget {
-  final Map<String, String> doctor;
+import 'modelDoctor.dart';
 
-  const EditDoctorPage({super.key, required this.doctor, required String name});
+class EditDoctorPage extends StatefulWidget {
+  final Doctor doctor;
+  const EditDoctorPage({
+    super.key,
+    required this.doctor,
+  });
+
+  @override
+  State<EditDoctorPage> createState() => _EditDoctorPageState();
+}
+
+class _EditDoctorPageState extends State<EditDoctorPage> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController nameCtrl;
+  late TextEditingController ageCtrl;
+  late TextEditingController phoneCtrl;
+  late TextEditingController emailCtrl;
+  late TextEditingController passwordCtrl;
+  late TextEditingController certificatesCtrl;
+  late TextEditingController experienceCtrl;
+  late TextEditingController workplaceCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    nameCtrl = TextEditingController(text: widget.doctor.name);
+    ageCtrl = TextEditingController(text: widget.doctor.age);
+    phoneCtrl = TextEditingController(text: widget.doctor.phone);
+    emailCtrl = TextEditingController(text: widget.doctor.email);
+    passwordCtrl = TextEditingController(text: widget.doctor.password);
+    certificatesCtrl = TextEditingController(text: widget.doctor.certificates);
+    experienceCtrl = TextEditingController(text: widget.doctor.experience);
+    workplaceCtrl = TextEditingController(text: widget.doctor.workplace);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final nameController = TextEditingController(text: doctor["name"]);
-    final ageController = TextEditingController(text: doctor["age"] ?? "");
-    final phoneController = TextEditingController(text: doctor["phone"] ?? "");
-    final emailController = TextEditingController(text: doctor["email"] ?? "");
-    final passwordController =
-        TextEditingController(text: doctor["password"] ?? "");
-    final certificatesController =
-        TextEditingController(text: doctor["certificates"] ?? "");
-    final experienceController =
-        TextEditingController(text: doctor["experience"] ?? "");
-    final workplaceController =
-        TextEditingController(text: doctor["workplace"] ?? "");
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("تعديل بيانات الطبيب"),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
+      appBar:
+          AppBar(title: const Text("تعديل بيانات الطبيب"), centerTitle: true),
+      body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            _buildField(
-              "الاسم الكامل",
-              nameController,
-            ),
-            const SizedBox(height: 15),
-            _buildField("العمر", ageController, keyboard: TextInputType.number),
-            const SizedBox(height: 15),
-            _buildField("رقم الموبايل", phoneController,
-                keyboard: TextInputType.phone),
-            const SizedBox(height: 15),
-            _buildField("البريد الإلكتروني", emailController,
-                keyboard: TextInputType.emailAddress),
-            const SizedBox(height: 15),
-            _buildField("كلمة المرور", passwordController, obscure: true),
-            const SizedBox(height: 15),
-            _buildField("الشهادات", certificatesController, maxLines: 2),
-            const SizedBox(height: 15),
-            _buildField("سنوات الخبرة", experienceController,
-                keyboard: TextInputType.number),
-            const SizedBox(height: 15),
-            _buildField("مكان العمل", workplaceController),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                //     الباك
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("تم تعديل بيانات الطبيب")),
-                );
-                Navigator.pop(context);
-              },
-              child: const Text("حفظ التعديلات"),
-            ),
-            const SizedBox(height: 10),
-            OutlinedButton(
-              onPressed: () {
-                //  حذف الطبيب
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("تم حذف الطبيب")),
-                );
-                Navigator.pop(context);
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.red,
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              _buildField("الاسم الكامل", nameCtrl),
+              _buildField("العمر", ageCtrl, keyboard: TextInputType.number),
+              _buildField("رقم الموبايل", phoneCtrl,
+                  keyboard: TextInputType.phone),
+              _buildField("البريد الإلكتروني", emailCtrl,
+                  keyboard: TextInputType.emailAddress),
+              _buildField("كلمة المرور", passwordCtrl, obscure: true),
+              _buildField("الشهادات", certificatesCtrl),
+              _buildField("سنوات الخبرة", experienceCtrl,
+                  keyboard: TextInputType.number),
+              _buildField("مكان العمل", workplaceCtrl),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  final updatedDoctor = Doctor(
+                    name: nameCtrl.text,
+                    age: ageCtrl.text,
+                    phone: phoneCtrl.text,
+                    email: emailCtrl.text,
+                    password: passwordCtrl.text,
+                    certificates: certificatesCtrl.text,
+                    experience: experienceCtrl.text,
+                    workplace: workplaceCtrl.text,
+                  );
+                  Navigator.pop(context, updatedDoctor);
+                },
+                child: const Text("حفظ التعديلات"),
               ),
-              child: const Text("حذف الطبيب"),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildField(String label, TextEditingController controller,
-      {bool obscure = false,
-      TextInputType keyboard = TextInputType.text,
-      int maxLines = 1}) {
-    return TextField(
-      controller: controller,
-      obscureText: obscure,
-      keyboardType: keyboard,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+      {bool obscure = false, TextInputType keyboard = TextInputType.text}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextFormField(
+        controller: controller,
+        obscureText: obscure,
+        keyboardType: keyboard,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
+        validator: (value) =>
+            value == null || value.isEmpty ? "الرجاء إدخال $label" : null,
       ),
     );
   }

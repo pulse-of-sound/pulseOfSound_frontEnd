@@ -1,77 +1,84 @@
 import 'package:flutter/material.dart';
 
-class AddDoctorPage extends StatelessWidget {
+import 'modelDoctor.dart';
+
+class AddDoctorPage extends StatefulWidget {
   const AddDoctorPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final nameController = TextEditingController();
-    final ageController = TextEditingController();
-    final phoneController = TextEditingController();
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
-    final certificatesController = TextEditingController();
-    final experienceController = TextEditingController();
-    final workplaceController = TextEditingController();
+  State<AddDoctorPage> createState() => _AddDoctorPageState();
+}
 
+class _AddDoctorPageState extends State<AddDoctorPage> {
+  final _formKey = GlobalKey<FormState>();
+  final nameCtrl = TextEditingController();
+  final ageCtrl = TextEditingController();
+  final phoneCtrl = TextEditingController();
+  final emailCtrl = TextEditingController();
+  final passwordCtrl = TextEditingController();
+  final certificatesCtrl = TextEditingController();
+  final experienceCtrl = TextEditingController();
+  final workplaceCtrl = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("إضافة طبيب جديد"),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
+      appBar: AppBar(title: const Text("إضافة طبيب جديد"), centerTitle: true),
+      body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            _buildField("الاسم الكامل", nameController),
-            const SizedBox(height: 15),
-            _buildField("العمر", ageController, keyboard: TextInputType.number),
-            const SizedBox(height: 15),
-            _buildField("رقم الموبايل", phoneController,
-                keyboard: TextInputType.phone),
-            const SizedBox(height: 15),
-            _buildField("البريد الإلكتروني", emailController,
-                keyboard: TextInputType.emailAddress),
-            const SizedBox(height: 15),
-            _buildField("كلمة المرور", passwordController, obscure: true),
-            const SizedBox(height: 15),
-            _buildField("الشهادات", certificatesController, maxLines: 2),
-            const SizedBox(height: 15),
-            _buildField("سنوات الخبرة", experienceController,
-                keyboard: TextInputType.number),
-            const SizedBox(height: 15),
-            _buildField("مكان العمل", workplaceController),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                //    مع الباك
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("تمت إضافة الطبيب بنجاح")),
-                );
-                Navigator.pop(context);
-              },
-              child: const Text("إضافة"),
-            ),
-          ],
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              _buildField("الاسم الكامل", nameCtrl),
+              _buildField("العمر", ageCtrl, keyboard: TextInputType.number),
+              _buildField("رقم الموبايل", phoneCtrl,
+                  keyboard: TextInputType.phone),
+              _buildField("البريد الإلكتروني", emailCtrl,
+                  keyboard: TextInputType.emailAddress),
+              _buildField("كلمة المرور", passwordCtrl, obscure: true),
+              _buildField("الشهادات", certificatesCtrl),
+              _buildField("سنوات الخبرة", experienceCtrl,
+                  keyboard: TextInputType.number),
+              _buildField("مكان العمل", workplaceCtrl),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  final doctor = Doctor(
+                    name: nameCtrl.text,
+                    age: ageCtrl.text,
+                    phone: phoneCtrl.text,
+                    email: emailCtrl.text,
+                    password: passwordCtrl.text,
+                    certificates: certificatesCtrl.text,
+                    experience: experienceCtrl.text,
+                    workplace: workplaceCtrl.text,
+                  );
+                  Navigator.pop(context, doctor);
+                },
+                child: const Text("إضافة"),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildField(String label, TextEditingController controller,
-      {bool obscure = false,
-      TextInputType keyboard = TextInputType.text,
-      int maxLines = 1}) {
-    return TextField(
-      controller: controller,
-      obscureText: obscure,
-      keyboardType: keyboard,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+      {bool obscure = false, TextInputType keyboard = TextInputType.text}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextFormField(
+        controller: controller,
+        obscureText: obscure,
+        keyboardType: keyboard,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
+        validator: (value) =>
+            value == null || value.isEmpty ? "الرجاء إدخال $label" : null,
       ),
     );
   }
