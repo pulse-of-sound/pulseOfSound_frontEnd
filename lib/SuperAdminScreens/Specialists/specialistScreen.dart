@@ -75,15 +75,17 @@ class _SpecialistsPageState extends State<SpecialistsPage> {
                         const Spacer(),
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () {
-                            Navigator.push(
+                          onPressed: () async {
+                            final updated = await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => EditSpecialistPage(
-                                  specialist: specialist,
-                                ),
+                                builder: (_) =>
+                                    EditSpecialistPage(specialist: specialist),
                               ),
                             );
+                            if (updated != null && updated is Specialist) {
+                              _editSpecialist(index, updated);
+                            }
                           },
                         ),
                         IconButton(

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:pulse_of_sound/OnBoarding/onBoarding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../HomeScreens/HomeScreen.dart';
 import 'loginscreen.dart';
@@ -76,7 +77,7 @@ class _OtpScreenState extends State<OtpScreen> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(builder: (_) => const OnBoardingScreen()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

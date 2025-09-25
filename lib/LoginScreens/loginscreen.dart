@@ -35,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text("الرجاء إدخال رقم الهاتف"),
-          backgroundColor: const Color(0xFFFF8A65), 
+          backgroundColor: const Color(0xFFFF8A65),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -69,7 +69,6 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-      
           Image.asset("images/background.jpg", fit: BoxFit.cover),
           Container(
             decoration: BoxDecoration(
@@ -83,14 +82,11 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-
-          
           Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                 
                 const Text(
                   "تسجيل الدخول برقم الهاتف",
                   style: TextStyle(
@@ -133,7 +129,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                  
                 ElevatedButton(
                   onPressed: _handleLogin,
                   style: ElevatedButton.styleFrom(
@@ -152,7 +147,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 20),
 
-                
                 OutlinedButton(
                   onPressed: () {
                     Navigator.push(
@@ -170,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   child: const Text(
-                    "Other Login",
+                    "تسجيل الدخول بطريقة اخرى",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),

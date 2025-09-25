@@ -50,14 +50,6 @@ class _EditSpecialistPageState extends State<EditSpecialistPage> {
               },
               child: const Text("حفظ التعديلات"),
             ),
-            const SizedBox(height: 10),
-            OutlinedButton(
-              onPressed: () {
-                Navigator.pop(context, null); // null = حذف
-              },
-              style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text("حذف الأخصائي"),
-            ),
           ],
         ),
       ),

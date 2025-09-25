@@ -88,13 +88,16 @@ class _DoctorsPageState extends State<DoctorsPage> {
                         const Spacer(),
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () {
-                            Navigator.push(
+                          onPressed: () async {
+                            final updated = await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => EditDoctorPage(doctor: doctor),
                               ),
                             );
+                            if (updated != null && updated is Doctor) {
+                              _editDoctor(index, updated);
+                            }
                           },
                         ),
                         IconButton(
