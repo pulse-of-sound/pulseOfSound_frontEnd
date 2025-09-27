@@ -3,7 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pulse_of_sound/Colors/theme.dart';
 import 'package:pulse_of_sound/SplashScreen/SplashScreen.dart';
 
-void main() {
+import 'utils/sharedPreferance.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SharedPrefsHelper.init();
   runApp(const MyApp());
 }
 

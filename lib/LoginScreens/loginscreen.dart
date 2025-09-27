@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:flutter/services.dart';
 import 'package:pulse_of_sound/LoginScreens/loginForAdmin&Dr.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../HomeScreens/HomeScreen.dart';
+import '../utils/shared_pref_helper.dart';
 import 'OTPScreen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -15,52 +14,26 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   String? completePhoneNumber;
-  bool hasSession = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkSession();
-  }
-
-  Future<void> _checkSession() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      hasSession = prefs.getBool("hasSession") ?? false;
-    });
-  }
 
   void _handleLogin() async {
     if (completePhoneNumber == null || completePhoneNumber!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text("الرجاء إدخال رقم الهاتف"),
-          backgroundColor: const Color(0xFFFF8A65),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
+        const SnackBar(content: Text("الرجاء إدخال رقم الهاتف")),
       );
       return;
     }
-    final prefs = await SharedPreferences.getInstance();
-    bool hasSession = prefs.getBool("hasSession") ?? false;
-    String? savedPhone = prefs.getString("phone");
 
-    if (hasSession && savedPhone == completePhoneNumber) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => OtpScreen(phone: completePhoneNumber!),
-        ),
-      );
-    }
+    // ✅ تخزين بيانات الجلسة
+    await SharedPrefsHelper.setSession(true);
+    await SharedPrefsHelper.setPhone(completePhoneNumber!);
+    await SharedPrefsHelper.setUserType("user");
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => OtpScreen(phone: completePhoneNumber!),
+      ),
+    );
   }
 
   @override
@@ -71,16 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
         children: [
           Image.asset("images/background.jpg", fit: BoxFit.cover),
           Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.white.withOpacity(0.1),
-                  Colors.white.withOpacity(0.6),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
+            color: Colors.white.withOpacity(0.6),
           ),
           Padding(
             padding: const EdgeInsets.all(20.0),
@@ -117,12 +81,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   initialCountryCode: 'SY',
-
-                  //   منع الأحرف والرموز
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                   ],
-
                   onChanged: (phone) {
                     completePhoneNumber = phone.completeNumber;
                   },
@@ -135,9 +96,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     backgroundColor: const Color(0xFFFFD600),
                     foregroundColor: const Color(0xFF1A237E),
                     minimumSize: const Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
                   ),
                   child: const Text(
                     "متابعة التسجيل",
@@ -159,9 +117,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     side: const BorderSide(color: Color(0xFF1A237E), width: 2),
                     foregroundColor: const Color(0xFF1A237E),
                     minimumSize: const Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
                   ),
                   child: const Text(
                     "تسجيل الدخول بطريقة اخرى",

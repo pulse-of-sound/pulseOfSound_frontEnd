@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:pulse_of_sound/OnBoarding/onBoarding.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../HomeScreens/HomeScreen.dart';
+
+import '../utils/shared_pref_helper.dart';
 import 'loginscreen.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -61,19 +61,9 @@ class _OtpScreenState extends State<OtpScreen> {
     String code = _controllers.map((c) => c.text).join();
 
     if (code == "123456") {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool("hasSession", true);
-      await prefs.setString("phone", widget.phone);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text(" تسجيل الدخول ناجح"),
-          backgroundColor: const Color.fromARGB(53, 0, 0, 0),
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+      await SharedPrefsHelper.setSession(true);
+      await SharedPrefsHelper.setPhone(widget.phone);
+      await SharedPrefsHelper.setUserType("user");
 
       Navigator.pushReplacement(
         context,
@@ -81,13 +71,7 @@ class _OtpScreenState extends State<OtpScreen> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text(" الكود غير صحيح"),
-          backgroundColor: const Color.fromARGB(134, 0, 0, 0),
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
+        const SnackBar(content: Text("الكود غير صحيح")),
       );
     }
   }
@@ -109,13 +93,9 @@ class _OtpScreenState extends State<OtpScreen> {
           counterText: "",
           filled: true,
           fillColor: Colors.white.withOpacity(0.9),
-          enabledBorder: OutlineInputBorder(
+          border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFFFD600), width: 2),
           ),
         ),
         onChanged: (value) {
@@ -134,18 +114,7 @@ class _OtpScreenState extends State<OtpScreen> {
         fit: StackFit.expand,
         children: [
           Image.asset("images/background.jpg", fit: BoxFit.cover),
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.white.withOpacity(0.1),
-                  Colors.white.withOpacity(0.6),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
+          Container(color: Colors.white.withOpacity(0.6)),
           Positioned(
             top: 30,
             left: 16,
@@ -173,13 +142,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     color: Color(0xFF1A237E),
                   ),
                 ),
-                const SizedBox(height: 10),
-                const Text(
-                  "تم إرسال الرمز ",
-                  style: TextStyle(fontSize: 14, color: Colors.black87),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: List.generate(6, (index) => _buildOtpBox(index)),
@@ -191,39 +154,16 @@ class _OtpScreenState extends State<OtpScreen> {
                     backgroundColor: const Color(0xFFFFD600),
                     foregroundColor: const Color(0xFF1A237E),
                     minimumSize: const Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
                   ),
-                  child: const Text(
-                    "تأكيد الكود",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
+                  child: const Text("تأكيد الكود"),
                 ),
                 const SizedBox(height: 20),
                 canResend
                     ? TextButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(" تم إرسال رمز جديد"),
-                              backgroundColor: Colors.orange,
-                            ),
-                          );
-                          _startTimer();
-                        },
-                        child: const Text(
-                          "إعادة إرسال الرمز",
-                          style: TextStyle(
-                            color: Color(0xFF1A237E),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        onPressed: _startTimer,
+                        child: const Text("إعادة إرسال الرمز"),
                       )
-                    : Text(
-                        "يمكنك إعادة الإرسال خلال $_seconds ثانية",
-                        style: const TextStyle(color: Color(0xFF1A237E)),
-                      ),
+                    : Text("يمكنك إعادة الإرسال خلال $_seconds ثانية"),
               ],
             ),
           ),

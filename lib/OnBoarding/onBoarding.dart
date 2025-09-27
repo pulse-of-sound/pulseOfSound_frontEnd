@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pulse_of_sound/Profile/profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Colors/colors.dart';
 
@@ -15,7 +16,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   Future<void> _acceptAndContinue() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool("hasAccepted", true);
-    Navigator.pushReplacementNamed(context, "/Profile");
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
   }
 
   @override

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../HomeScreens/AdminHomeScreen.dart';
 import '../HomeScreens/DoctorHomeScreen.dart';
+import '../utils/shared_pref_helper.dart';
 import 'loginscreen.dart';
 
 class LoginForAdminAndDr extends StatefulWidget {
@@ -14,36 +15,31 @@ class _LoginForAdminAndDrState extends State<LoginForAdminAndDr> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  void _login() {
+  void _login() async {
     String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
 
     if (username == "admin" && password == "1234") {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text(" مرحباً Admin"),
-            backgroundColor: Color.fromARGB(54, 0, 0, 0)),
-      );
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const AdminHome()));
-    }
+      await SharedPrefsHelper.setSession(true);
+      await SharedPrefsHelper.setUserType("admin");
+      await SharedPrefsHelper.setName("Admin");
 
-    if (username == "doctor" && password == "4321") {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text(" مرحباً دكتور"),
-            backgroundColor: Color.fromARGB(54, 0, 0, 0)),
-      );
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const Doctorhomescreen()));
-    }
+        context,
+        MaterialPageRoute(builder: (_) => const AdminHome()),
+      );
+    } else if (username == "doctor" && password == "4321") {
+      await SharedPrefsHelper.setSession(true);
+      await SharedPrefsHelper.setUserType("doctor");
+      await SharedPrefsHelper.setName("Doctor");
 
-    if (!(username == "admin" && password == "1234") &&
-        !(username == "doctor" && password == "4321")) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const Doctorhomescreen()),
+      );
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text(" اسم المستخدم أو كلمة المرور غير صحيحة"),
-            backgroundColor: Color.fromARGB(87, 0, 0, 0)),
+        const SnackBar(content: Text("اسم المستخدم أو كلمة المرور غير صحيحة")),
       );
     }
   }
@@ -55,18 +51,7 @@ class _LoginForAdminAndDrState extends State<LoginForAdminAndDr> {
         fit: StackFit.expand,
         children: [
           Image.asset("images/background.jpg", fit: BoxFit.cover),
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.white.withOpacity(0.1),
-                  Colors.white.withOpacity(0.6),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
+          Container(color: Colors.white.withOpacity(0.6)),
           Positioned(
             top: 30,
             left: 16,
@@ -97,34 +82,20 @@ class _LoginForAdminAndDrState extends State<LoginForAdminAndDr> {
                 const SizedBox(height: 30),
                 TextField(
                   controller: _usernameController,
-                  style: const TextStyle(color: Color(0xFF1A237E)),
-                  decoration: InputDecoration(
-                    prefixIcon:
-                        const Icon(Icons.person, color: Color(0xFF1A237E)),
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.person, color: Color(0xFF1A237E)),
                     labelText: "اسم المستخدم",
                     filled: true,
-                    fillColor: Colors.white.withOpacity(0.9),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
                 TextField(
                   controller: _passwordController,
                   obscureText: true,
-                  style: const TextStyle(color: Color(0xFF1A237E)),
-                  decoration: InputDecoration(
-                    prefixIcon:
-                        const Icon(Icons.lock, color: Color(0xFF1A237E)),
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.lock, color: Color(0xFF1A237E)),
                     labelText: "كلمة المرور",
                     filled: true,
-                    fillColor: Colors.white.withOpacity(0.9),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -135,11 +106,7 @@ class _LoginForAdminAndDrState extends State<LoginForAdminAndDr> {
                     foregroundColor: const Color(0xFF1A237E),
                     minimumSize: const Size(double.infinity, 50),
                   ),
-                  child: const Text(
-                    "تسجيل الدخول",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold, color: Color(0xFF1A237E)),
-                  ),
+                  child: const Text("تسجيل الدخول"),
                 ),
               ],
             ),

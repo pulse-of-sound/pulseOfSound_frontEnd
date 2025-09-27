@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-
 import 'package:pulse_of_sound/LoginScreens/loginscreen.dart';
+import 'package:pulse_of_sound/HomeScreens/HomeScreen.dart';
+import 'package:pulse_of_sound/HomeScreens/AdminHomeScreen.dart';
+import 'package:pulse_of_sound/HomeScreens/DoctorHomeScreen.dart';
+import 'package:pulse_of_sound/utils/sharedPreferance.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -28,10 +31,36 @@ class _SplashScreenState extends State<SplashScreen>
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
 
-    Timer(const Duration(seconds: 5), () {
+    Timer(const Duration(seconds: 3), _navigateUser);
+  }
+
+  void _navigateUser() {
+    bool hasSession = SharedPrefsHelper.getHasSession();
+    String? type = SharedPrefsHelper.getUserType();
+
+    if (hasSession) {
+      if (type == "admin") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const AdminHome()),
+        );
+      } else if (type == "doctor") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const Doctorhomescreen()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      }
+    } else {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const LoginScreen()));
-    });
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+    }
   }
 
   @override
@@ -46,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen>
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFB3E5FC), Color(0xFFF8BBD0)], // سماوي -> وردي
+            colors: [Color(0xFFB3E5FC), Color(0xFFF8BBD0)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -57,29 +86,14 @@ class _SplashScreenState extends State<SplashScreen>
             children: [
               ScaleTransition(
                 scale: _animation,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 10,
-                        offset: Offset(0, 5),
-                      )
-                    ],
-                  ),
-                  child:ClipOval(
+                child: ClipOval(
                   child: Image.asset(
                     'images/logo.jpg',
                     width: 160,
                     height: 160,
                     fit: BoxFit.cover,
-                    //color: Colors.white,
                   ),
                 ),
-              ),
               ),
               const SizedBox(height: 24),
               const Text(
