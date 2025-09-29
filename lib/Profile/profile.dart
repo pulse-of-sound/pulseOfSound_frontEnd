@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pulse_of_sound/HomeScreens/HomeScreen.dart';
+import 'package:pulse_of_sound/PreTestIntro/preTestIntroScreen.dart';
 import '../Colors/colors.dart';
 import '../utils/shared_pref_helper.dart';
 
@@ -61,7 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(builder: (_) => const PreTestIntroScreen()),
       );
     }
   }
