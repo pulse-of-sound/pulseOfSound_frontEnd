@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pulse_of_sound/HomeScreens/HomeScreen.dart';
+import 'package:pulse_of_sound/PreTestIntro/TrainingTest/trainingScreen.dart';
+import 'package:pulse_of_sound/PreTestIntro/preTestScreen.dart';
 
 class ResultScreen extends StatelessWidget {
   final int score;
@@ -13,6 +16,7 @@ class ResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool passed = score >= 8;
+    double percentage = (score / total);
 
     return Scaffold(
       appBar: AppBar(
@@ -34,27 +38,56 @@ class ResultScreen extends StatelessWidget {
 
             // رسالة النجاح أو الفشل
             Text(
-              passed ? "تهانينا 🎉" : "للأسف 😔",
+              passed ? "أحسنت  لقد اجتزت الاختبار" : "للأسف لم تنجح ",
               style: TextStyle(
-                fontSize: 28,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: passed ? Colors.green : Colors.redAccent,
               ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
 
             // النتيجة
-            Text(
-              "لقد حصلت على $score من $total",
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      "النتيجة: $score من $total",
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    LinearProgressIndicator(
+                      value: percentage,
+                      minHeight: 12,
+                      borderRadius: BorderRadius.circular(10),
+                      backgroundColor: Colors.grey[300],
+                      color: passed ? Colors.green : Colors.redAccent,
+                    ),
+                    const SizedBox(height: 8),
+                    Text("${(percentage * 100).toStringAsFixed(1)}%"),
+                  ],
+                ),
+              ),
             ),
+
             const SizedBox(height: 40),
 
             // إذا ناجح → زر للانتقال للهوم
             if (passed)
               ElevatedButton.icon(
                 onPressed: () {
-                  Navigator.pushReplacementNamed(context, "/Home");
+                  Navigator.pushReplacement(
+                      context, MaterialPageRoute(builder: (_) => HomeScreen()));
                 },
                 icon: const Icon(Icons.home),
                 label: const Text("الانتقال إلى الصفحة الرئيسية"),
@@ -62,6 +95,9 @@ class ResultScreen extends StatelessWidget {
                   minimumSize: const Size(double.infinity, 50),
                   backgroundColor: Colors.green,
                   foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               )
             else
@@ -70,7 +106,8 @@ class ResultScreen extends StatelessWidget {
                 children: [
                   ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.pushReplacementNamed(context, "/Quiz");
+                      Navigator.pushReplacement(context,
+                          MaterialPageRoute(builder: (_) => Pretestscreen()));
                     },
                     icon: const Icon(Icons.refresh),
                     label: const Text("إعادة الاختبار"),
@@ -78,12 +115,16 @@ class ResultScreen extends StatelessWidget {
                       minimumSize: const Size(double.infinity, 50),
                       backgroundColor: Colors.redAccent,
                       foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.pushReplacementNamed(context, "/Training");
+                      Navigator.pushReplacement(context,
+                          MaterialPageRoute(builder: (_) => TrainingScreen()));
                     },
                     icon: const Icon(Icons.school),
                     label: const Text("التدريب على الأسئلة"),
@@ -91,6 +132,9 @@ class ResultScreen extends StatelessWidget {
                       minimumSize: const Size(double.infinity, 50),
                       backgroundColor: Colors.blueAccent,
                       foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ],
