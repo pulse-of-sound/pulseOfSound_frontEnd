@@ -19,128 +19,193 @@ class ResultScreen extends StatelessWidget {
     double percentage = (score / total);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("نتيجة الاختبار"),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // أيقونة نجاح أو فشل
-            Icon(
-              passed ? Icons.emoji_events : Icons.error_outline,
-              color: passed ? Colors.green : Colors.redAccent,
-              size: 100,
-            ),
-            const SizedBox(height: 20),
-
-            // رسالة النجاح أو الفشل
-            Text(
-              passed ? "أحسنت  لقد اجتزت الاختبار" : "للأسف لم تنجح ",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: passed ? Colors.green : Colors.redAccent,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-
-            // النتيجة
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Text(
-                      "النتيجة: $score من $total",
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    LinearProgressIndicator(
-                      value: percentage,
-                      minHeight: 12,
-                      borderRadius: BorderRadius.circular(10),
-                      backgroundColor: Colors.grey[300],
-                      color: passed ? Colors.green : Colors.redAccent,
-                    ),
-                    const SizedBox(height: 8),
-                    Text("${(percentage * 100).toStringAsFixed(1)}%"),
-                  ],
-                ),
+      body: Stack(
+        children: [
+          // الخلفية
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("images/result.jpg"),
+                fit: BoxFit.fill,
               ),
             ),
+          ),
 
-            const SizedBox(height: 40),
-
-            // إذا ناجح → زر للانتقال للهوم
-            if (passed)
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                      context, MaterialPageRoute(builder: (_) => HomeScreen()));
-                },
-                icon: const Icon(Icons.home),
-                label: const Text("الانتقال إلى الصفحة الرئيسية"),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              )
-            else
-              // إذا راسب → خيارين (إعادة أو تدريب)
-              Column(
+          // المحتوى
+          SafeArea(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pushReplacement(context,
-                          MaterialPageRoute(builder: (_) => Pretestscreen()));
-                    },
-                    icon: const Icon(Icons.refresh),
-                    label: const Text("إعادة الاختبار"),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 50),
-                      backgroundColor: Colors.redAccent,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 8,
+                          offset: const Offset(2, 4),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(20),
+                    child: ClipOval(
+                      child: Image.asset(
+                        passed
+                            ? "images/resultSuccess1.jpg"
+                            : "images/resultFaild1.jpg",
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pushReplacement(context,
-                          MaterialPageRoute(builder: (_) => TrainingScreen()));
-                    },
-                    icon: const Icon(Icons.school),
-                    label: const Text("التدريب على الأسئلة"),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 50),
-                      backgroundColor: Colors.blueAccent,
-                      foregroundColor: Colors.white,
+                  const SizedBox(height: 20),
+
+                  // رسالة
+                  Text(
+                    passed ? "أحسنت  لقد اجتزت الاختبار" : "للأسف  لم تنجح",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: passed ? Colors.pinkAccent : Colors.redAccent,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withOpacity(0.25),
+                          blurRadius: 4,
+                          offset: const Offset(1, 1),
+                        ),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // النتيجة
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.7,
+                    child: Card(
+                      color: Colors.white.withOpacity(0.9),
+                      elevation: 4,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12.0, horizontal: 16.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "النتيجة: $score من $total",
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            LinearProgressIndicator(
+                              value: percentage,
+                              minHeight: 8,
+                              borderRadius: BorderRadius.circular(8),
+                              backgroundColor: Colors.grey[300],
+                              color: passed ? Colors.pinkAccent : Colors.red,
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              "${(percentage * 100).toStringAsFixed(1)}%",
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
+
+                  const SizedBox(height: 30),
+
+                  // الأزرار
+                  if (passed)
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => HomeScreen()),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          backgroundColor: Colors.pinkAccent,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        child: const Text(
+                          "الانتقال إلى الرئيسية",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ),
+                    )
+                  else
+                    Column(
+                      children: [
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.7,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => Pretestscreen()),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              backgroundColor: Colors.redAccent,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: const Text("إعادة الاختبار",
+                                style: TextStyle(fontSize: 16)),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.7,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => TrainingScreen()),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              backgroundColor: Colors.blueAccent,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: const Text("التدريب على الأسئلة",
+                                style: TextStyle(fontSize: 16)),
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
-          ],
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }

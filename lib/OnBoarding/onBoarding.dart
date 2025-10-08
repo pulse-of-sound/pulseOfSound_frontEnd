@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pulse_of_sound/Profile/profile.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../Colors/colors.dart';
 
 class OnBoardingScreen extends StatefulWidget {
   const OnBoardingScreen({super.key});
@@ -11,120 +9,160 @@ class OnBoardingScreen extends StatefulWidget {
 }
 
 class _OnBoardingScreenState extends State<OnBoardingScreen> {
-  bool _isChecked = false;
+  final PageController _controller = PageController();
+  int _currentPage = 0;
 
-  Future<void> _acceptAndContinue() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool("hasAccepted", true);
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
-  }
+  final List<Map<String, String>> _pages = [
+    {
+      "title": "   أهلاً بك! في تطبيق نبض الصوت",
+      "subtitle":
+          "تم تطوير هذا التطبيق خصيصاً لمساعدة الأطفال ضعيفي السمع على تطوير مهاراتهم اللغوية والإدراكية",
+    },
+    {
+      "title": " التعلم باللعب",
+      "subtitle":
+          " عالم صغير يرافق الطفل عبر أنشطة يومية مشوّقة واختبارات دقيقة ومتابعة مستمرة من الأهل "
+    },
+    {
+      "title": " دعم الأطباء",
+      "subtitle": "يمكنك حجز استشارات مع الأطباء والأخصائيين بسهولة.",
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.babyPink,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              const Text(
-                " مرحباً بك في Pulse of Sound ",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A237E),
-                ),
+      body: Stack(
+        children: [
+          // الخلفية
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("images/onboarding.jpg"),
+                fit: BoxFit.cover,
               ),
-              const SizedBox(height: 20),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 6,
-                        offset: Offset(0, 3),
+            ),
+          ),
+
+          // المحتوى
+          PageView.builder(
+            controller: _controller,
+            itemCount: _pages.length,
+            onPageChanged: (index) {
+              setState(() {
+                _currentPage = index;
+              });
+            },
+            itemBuilder: (context, index) {
+              final page = _pages[index];
+              return Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                      left: 20, right: 20, bottom: 160), //  مكان النص
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        page["title"]!,
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              offset: Offset(2, 2),
+                              blurRadius: 6,
+                              color: Colors.black54,
+                            ),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        page["subtitle"]!,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          height: 1.5,
+                          shadows: [
+                            Shadow(
+                              offset: Offset(1, 1),
+                              blurRadius: 5,
+                              color: Colors.black54,
+                            ),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
-                  child: SingleChildScrollView(
-                    child: const Text(
-                      """مرحباً بك في تطبيق **Pulse of Sound** 
+                ),
+              );
+            },
+          ),
 
-تم تطوير هذا التطبيق خصيصاً لمساعدة الأطفال ضعيفي السمع على تطوير مهاراتهم اللغوية والإدراكية من خلال رحلة تعليمية ممتعة مقسّمة إلى ثلاثة مستويات
-"نبض الصوت" هو الحل الذي سيكون بحق "النبض الأول"
-لقد تبنّينا هذا التحدي الأكبر في حياة هذه الفئة، وصغناه بتطبيق يفتح أمام الطفل عالماً أكثر إشراقاً واندماجاً عالم مليء بالأصوات الجديدة، والحروف الملوّنة، والتجارب الغنية
-
-يوفّر التطبيق فضاءً تعليمياً وتفاعلياً يمكّن الطفل بثقة وتدرّج من تنمية قدراته، ويمنحه الأمل والدعم في كل مرحلة من رحلته
-
-عالم صغير يرافق الطفل عبر أنشطة يومية مشوّقة واختبارات دقيقة ومتابعة مستمرة من الأهل والأخصائيين، واستشارات مباشرة مع الأطباء
-
-من خلال "نبض الصوت" نقدّم منظومة متكاملة للتعلّم، التقييم، والدعم، لنمنح الطفل فرصته الحقيقية في الانطلاق بثقة وأمل.
-  
----
-
- **مميزات إضافية داخل التطبيق:**  
-- إمكانية حجز استشارة مع دكتور مختص.  
-- التواصل مع أخصائي لمتابعة تطور الطفل.  
-- توفير محادثة خاصة للأهل لتبادل الخبرات.  
-- تمكين الأهل من متابعة التقييمات والاختبارات الخاصة بالطفل بشكل مباشر.  
-
----
-
- هدفنا الاساسي  
-أن يصل الطفل لاستخدام أفضل لقدراته الادراكية والبصرية واللغوية، ليكون قادراً على التواصل بثقة والتفاعل مع من حوله .
-""",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                        height: 1.6,
-                      ),
-                      textAlign: TextAlign.right,
+          // نقاط التنقل + زر
+          Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  _pages.length,
+                  (index) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    margin: const EdgeInsets.symmetric(horizontal: 6),
+                    width: _currentPage == index ? 20 : 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: _currentPage == index
+                          ? Colors.pinkAccent
+                          : Colors.grey.shade400,
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: 20),
-              Row(
-                children: [
-                  Checkbox(
-                    value: _isChecked,
-                    onChanged: (value) =>
-                        setState(() => _isChecked = value ?? false),
-                  ),
-                  const Expanded(
-                    child: Text(
-                      "أوافق على الشروط والمتابعة",
-                      style:
-                          TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_currentPage == _pages.length - 1) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => ProfileScreen()),
+                      );
+                    } else {
+                      _controller.nextPage(
+                        duration: const Duration(milliseconds: 400),
+                        curve: Curves.easeInOut,
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.pinkAccent,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 55),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              ElevatedButton(
-                onPressed: _isChecked ? _acceptAndContinue : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.pink,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 52),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  child: Text(
+                    _currentPage == _pages.length - 1 ? "لنبدأ " : "التالي ",
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                child: const Text(
-                  "متابعة",
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
-          ),
-        ),
+          )
+        ],
       ),
     );
   }

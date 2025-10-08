@@ -71,7 +71,10 @@ class _OtpScreenState extends State<OtpScreen> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("الكود غير صحيح")),
+        const SnackBar(
+          content: Text("الكود غير صحيح"),
+          backgroundColor: Colors.tealAccent,
+        ),
       );
     }
   }
@@ -155,7 +158,10 @@ class _OtpScreenState extends State<OtpScreen> {
                     foregroundColor: const Color(0xFF1A237E),
                     minimumSize: const Size(double.infinity, 50),
                   ),
-                  child: const Text("تأكيد الكود"),
+                  child: const Text("تأكيد الكود",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      )),
                 ),
                 const SizedBox(height: 20),
                 canResend

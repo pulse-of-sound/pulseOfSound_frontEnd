@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pulse_of_sound/PreTestIntro/preTestScreen.dart';
 import '../preTestIntroScreen.dart';
 import 'modelTrainingQuestion.dart';
 
@@ -15,7 +14,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
   int? selectedAnswer;
   bool answered = false;
 
-  // Dummy data    الباك
+  // Dummy data مؤقت لحد ما يجي من الباك
   final List<TrainingQuestion> trainingQuestions = List.generate(
     10,
     (index) => TrainingQuestion(
@@ -60,8 +59,10 @@ class _TrainingScreenState extends State<TrainingScreen> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => PreTestIntroScreen()));
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => PreTestIntroScreen()),
+              );
             },
             child: const Text("رجوع"),
           )
@@ -75,81 +76,142 @@ class _TrainingScreenState extends State<TrainingScreen> {
     final q = trainingQuestions[currentQuestion];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-            "التدريب ${currentQuestion + 1} / ${trainingQuestions.length}"),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            const Text(
-              "اختر الشكل الصحيح الذي يُكمل المجموعة:",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+      body: Stack(
+        children: [
+          //  الخلفية
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("images/questionScreen1.jpg"),
+                fit: BoxFit.cover,
+              ),
             ),
-            const SizedBox(height: 16),
+          ),
 
-            // صورة السؤال
-            Image.asset(q.questionImage, height: 200),
-            const SizedBox(height: 20),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  // العلوي: السؤال + صورة المجموعة
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.85),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          "التدريب ${currentQuestion + 1} من ${trainingQuestions.length}",
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.purple,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          "اختر الشكل الصحيح الذي يُكمل المجموعة:",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        Image.asset(q.questionImage, height: 140),
+                      ],
+                    ),
+                  ),
 
-            // الخيارات
-            Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                ),
-                itemCount: q.options.length,
-                itemBuilder: (context, i) {
-                  Color borderColor = Colors.transparent;
+                  const SizedBox(height: 40),
 
-                  if (answered) {
-                    if (i == q.correctAnswer) {
-                      borderColor = Colors.green;
-                    } else if (i == selectedAnswer) {
-                      borderColor = Colors.red;
-                    }
-                  }
-
-                  return GestureDetector(
-                    onTap: () => _selectAnswer(i),
-                    child: Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: borderColor, width: 3),
+                  //  شبكة الخيارات
+                  Expanded(
+                    child: GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 20,
+                        mainAxisSpacing: 20,
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Image.asset(q.options[i]),
+                      itemCount: q.options.length,
+                      itemBuilder: (context, i) {
+                        // حدود مبهجة
+                        final borderColors = [
+                          Colors.pinkAccent,
+                        ];
+
+                        // إذا جاوب → يلون الصح والغلط
+                        Color borderColor =
+                            borderColors[i % borderColors.length];
+                        if (answered) {
+                          if (i == q.correctAnswer) {
+                            borderColor = Colors.green;
+                          } else if (i == selectedAnswer) {
+                            borderColor = Colors.red;
+                          }
+                        }
+
+                        return GestureDetector(
+                          onTap: () => _selectAnswer(i),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(25),
+                              border: Border.all(
+                                color: borderColor,
+                                width: 4,
+                              ),
+                              color: Colors.white.withOpacity(0.9),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 6,
+                                  offset: const Offset(2, 3),
+                                ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Image.asset(
+                                q.options[i],
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  // ✅ زر التالي يظهر بعد الجواب
+                  if (answered)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: ElevatedButton(
+                        onPressed: _nextQuestion,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 50),
+                          backgroundColor: Colors.pinkAccent,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: Text(
+                          currentQuestion < trainingQuestions.length - 1
+                              ? "التالي"
+                              : "إنهاء التدريب",
+                        ),
                       ),
                     ),
-                  );
-                },
+                ],
               ),
             ),
-
-            const SizedBox(height: 16),
-
-            // زر التالي
-            if (answered)
-              ElevatedButton(
-                onPressed: _nextQuestion,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-                child: Text(
-                  currentQuestion < trainingQuestions.length - 1
-                      ? "التالي"
-                      : "إنهاء التدريب",
-                ),
-              ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

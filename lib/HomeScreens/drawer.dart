@@ -40,7 +40,7 @@ class DrawerScreen extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                MaterialPageRoute(builder: (_) => ProfileScreen()),
               );
             },
           ),
