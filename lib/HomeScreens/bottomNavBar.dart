@@ -1,40 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:pulse_of_sound/Articles/articlesScreen.dart';
+import 'package:pulse_of_sound/HomeScreens/HomeScreen.dart';
 import '../Colors/colors.dart';
 
 class BottomNavScreen extends StatefulWidget {
-  const BottomNavScreen({super.key});
+  final int initialIndex;
+  const BottomNavScreen({super.key, this.initialIndex = 0});
 
   @override
   State<BottomNavScreen> createState() => _BottomNavScreenState();
 }
 
 class _BottomNavScreenState extends State<BottomNavScreen> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   final List<Widget> _pages = [
-    const Center(child: Text("الرئيسية")),
-    const Center(child: Text("الألعاب")),
-    const Center(child: Text("إضافة")),
-    const Center(child: Text("الاستشارات")),
-    const Center(child: Text("المحادثة")),
+    const Center(child: Text("الألعاب", style: TextStyle(fontSize: 18))),
+    const Center(child: Text("الألعاب", style: TextStyle(fontSize: 18))),
+    const Center(child: Text("إضافة", style: TextStyle(fontSize: 18))),
+    const ArticlesScreen(),
+    const Center(child: Text("المحادثة", style: TextStyle(fontSize: 18))),
   ];
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+  void _onItemTapped(int index) => setState(() => _selectedIndex = index);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
+      backgroundColor: Colors.transparent,
       body: _pages[_selectedIndex],
-
-      // الزر الكبير بالنص
       floatingActionButton: Container(
-        height: 70,
-        width: 70,
+        height: 62,
+        width: 62,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: LinearGradient(
@@ -42,90 +47,67 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
-              color: Colors.black26,
-              blurRadius: 8,
-              offset: Offset(0, 4),
-            )
+                color: Colors.black26, blurRadius: 6, offset: Offset(0, 3)),
           ],
         ),
         child: FloatingActionButton(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          onPressed: () {
-            setState(() {
-              _selectedIndex = 2; // صفحة الإضافة
-            });
-          },
-          child: const Icon(Iconsax.add, size: 32, color: Colors.white),
+          onPressed: () => _onItemTapped(2),
+          child: const Icon(Iconsax.add, size: 26, color: Colors.white),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-
-      // Bottom App Bar
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 8,
-        child: SizedBox(
-          height: 60,
+        elevation: 10,
+        color: Colors.white.withOpacity(0.95),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // الجهة اليسار
-              Row(
-                children: [
-                  MaterialButton(
-                    minWidth: 40,
-                    onPressed: () => _onItemTapped(0),
-                    child: Icon(
-                      Iconsax.home,
-                      size: 26,
-                      color:
-                          _selectedIndex == 0 ? AppColors.skyBlue : Colors.grey,
-                    ),
-                  ),
-                  MaterialButton(
-                    minWidth: 40,
-                    onPressed: () => _onItemTapped(1),
-                    child: Icon(
-                      Iconsax.game,
-                      size: 26,
-                      color:
-                          _selectedIndex == 1 ? AppColors.skyBlue : Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
-
-              // الجهة اليمين
-              Row(
-                children: [
-                  MaterialButton(
-                    minWidth: 40,
-                    onPressed: () => _onItemTapped(3),
-                    child: Icon(
-                      Iconsax.health,
-                      size: 26,
-                      color:
-                          _selectedIndex == 3 ? AppColors.skyBlue : Colors.grey,
-                    ),
-                  ),
-                  MaterialButton(
-                    minWidth: 40,
-                    onPressed: () => _onItemTapped(4),
-                    child: Icon(
-                      Iconsax.message,
-                      size: 26,
-                      color:
-                          _selectedIndex == 4 ? AppColors.skyBlue : Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
+              Row(children: [
+                _buildNavItem(Iconsax.home, 0),
+                const SizedBox(width: 5),
+                _buildNavItem(Iconsax.game, 1),
+              ]),
+              Row(children: [
+                _buildNavItem(Iconsax.document, 3),
+                const SizedBox(width: 5),
+                _buildNavItem(Iconsax.message, 4),
+              ]),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(IconData icon, int index) {
+    final bool isSelected = _selectedIndex == index;
+    return MaterialButton(
+      minWidth: 50,
+      onPressed: () => _onItemTapped(index),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon,
+              size: 23,
+              color: isSelected ? AppColors.skyBlue : Colors.grey.shade500),
+          const SizedBox(height: 3),
+          Container(
+            height: 3,
+            width: 18,
+            decoration: BoxDecoration(
+              color: isSelected ? AppColors.skyBlue : Colors.transparent,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        ],
       ),
     );
   }

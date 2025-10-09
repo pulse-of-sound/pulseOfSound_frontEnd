@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:pulse_of_sound/Articles/articlesScreen.dart';
 import 'package:pulse_of_sound/HomeScreens/HomeScreen.dart';
 import 'package:pulse_of_sound/PreTestIntro/TrainingTest/trainingScreen.dart';
 import 'package:pulse_of_sound/PreTestIntro/preTestScreen.dart';
+
+import '../HomeScreens/bottomNavBar.dart';
 
 class ResultScreen extends StatelessWidget {
   final int score;
@@ -131,9 +134,13 @@ class ResultScreen extends StatelessWidget {
                       width: MediaQuery.of(context).size.width * 0.7,
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.pushReplacement(
+                          Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(builder: (_) => HomeScreen()),
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  const BottomNavScreen(initialIndex: 0),
+                            ),
+                            (route) => false,
                           );
                         },
                         style: ElevatedButton.styleFrom(

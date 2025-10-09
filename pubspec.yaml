@@ -42,6 +42,7 @@ dependencies:
   iconsax: ^0.0.8
   image_picker: ^1.1.2
   smooth_page_indicator: ^1.2.1
+  animate_do: ^4.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

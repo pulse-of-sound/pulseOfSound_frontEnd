@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pulse_of_sound/Colors/colors.dart';
-
 import 'addDoctorScreen.dart';
 import 'editDoctorScreen.dart';
 import 'modelDoctor.dart';
@@ -16,134 +15,111 @@ class _DoctorsPageState extends State<DoctorsPage> {
   List<Doctor> doctors = [
     Doctor(
       name: "د. أحمد",
-      age: "40",
+      birthDate: "10/3/1985",
       phone: "0999999999",
-      email: "ahmad@mail.com",
       password: "1234",
-      certificates: "دكتوراه",
-      experience: "10",
+      email: "ahmad@mail.com",
+      certificates: "دكتوراه في طب الأذن",
+      experience: "10 سنوات",
       workplace: "مشفى السلام",
-    ),
-    Doctor(
-      name: "د. سارة",
-      age: "35",
-      phone: "0988888888",
-      email: "sara@mail.com",
-      password: "abcd",
-      certificates: "ماجستير",
-      experience: "8",
-      workplace: "مركز الشفاء",
     ),
   ];
 
   void _addDoctor(Doctor doctor) {
-    setState(() {
-      doctors.add(doctor);
-    });
+    setState(() => doctors.add(doctor));
   }
 
-  void _editDoctor(int index, Doctor doctor) {
-    setState(() {
-      doctors[index] = doctor;
-    });
+  void _editDoctor(int index, Doctor updated) {
+    setState(() => doctors[index] = updated);
   }
 
   void _deleteDoctor(int index) {
-    setState(() {
-      doctors.removeAt(index);
-    });
+    setState(() => doctors.removeAt(index));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("الأطباء"), centerTitle: true),
-      body: ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: doctors.length,
-          itemBuilder: (context, index) {
-            final doctor = doctors[index];
-            return Card(
-              color: AppColors.babyBlue,
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.person, color: Colors.blue),
-                        const SizedBox(width: 8),
-                        Text(
-                          doctor.name,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () async {
-                            final updated = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => EditDoctorPage(doctor: doctor),
-                              ),
-                            );
-                            if (updated != null && updated is Doctor) {
-                              _editDoctor(index, updated);
-                            }
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            _deleteDoctor(index);
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-
-                    // العمر
-                    Row(
-                      children: [
-                        const Icon(Icons.cake, size: 18, color: Colors.grey),
-                        const SizedBox(width: 6),
-                        Text("العمر: ${doctor.age}"),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-
-                    // الهاتف
-                    Row(
-                      children: [
-                        const Icon(Icons.phone, size: 18, color: Colors.grey),
-                        const SizedBox(width: 6),
-                        Text("الهاتف: ${doctor.phone}"),
-                      ],
-                    ),
-                  ],
-                ),
+      body: Stack(
+        children: [
+          // خلفية ثابتة
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("images/Admin.jpg"),
+                fit: BoxFit.cover,
               ),
-            );
-          }),
+            ),
+          ),
+
+          // المحتوى
+          ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: doctors.length,
+            itemBuilder: (context, index) {
+              final doctor = doctors[index];
+              return Card(
+                color: Colors.white.withOpacity(0.85),
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                elevation: 5,
+                child: ListTile(
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  leading: const CircleAvatar(
+                    backgroundColor: AppColors.skyBlue,
+                    radius: 26,
+                    child: Icon(Icons.person, color: Colors.white),
+                  ),
+                  title: Text(
+                    doctor.name,
+                    style: const TextStyle(
+                        fontSize: 17, fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    "هاتف: ${doctor.phone}",
+                    style: const TextStyle(fontSize: 14, color: Colors.black54),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.blueAccent),
+                        onPressed: () async {
+                          final updated = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => EditDoctorPage(doctor: doctor),
+                            ),
+                          );
+                          if (updated != null && updated is Doctor) {
+                            _editDoctor(index, updated);
+                          }
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.redAccent),
+                        onPressed: () => _deleteDoctor(index),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.skyBlue,
         onPressed: () async {
           final newDoctor = await Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AddDoctorPage()),
           );
-          if (newDoctor != null) {
-            _addDoctor(newDoctor);
-          }
+          if (newDoctor != null) _addDoctor(newDoctor);
         },
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

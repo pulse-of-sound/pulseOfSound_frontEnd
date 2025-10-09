@@ -1,16 +1,16 @@
 class Doctor {
   String name;
-  String age;
+  String? birthDate;
   String phone;
-  String email;
+  String? email;
   String password;
-  String certificates;
-  String experience;
-  String workplace;
+  String? certificates;
+  String? experience;
+  String? workplace;
 
   Doctor({
     required this.name,
-    required this.age,
+    required this.birthDate,
     required this.phone,
     required this.email,
     required this.password,
