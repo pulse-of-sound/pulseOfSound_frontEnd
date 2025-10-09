@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:pulse_of_sound/LoginScreens/loginscreen.dart';
 import 'package:pulse_of_sound/OnBoarding/onBoarding.dart';
-
 import '../utils/shared_pref_helper.dart';
-import 'loginscreen.dart';
 
 class OtpScreen extends StatefulWidget {
   final String phone;
@@ -16,7 +15,6 @@ class OtpScreen extends StatefulWidget {
 class _OtpScreenState extends State<OtpScreen> {
   final List<TextEditingController> _controllers =
       List.generate(6, (index) => TextEditingController());
-
   int _seconds = 30;
   Timer? _timer;
   bool canResend = false;
@@ -36,13 +34,9 @@ class _OtpScreenState extends State<OtpScreen> {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_seconds > 0) {
-        setState(() {
-          _seconds--;
-        });
+        setState(() => _seconds--);
       } else {
-        setState(() {
-          canResend = true;
-        });
+        setState(() => canResend = true);
         timer.cancel();
       }
     });
@@ -51,8 +45,8 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   void dispose() {
     _timer?.cancel();
-    for (var controller in _controllers) {
-      controller.dispose();
+    for (var c in _controllers) {
+      c.dispose();
     }
     super.dispose();
   }
@@ -73,7 +67,7 @@ class _OtpScreenState extends State<OtpScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("الكود غير صحيح"),
-          backgroundColor: Colors.tealAccent,
+          backgroundColor: Colors.redAccent,
         ),
       );
     }
@@ -81,16 +75,16 @@ class _OtpScreenState extends State<OtpScreen> {
 
   Widget _buildOtpBox(int index) {
     return SizedBox(
-      width: 50,
+      width: 45,
       child: TextField(
         controller: _controllers[index],
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
         maxLength: 1,
         style: const TextStyle(
-          fontSize: 22,
+          fontSize: 20,
           fontWeight: FontWeight.bold,
-          color: Color(0xFF1A237E),
+          color: Colors.pinkAccent,
         ),
         decoration: InputDecoration(
           counterText: "",
@@ -101,8 +95,8 @@ class _OtpScreenState extends State<OtpScreen> {
             borderSide: BorderSide.none,
           ),
         ),
-        onChanged: (value) {
-          if (value.isNotEmpty && index < _controllers.length - 1) {
+        onChanged: (v) {
+          if (v.isNotEmpty && index < _controllers.length - 1) {
             FocusScope.of(context).nextFocus();
           }
         },
@@ -112,18 +106,22 @@ class _OtpScreenState extends State<OtpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset("images/background.jpg", fit: BoxFit.cover),
-          Container(color: Colors.white.withOpacity(0.6)),
+          Image.asset("images/login.jpg", fit: BoxFit.cover),
+          Container(color: Colors.white.withOpacity(0.25)),
+
+          // زر الرجوع
           Positioned(
-            top: 30,
-            left: 16,
+            top: 40,
+            left: 20,
             child: IconButton(
-              icon: const Icon(Icons.arrow_back,
-                  color: Color(0xFF1A237E), size: 30),
+              icon: const Icon(Icons.arrow_back_ios,
+                  color: Colors.pinkAccent, size: 28),
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
@@ -132,45 +130,73 @@ class _OtpScreenState extends State<OtpScreen> {
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "أدخل رمز التحقق",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 22,
-                    color: Color(0xFF1A237E),
+
+          // المحتوى داخل الإطار
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                child: Container(
+                  width: width * 0.8,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 28),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.35),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        "أدخل رمز التحقق",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          color: Colors.pinkAccent,
+                        ),
+                      ),
+                      const SizedBox(height: 25),
+
+                      // مربعات الكود
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children:
+                            List.generate(6, (index) => _buildOtpBox(index)),
+                      ),
+                      const SizedBox(height: 30),
+
+                      SizedBox(
+                        width: width * 0.6,
+                        height: 44,
+                        child: ElevatedButton(
+                          onPressed: _verifyOtp,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.pinkAccent,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                          ),
+                          child: const Text("تأكيد الكود",
+                              style: TextStyle(fontSize: 15)),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      canResend
+                          ? TextButton(
+                              onPressed: _startTimer,
+                              child: const Text("إعادة إرسال الرمز",
+                                  style: TextStyle(color: Colors.pinkAccent)),
+                            )
+                          : Text(
+                              "يمكنك إعادة الإرسال خلال $_seconds ثانية",
+                              style: const TextStyle(
+                                  color: Colors.black87, fontSize: 14),
+                            ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(6, (index) => _buildOtpBox(index)),
-                ),
-                const SizedBox(height: 40),
-                ElevatedButton(
-                  onPressed: _verifyOtp,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFD600),
-                    foregroundColor: const Color(0xFF1A237E),
-                    minimumSize: const Size(double.infinity, 50),
-                  ),
-                  child: const Text("تأكيد الكود",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      )),
-                ),
-                const SizedBox(height: 20),
-                canResend
-                    ? TextButton(
-                        onPressed: _startTimer,
-                        child: const Text("إعادة إرسال الرمز"),
-                      )
-                    : Text("يمكنك إعادة الإرسال خلال $_seconds ثانية"),
-              ],
+              ),
             ),
           ),
         ],

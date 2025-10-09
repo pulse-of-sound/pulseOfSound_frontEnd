@@ -39,25 +39,30 @@ class _LoginForAdminAndDrState extends State<LoginForAdminAndDr> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("اسم المستخدم أو كلمة المرور غير صحيحة")),
+        const SnackBar(
+          content: Text("اسم المستخدم أو كلمة المرور غير صحيحة"),
+          backgroundColor: Colors.redAccent,
+        ),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset("images/background.jpg", fit: BoxFit.cover),
-          Container(color: Colors.white.withOpacity(0.6)),
+          Image.asset("images/login.jpg", fit: BoxFit.cover),
+          Container(color: Colors.white.withOpacity(0.25)),
           Positioned(
-            top: 30,
-            left: 16,
+            top: 40,
+            left: 20,
             child: IconButton(
-              icon: const Icon(Icons.arrow_back,
-                  color: Color(0xFF1A237E), size: 30),
+              icon: const Icon(Icons.arrow_back_ios,
+                  color: Colors.pinkAccent, size: 28),
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
@@ -66,52 +71,81 @@ class _LoginForAdminAndDrState extends State<LoginForAdminAndDr> {
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "تسجيل الدخول للأدمن / الدكتور",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 22,
-                    color: Color(0xFF1A237E),
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                child: Container(
+                  width: width * 0.8,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 28),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.35),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        "تسجيل الدخول للأدمن / الدكتور",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          color: Colors.pinkAccent,
+                        ),
+                      ),
+                      const SizedBox(height: 25),
+                      _buildTextField("اسم المستخدم", Icons.person,
+                          controller: _usernameController),
+                      const SizedBox(height: 15),
+                      _buildTextField("كلمة المرور", Icons.lock,
+                          controller: _passwordController, obscure: true),
+                      const SizedBox(height: 25),
+                      SizedBox(
+                        width: width * 0.6,
+                        height: 44,
+                        child: ElevatedButton(
+                          onPressed: _login,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.pinkAccent,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                          ),
+                          child: const Text("تسجيل الدخول",
+                              style: TextStyle(fontSize: 15)),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 30),
-                TextField(
-                  controller: _usernameController,
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.person, color: Color(0xFF1A237E)),
-                    labelText: "اسم المستخدم",
-                    filled: true,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.lock, color: Color(0xFF1A237E)),
-                    labelText: "كلمة المرور",
-                    filled: true,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _login,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFD600),
-                    foregroundColor: const Color(0xFF1A237E),
-                    minimumSize: const Size(double.infinity, 50),
-                  ),
-                  child: const Text("تسجيل الدخول"),
-                ),
-              ],
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTextField(String hint, IconData icon,
+      {bool obscure = false, required TextEditingController controller}) {
+    return TextField(
+      controller: controller,
+      obscureText: obscure,
+      textAlign: TextAlign.right,
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon, color: Colors.pinkAccent),
+        hintText: hint,
+        hintStyle: const TextStyle(fontSize: 14, color: Colors.black87),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.85),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
       ),
     );
   }

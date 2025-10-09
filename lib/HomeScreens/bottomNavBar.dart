@@ -37,9 +37,11 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
       extendBody: true,
       backgroundColor: Colors.transparent,
       body: _pages[_selectedIndex],
+
+      // 🔹 الزر الدائري بالنص
       floatingActionButton: Container(
-        height: 62,
-        width: 62,
+        height: 65,
+        width: 65,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: LinearGradient(
@@ -49,37 +51,50 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
           ),
           boxShadow: const [
             BoxShadow(
-                color: Colors.black26, blurRadius: 6, offset: Offset(0, 3)),
+              color: Colors.black26,
+              blurRadius: 8,
+              offset: Offset(0, 4),
+            ),
           ],
         ),
         child: FloatingActionButton(
           backgroundColor: Colors.transparent,
           elevation: 0,
           onPressed: () => _onItemTapped(2),
-          child: const Icon(Iconsax.add, size: 26, color: Colors.white),
+          child: const Icon(Iconsax.add, size: 28, color: Colors.white),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
+      // 🔹 البار السفلي
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 8,
-        elevation: 10,
-        color: Colors.white.withOpacity(0.95),
+        elevation: 15,
+        color: Colors.white.withOpacity(0.85), // 🔸 مش أبيض ناصع
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14.0),
+          padding:
+              const EdgeInsets.symmetric(horizontal: 28.0), // 🔹 توازن المسافات
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(children: [
-                _buildNavItem(Iconsax.home, 0),
-                const SizedBox(width: 5),
-                _buildNavItem(Iconsax.game, 1),
-              ]),
-              Row(children: [
-                _buildNavItem(Iconsax.document, 3),
-                const SizedBox(width: 5),
-                _buildNavItem(Iconsax.message, 4),
-              ]),
+              // الجهة اليسار
+              Row(
+                children: [
+                  _buildNavItem(Iconsax.home_2, 0),
+                  const SizedBox(width: 28),
+                  _buildNavItem(Iconsax.game, 1),
+                ],
+              ),
+
+              // الجهة اليمين
+              Row(
+                children: [
+                  _buildNavItem(Iconsax.document, 3),
+                  const SizedBox(width: 28),
+                  _buildNavItem(Iconsax.message, 4),
+                ],
+              ),
             ],
           ),
         ),
@@ -87,27 +102,36 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     );
   }
 
+  // 🔸 بناء كل عنصر أيقونة بالـ BottomNav
   Widget _buildNavItem(IconData icon, int index) {
     final bool isSelected = _selectedIndex == index;
-    return MaterialButton(
-      minWidth: 50,
-      onPressed: () => _onItemTapped(index),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon,
-              size: 23,
-              color: isSelected ? AppColors.skyBlue : Colors.grey.shade500),
-          const SizedBox(height: 3),
-          Container(
-            height: 3,
-            width: 18,
-            decoration: BoxDecoration(
-              color: isSelected ? AppColors.skyBlue : Colors.transparent,
-              borderRadius: BorderRadius.circular(2),
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(25),
+      onTap: () => _onItemTapped(index),
+      child: SizedBox(
+        width: 45, // 🔹 حجم متساوٍ لكل عنصر
+        height: 58,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 24,
+              color: isSelected ? AppColors.skyBlue : Colors.grey.shade600,
             ),
-          ),
-        ],
+            const SizedBox(height: 3),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              height: 3,
+              width: 18,
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.skyBlue : Colors.transparent,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

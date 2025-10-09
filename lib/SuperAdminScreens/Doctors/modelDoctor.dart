@@ -10,12 +10,12 @@ class Doctor {
 
   Doctor({
     required this.name,
-    required this.birthDate,
+    this.birthDate,
     required this.phone,
-    required this.email,
+    this.email,
     required this.password,
-    required this.certificates,
-    required this.experience,
-    required this.workplace,
+    this.certificates,
+    this.experience,
+    this.workplace,
   });
 }
