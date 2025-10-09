@@ -164,9 +164,19 @@ class _EditDoctorPageState extends State<EditDoctorPage> {
           style: const TextStyle(color: Colors.black87),
           decoration: InputDecoration(
             labelText: label,
+            filled: true,
+            fillColor: Colors.white.withOpacity(0.85),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+            enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: BorderSide(color: Colors.transparent)),
+            focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: BorderSide(color: Colors.blueAccent, width: 1.5)),
             suffixIcon:
                 const Icon(Icons.calendar_today, color: Colors.blueAccent),
-            border: InputBorder.none,
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
@@ -190,7 +200,17 @@ class _EditDoctorPageState extends State<EditDoctorPage> {
           style: const TextStyle(color: Colors.black87),
           decoration: InputDecoration(
             labelText: label,
-            border: InputBorder.none,
+            filled: true,
+            fillColor: Colors.white.withOpacity(0.85),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+            enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: BorderSide(color: Colors.transparent)),
+            focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: BorderSide(color: Colors.white, width: 1.5)),
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
