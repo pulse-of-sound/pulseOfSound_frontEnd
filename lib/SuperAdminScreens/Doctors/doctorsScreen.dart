@@ -115,7 +115,7 @@ class _DoctorsPageState extends State<DoctorsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // 🔹 الخلفية
+      //  الخلفية
       body: Stack(
         children: [
           Container(
@@ -130,7 +130,7 @@ class _DoctorsPageState extends State<DoctorsPage> {
           SafeArea(
             child:
 
-                // 🔹 شريط علوي
+                //  شريط علوي
                 Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Column(
@@ -164,11 +164,11 @@ class _DoctorsPageState extends State<DoctorsPage> {
                     height: 15,
                   ),
 
-// 🔹 البحث
+//  البحث
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Material(
-                      // 👈 هنا حل الخطأ
+                      //  هنا حل الخطأ
                       color: Colors.transparent,
                       child: TextField(
                         controller: searchController,
@@ -188,7 +188,7 @@ class _DoctorsPageState extends State<DoctorsPage> {
                   ),
                   const SizedBox(height: 8),
 
-                  // 🔹 القائمة
+                  //  القائمة
                   Expanded(
                     child: ListView.builder(
                       padding: const EdgeInsets.all(16),
@@ -282,7 +282,7 @@ class _DoctorsPageState extends State<DoctorsPage> {
         ],
       ),
 
-      // 🔹 زر الإضافة
+      //  زر الإضافة
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.skyBlue,
         onPressed: () async {

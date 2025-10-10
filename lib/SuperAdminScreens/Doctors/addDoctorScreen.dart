@@ -129,7 +129,9 @@ class _AddDoctorPageState extends State<AddDoctorPage> {
                       child: const Text(
                         "إضافة الطبيب",
                         style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
                       ),
                     ),
                   ],

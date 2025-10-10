@@ -14,17 +14,17 @@ class AdminHome extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        // 🖼️ الخلفية
+        // الخلفية
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("images/Admin.jpg"), // ← حطي هون الصورة يلي بعتيا
+            image: AssetImage("images/Admin.jpg"),
             fit: BoxFit.cover,
           ),
         ),
         child: SafeArea(
           child: Column(
             children: [
-              // 🌈 شريط العنوان
+              //  شريط العنوان
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -47,7 +47,7 @@ class AdminHome extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // 🧊 شبكة الكروت
+              //  شبكة الكروت
               Expanded(
                 child: GridView.count(
                   crossAxisCount: 2,
@@ -63,11 +63,11 @@ class AdminHome extends StatelessWidget {
                         context,
                         "الأخصائيين",
                         "icons/icons8-mental-health-64.png",
-                        const SpecialistsPage()),
+                        const Specialistscreen()),
                     _buildGlassCard(context, "الأطفال",
                         "icons/icons8-children-64.png", const ChildrenPage()),
                     _buildGlassCard(context, "الأدمن",
-                        "icons/icons8-admin-50.png", const AdminsPage()),
+                        "icons/icons8-admin-50.png", const Adminscreen()),
                   ],
                 ),
               ),
@@ -78,7 +78,7 @@ class AdminHome extends StatelessWidget {
     );
   }
 
-  // 🎁 كارد زجاجي احترافي
+  //  كارد زجاجي احترافي
   Widget _buildGlassCard(
       BuildContext context, String title, String iconPath, Widget page) {
     return GestureDetector(
@@ -88,7 +88,7 @@ class AdminHome extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12), // 💧 تأثير الزجاج
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12), //  تأثير الزجاج
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),

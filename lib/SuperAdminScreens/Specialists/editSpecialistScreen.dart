@@ -1,70 +1,242 @@
 import 'package:flutter/material.dart';
-import 'modelSpecialists.dart';
+import 'package:pulse_of_sound/SuperAdminScreens/Specialists/modelSpecialists.dart';
 
 class EditSpecialistPage extends StatefulWidget {
   final Specialist specialist;
-
   const EditSpecialistPage({super.key, required this.specialist});
 
   @override
-  State<EditSpecialistPage> createState() => _EditSpecialistPageState();
+  State<EditSpecialistPage> createState() => _EditDoctorPageState();
 }
 
-class _EditSpecialistPageState extends State<EditSpecialistPage> {
-  late TextEditingController nameController;
-  late TextEditingController ageController;
-  late TextEditingController phoneController;
+class _EditDoctorPageState extends State<EditSpecialistPage> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController nameCtrl;
+  late TextEditingController birthDateCtrl;
+  late TextEditingController phoneCtrl;
+  late TextEditingController passwordCtrl;
+  late TextEditingController emailCtrl;
+  late TextEditingController certificatesCtrl;
+  late TextEditingController experienceCtrl;
+  late TextEditingController workplaceCtrl;
 
   @override
   void initState() {
     super.initState();
-    nameController = TextEditingController(text: widget.specialist.name);
-    ageController = TextEditingController(text: widget.specialist.age);
-    phoneController = TextEditingController(text: widget.specialist.phone);
+    nameCtrl = TextEditingController(text: widget.specialist.name);
+    birthDateCtrl =
+        TextEditingController(text: widget.specialist.birthDate ?? "");
+    phoneCtrl = TextEditingController(text: widget.specialist.phone);
+    passwordCtrl = TextEditingController(text: widget.specialist.password);
+    emailCtrl = TextEditingController(text: widget.specialist.email ?? "");
+    certificatesCtrl =
+        TextEditingController(text: widget.specialist.certificates ?? "");
+    experienceCtrl =
+        TextEditingController(text: widget.specialist.experience ?? "");
+    workplaceCtrl =
+        TextEditingController(text: widget.specialist.workplace ?? "");
+  }
+
+  Future<void> _pickBirthDate() async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(1980),
+      firstDate: DateTime(1950),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        birthDateCtrl.text = "${picked.day}/${picked.month}/${picked.year}";
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          AppBar(title: const Text("تعديل بيانات الأخصائي"), centerTitle: true),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            _buildField("الاسم الكامل", nameController),
-            const SizedBox(height: 15),
-            _buildField("العمر", ageController, keyboard: TextInputType.number),
-            const SizedBox(height: 15),
-            _buildField("رقم الموبايل", phoneController,
-                keyboard: TextInputType.phone),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                final updated = Specialist(
-                  name: nameController.text,
-                  age: ageController.text,
-                  phone: phoneController.text,
-                );
-                Navigator.pop(context, updated);
-              },
-              child: const Text("حفظ التعديلات"),
+      body: Stack(
+        children: [
+          // الخلفية
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("images/Admin.jpg"),
+                fit: BoxFit.cover,
+              ),
             ),
-          ],
+          ),
+
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back_ios_new,
+                              color: Colors.white),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        const Expanded(
+                          child: Text(
+                            "تعديل بيانات الأخصائي",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black54,
+                                  blurRadius: 6,
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 48),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    _buildField("الاسم الكامل", nameCtrl, required: true),
+                    _buildDateField("تاريخ الميلاد", birthDateCtrl),
+                    _buildField("رقم الموبايل", phoneCtrl,
+                        required: true, keyboard: TextInputType.phone),
+                    _buildField("كلمة المرور", passwordCtrl,
+                        required: true, obscure: true),
+                    _buildField("البريد الإلكتروني", emailCtrl,
+                        keyboard: TextInputType.emailAddress),
+                    _buildField("الشهادات", certificatesCtrl),
+                    _buildField("سنوات الخبرة", experienceCtrl),
+                    _buildField("مكان العمل", workplaceCtrl),
+                    const SizedBox(height: 30),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 52),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        elevation: 6,
+                      ),
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          final updatedDoctor = Specialist(
+                            name: nameCtrl.text,
+                            birthDate: birthDateCtrl.text,
+                            phone: phoneCtrl.text,
+                            password: passwordCtrl.text,
+                            email: emailCtrl.text,
+                            certificates: certificatesCtrl.text,
+                            experience: experienceCtrl.text,
+                            workplace: workplaceCtrl.text,
+                          );
+                          Navigator.pop(context, updatedDoctor);
+                        }
+                      },
+                      child: const Text(
+                        "حفظ التعديلات",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateField(String label, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Container(
+        decoration: _inputBoxDecoration(),
+        child: TextFormField(
+          controller: controller,
+          readOnly: true,
+          onTap: _pickBirthDate,
+          style: const TextStyle(color: Colors.black87),
+          decoration: InputDecoration(
+            labelText: label,
+            filled: true,
+            fillColor: Colors.white.withOpacity(0.85),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+            enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: BorderSide(color: Colors.transparent)),
+            focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: BorderSide(color: Colors.blueAccent, width: 1.5)),
+            suffixIcon:
+                const Icon(Icons.calendar_today, color: Colors.blueAccent),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          ),
         ),
       ),
     );
   }
 
   Widget _buildField(String label, TextEditingController controller,
-      {TextInputType keyboard = TextInputType.text}) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboard,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      {bool required = false,
+      bool obscure = false,
+      TextInputType keyboard = TextInputType.text}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Container(
+        decoration: _inputBoxDecoration(),
+        child: TextFormField(
+          controller: controller,
+          obscureText: obscure,
+          keyboardType: keyboard,
+          style: const TextStyle(color: Colors.black87),
+          decoration: InputDecoration(
+            labelText: label,
+            filled: true,
+            fillColor: Colors.white.withOpacity(0.85),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+            enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: BorderSide(color: Colors.transparent)),
+            focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: BorderSide(color: Colors.white, width: 1.5)),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          ),
+          validator: required
+              ? (value) => (value == null || value.isEmpty)
+                  ? "الرجاء إدخال $label"
+                  : null
+              : null,
+        ),
       ),
+    );
+  }
+
+  BoxDecoration _inputBoxDecoration() {
+    return BoxDecoration(
+      color: Colors.white.withOpacity(0.85),
+      borderRadius: BorderRadius.circular(20),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black26,
+          blurRadius: 6,
+          offset: const Offset(2, 3),
+        ),
+      ],
     );
   }
 }
