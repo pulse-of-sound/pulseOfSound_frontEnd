@@ -1,7 +1,7 @@
 class Child {
   String name;
-  String age;
+  String birthDate;
   String parentPhone;
 
-  Child({required this.name, required this.age, required this.parentPhone});
+  Child({required this.name, required this.birthDate, required this.parentPhone});
 }
