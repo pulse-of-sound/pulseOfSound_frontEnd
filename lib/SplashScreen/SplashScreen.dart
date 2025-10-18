@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:pulse_of_sound/LoginScreens/loginscreen.dart';
 import 'package:pulse_of_sound/HomeScreens/HomeScreen.dart';
 import 'package:pulse_of_sound/HomeScreens/AdminHomeScreen.dart';
@@ -14,24 +14,31 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
+    with TickerProviderStateMixin {
+  late AnimationController _logoController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    _controller = AnimationController(
-      duration: const Duration(seconds: 3),
-      vsync: this,
-    )..repeat(reverse: true);
+    // Animation for logo
+    _logoController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 3));
 
-    _animation = Tween<double>(begin: 0.9, end: 1.1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.1).animate(
+      CurvedAnimation(parent: _logoController, curve: Curves.easeInOut),
     );
 
-    Timer(const Duration(seconds: 3), _navigateUser);
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 3.0).animate(
+      CurvedAnimation(parent: _logoController, curve: Curves.easeIn),
+    );
+
+    _logoController.forward();
+
+    // Navigation after 3.5s
+    Timer(const Duration(seconds: 4), _navigateUser);
   }
 
   void _navigateUser() {
@@ -65,55 +72,97 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
-    _controller.dispose();
+    _logoController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body: AnimatedContainer(
+        duration: const Duration(seconds: 1),
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFB3E5FC), Color(0xFFF8BBD0)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF5CD1FF), // أزرق سماوي
+              Color(0xFFFF9AE1), // زهري
+              Color(0xFFFFE27D), // أصفر باهت
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ScaleTransition(
-                scale: _animation,
-                child: ClipOval(
-                  child: Image.asset(
-                    'images/logo.jpg',
-                    width: 160,
-                    height: 160,
-                    fit: BoxFit.cover,
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: ScaleTransition(
+              scale: _scaleAnimation,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // الشعار
+                  Container(
+                    width: 200,
+                    height: 200,
+                    decoration: BoxDecoration(
+                      image: const DecorationImage(
+                        image: AssetImage("images/logoColorful.png"), //  الصورة
+                        fit: BoxFit.contain,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white.withOpacity(0.2),
+                          blurRadius: 30,
+                          spreadRadius: 10,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 40),
+
+                  // النص الرئيسي
+                  const Text(
+                    "Pulse of Sound",
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 1.4,
+                      shadows: [
+                        Shadow(
+                          blurRadius: 10,
+                          color: Colors.black26,
+                          offset: Offset(1, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // الشعار الفرعي
+                  const Text(
+                    "Learn • Play • Happiness",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white70,
+                      letterSpacing: 1.1,
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+
+                  // خط التحميل السفلي
+                  SizedBox(
+                    width: 120,
+                    child: LinearProgressIndicator(
+                      backgroundColor: Colors.white30,
+                      color: Colors.white,
+                      minHeight: 4,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 24),
-              const Text(
-                'Pulse Of Sound',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Learn ,Play ,Happiness',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black54,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

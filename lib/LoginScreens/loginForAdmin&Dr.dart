@@ -114,7 +114,8 @@ class _LoginForAdminAndDrState extends State<LoginForAdminAndDr> {
                             ),
                           ),
                           child: const Text("تسجيل الدخول",
-                              style: TextStyle(fontSize: 15)),
+                              style: TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.bold)),
                         ),
                       ),
                     ],

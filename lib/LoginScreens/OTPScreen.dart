@@ -177,7 +177,8 @@ class _OtpScreenState extends State<OtpScreen> {
                             ),
                           ),
                           child: const Text("تأكيد الكود",
-                              style: TextStyle(fontSize: 15)),
+                              style: TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.bold)),
                         ),
                       ),
                       const SizedBox(height: 20),

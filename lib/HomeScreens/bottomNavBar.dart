@@ -3,6 +3,8 @@ import 'package:iconsax/iconsax.dart';
 import 'package:pulse_of_sound/Articles/articlesScreen.dart';
 import 'package:pulse_of_sound/HomeScreens/HomeScreen.dart';
 import '../Colors/colors.dart';
+import '../Levels/StageDetailScreen.dart';
+import '../Levels/levelsScreen.dart';
 
 class BottomNavScreen extends StatefulWidget {
   final int initialIndex;
@@ -23,7 +25,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
 
   final List<Widget> _pages = [
     const Center(child: Text("الألعاب", style: TextStyle(fontSize: 18))),
-    const Center(child: Text("الألعاب", style: TextStyle(fontSize: 18))),
+    LevelScreen(),
     const Center(child: Text("إضافة", style: TextStyle(fontSize: 18))),
     const ArticlesScreen(),
     const Center(child: Text("المحادثة", style: TextStyle(fontSize: 18))),
