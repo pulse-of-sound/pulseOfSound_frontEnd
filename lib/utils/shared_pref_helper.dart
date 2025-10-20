@@ -95,4 +95,15 @@ class SharedPrefsHelper {
   static Future clear() async {
     await _prefs?.clear();
   }
+
+  //المحفظة
+  static Future<void> setWalletImage(String path) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("walletImage", path);
+  }
+
+  static Future<String?> getWalletImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString("walletImage");
+  }
 }

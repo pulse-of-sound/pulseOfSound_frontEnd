@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:pulse_of_sound/Articles/articlesScreen.dart';
 import 'package:pulse_of_sound/HomeScreens/HomeScreen.dart';
+import '../Booking/screens/consultation_flow.dart';
 import '../Colors/colors.dart';
 import '../Levels/StageDetailScreen.dart';
 import '../Levels/levelsScreen.dart';
@@ -24,9 +25,9 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   }
 
   final List<Widget> _pages = [
-    const Center(child: Text("الألعاب", style: TextStyle(fontSize: 18))),
+    HomeScreen(),
     LevelScreen(),
-    const Center(child: Text("إضافة", style: TextStyle(fontSize: 18))),
+    ConsultationTypeScreen(),
     const ArticlesScreen(),
     const Center(child: Text("المحادثة", style: TextStyle(fontSize: 18))),
   ];
