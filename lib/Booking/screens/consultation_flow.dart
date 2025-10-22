@@ -124,12 +124,12 @@ class _ConsultationTypeScreenState extends State<ConsultationTypeScreen> {
             id: "1",
             name: "د. أحمد سليمان",
             specialty: "أخصائي أنف وأذن وحنجرة",
-            avatar: "images/doctor1.jpg"),
+            avatar: "images/doctor1.jpeg"),
         ProviderModel(
             id: "2",
             name: "د. سارة الخطيب",
             specialty: "جراحة سمعية",
-            avatar: "images/doctor2.jpg"),
+            avatar: "images/doctor.jpg"),
       ];
     } else {
       return [
@@ -137,12 +137,12 @@ class _ConsultationTypeScreenState extends State<ConsultationTypeScreen> {
             id: "3",
             name: "أ. منى العبدالله",
             specialty: "أخصائية نطق ولغة",
-            avatar: "images/psych1.jpg"),
+            avatar: "images/doctor.jpg"),
         ProviderModel(
             id: "4",
             name: "أ. خليل الرفاعي",
             specialty: "علاج سلوكي",
-            avatar: "images/psych2.jpg"),
+            avatar: "images/doctor1.jpeg"),
       ];
     }
   }

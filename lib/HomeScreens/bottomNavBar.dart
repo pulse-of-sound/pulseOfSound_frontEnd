@@ -25,11 +25,11 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   }
 
   final List<Widget> _pages = [
-    HomeScreen(),
     LevelScreen(),
     ConsultationTypeScreen(),
-    const ArticlesScreen(),
+    HomeScreen(),
     const Center(child: Text("المحادثة", style: TextStyle(fontSize: 18))),
+    const ArticlesScreen(),
   ];
 
   void _onItemTapped(int index) => setState(() => _selectedIndex = index);
@@ -64,7 +64,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           onPressed: () => _onItemTapped(2),
-          child: const Icon(Iconsax.add, size: 28, color: Colors.white),
+          child: const Icon(Iconsax.home_2, size: 28, color: Colors.white),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -84,18 +84,18 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
               // الجهة اليسار
               Row(
                 children: [
-                  _buildNavItem(Iconsax.home_2, 0),
+                  _buildNavItem(Iconsax.game, 0),
                   const SizedBox(width: 28),
-                  _buildNavItem(Iconsax.game, 1),
+                  _buildNavItem(Icons.local_hospital, 1),
                 ],
               ),
 
               // الجهة اليمين
               Row(
                 children: [
-                  _buildNavItem(Iconsax.document, 3),
+                  _buildNavItem(Iconsax.message, 3),
                   const SizedBox(width: 28),
-                  _buildNavItem(Iconsax.message, 4),
+                  _buildNavItem(Iconsax.document, 4),
                 ],
               ),
             ],

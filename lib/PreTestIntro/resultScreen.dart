@@ -137,9 +137,8 @@ class ResultScreen extends StatelessWidget {
                           Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  const BottomNavScreen(initialIndex: 0),
-                            ),
+                                builder: (_) =>
+                                    const BottomNavScreen(initialIndex: 2)),
                             (route) => false,
                           );
                         },

@@ -47,6 +47,8 @@ class _BookingsScreenState extends State<BookingsScreen> {
         return Colors.redAccent;
       case BookingStatus.completed:
         return Colors.blueGrey;
+      case BookingStatus.rejected:
+        return Colors.red;
     }
   }
 
@@ -61,6 +63,8 @@ class _BookingsScreenState extends State<BookingsScreen> {
       case BookingStatus.cancelled:
         return "ملغاة";
       case BookingStatus.completed:
+        return "مكتملة";
+      case BookingStatus.rejected:
         return "مكتملة";
     }
   }

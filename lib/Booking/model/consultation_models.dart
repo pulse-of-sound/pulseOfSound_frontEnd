@@ -28,13 +28,21 @@ class ProviderModel {
       );
 }
 
-enum BookingStatus { pending, processing, accepted, cancelled, completed }
+enum BookingStatus {
+  pending, // بانتظار الرد
+  processing, // قيد المعالجة
+  accepted, // تم القبول وخصم الرصيد
+  rejected, // تم الرفض
+  cancelled, // تم الإلغاء من الأهل
+  completed // انتهت الاستشارة بنجاح
+}
 
 class Booking {
   final String id;
+  final String parentId; // 🧠 لتحديد صاحب الحجز (الأهل)
   final String parentName;
   final String phone;
-  final String type; // طبية أو نفسية
+  final String type;
   final ProviderModel provider;
   final String plan;
   final double price;
@@ -44,6 +52,7 @@ class Booking {
 
   Booking({
     required this.id,
+    required this.parentId,
     required this.parentName,
     required this.phone,
     required this.type,
@@ -57,6 +66,7 @@ class Booking {
 
   Map<String, dynamic> toMap() => {
         "id": id,
+        "parentId": parentId,
         "parentName": parentName,
         "phone": phone,
         "type": type,
@@ -70,6 +80,7 @@ class Booking {
 
   factory Booking.fromMap(Map<String, dynamic> m) => Booking(
         id: m["id"],
+        parentId: m["parentId"],
         parentName: m["parentName"],
         phone: m["phone"],
         type: m["type"],

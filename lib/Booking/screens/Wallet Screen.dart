@@ -1,8 +1,9 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-
-import '../../utils/shared_pref_helper.dart';
+import '../utils/wallet_prefs.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
@@ -12,34 +13,48 @@ class WalletScreen extends StatefulWidget {
 }
 
 class _WalletScreenState extends State<WalletScreen> {
-  File? _imageFile;
-
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      final file = File(picked.path);
-      await SharedPrefsHelper.setWalletImage(file.path);
-      setState(() {
-        _imageFile = file;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ تم رفع إيصال الدفع بنجاح")),
-      );
-    }
-  }
-
-  Future<void> _loadSavedImage() async {
-    final path = await SharedPrefsHelper.getWalletImage();
-    if (path != null && File(path).existsSync()) {
-      setState(() => _imageFile = File(path));
-    }
-  }
+  double _balance = 0.0;
+  XFile? _pickedImage;
+  Uint8List? _webImage;
 
   @override
   void initState() {
     super.initState();
-    _loadSavedImage();
+    _loadBalance();
+  }
+
+  Future<void> _loadBalance() async {
+    final b = await WalletPrefs.getBalance();
+    setState(() => _balance = b);
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+
+    if (picked != null) {
+      if (kIsWeb) {
+        _webImage = await picked.readAsBytes();
+      } else {
+        _pickedImage = picked;
+      }
+
+      await WalletPrefs.setReceiptImage(picked.path);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(" تم رفع إيصال الدفع بنجاح")),
+      );
+      setState(() {});
+    }
+  }
+
+  Future<void> _simulateAdminApproval() async {
+    // محاكاة أن الأدمن أضاف الرصيد
+    await WalletPrefs.addBalance(50); // إضافة 50$
+    _loadBalance();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("💰 تمت إضافة 50\$ للمحفظة")),
+    );
   }
 
   @override
@@ -49,51 +64,58 @@ class _WalletScreenState extends State<WalletScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text("المحفظة",
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("المحفظة"),
         centerTitle: true,
       ),
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-              image: AssetImage("images/booking.jpg"), fit: BoxFit.cover),
+            image: AssetImage("images/booking.jpg"),
+            fit: BoxFit.cover,
+          ),
         ),
         child: Center(
-          child: Container(
+          child: Padding(
             padding: const EdgeInsets.all(20),
-            width: 350,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.9),
-              borderRadius: BorderRadius.circular(25),
-            ),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text("قم برفع إيصال الدفع:",
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 20),
-                _imageFile == null
-                    ? const Icon(Icons.image_not_supported,
-                        size: 100, color: Colors.grey)
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: Image.file(_imageFile!,
-                            height: 200, fit: BoxFit.cover),
-                      ),
-                const SizedBox(height: 25),
+                const Text(
+                  "رصيدك الحالي",
+                  style: TextStyle(color: Colors.white, fontSize: 22),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "\$$_balance",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 30),
                 ElevatedButton.icon(
                   onPressed: _pickImage,
+                  icon: const Icon(Icons.upload_file),
+                  label: const Text("رفع إيصال الدفع"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.pinkAccent,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 30, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25)),
+                        horizontal: 40, vertical: 14),
                   ),
-                  icon: const Icon(Icons.upload, color: Colors.white),
-                  label: const Text("رفع إيصال",
-                      style: TextStyle(color: Colors.white)),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed: _simulateAdminApproval,
+                  icon: const Icon(Icons.admin_panel_settings),
+                  label: const Text("محاكاة موافقة الأدمن"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40, vertical: 14),
+                  ),
                 ),
               ],
             ),

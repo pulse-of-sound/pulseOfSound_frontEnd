@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../Booking/screens/Wallet Screen.dart';
 import '../Booking/screens/bookings_list_screen.dart';
 import '../Booking/utils/bookings_prefs.dart';
 import '../Colors/colors.dart';
@@ -54,7 +55,12 @@ class _DrawerScreenState extends State<DrawerScreen> {
           ListTile(
             leading: const Icon(Icons.wallet),
             title: const Text("المحفظة"),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => WalletScreen()),
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.calendar_today),

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../model/consultation_models.dart';
+import 'wallet_prefs.dart';
 
 class BookingsPrefs {
   static const String _key = "app_bookings";
@@ -32,6 +33,16 @@ class BookingsPrefs {
     final i = list.indexWhere((x) => x.id == b.id);
     if (i != -1) list[i] = b;
     await save(list);
+  }
+
+  // 🔹 دالة الطبيب لقبول الحجز مع خصم الرصيد
+  static Future<bool> approveBooking(Booking booking) async {
+    final success = await WalletPrefs.deduct(booking.price);
+    if (success) {
+      booking.status = BookingStatus.accepted;
+      await update(booking);
+    }
+    return success;
   }
 
   static Future<int> pendingCount() async {
