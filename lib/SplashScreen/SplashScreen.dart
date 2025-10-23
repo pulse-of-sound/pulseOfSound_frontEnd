@@ -54,7 +54,7 @@ class _SplashScreenState extends State<SplashScreen>
       } else if (type == "doctor") {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const Doctorhomescreen()),
+          MaterialPageRoute(builder: (_) => const DoctorDashboard()),
         );
       } else {
         Navigator.pushReplacement(

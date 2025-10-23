@@ -35,7 +35,7 @@ class _LoginForAdminAndDrState extends State<LoginForAdminAndDr> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const Doctorhomescreen()),
+        MaterialPageRoute(builder: (_) => const DoctorDashboard()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
