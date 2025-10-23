@@ -1,9 +1,11 @@
 import 'dart:io';
-import 'dart:typed_data';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../utils/wallet_prefs.dart';
+import '../../Booking/utils/wallet_prefs.dart';
+import '../../Colors/colors.dart';
+import '../../SuperAdminScreens/Wallet/ReceiptModel.dart';
+import 'MyReceiptsScreen.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
@@ -13,9 +15,9 @@ class WalletScreen extends StatefulWidget {
 }
 
 class _WalletScreenState extends State<WalletScreen> {
-  double _balance = 0.0;
-  XFile? _pickedImage;
-  Uint8List? _webImage;
+  double balance = 0.0;
+  String? _imagePath; // ✅ بدل File image
+  final TextEditingController amountController = TextEditingController();
 
   @override
   void initState() {
@@ -25,102 +27,235 @@ class _WalletScreenState extends State<WalletScreen> {
 
   Future<void> _loadBalance() async {
     final b = await WalletPrefs.getBalance();
-    setState(() => _balance = b);
+    setState(() => balance = b);
   }
 
+  /// ✅ اختيار صورة الإيصال (يدعم Web و Mobile)
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
-
     if (picked != null) {
-      if (kIsWeb) {
-        _webImage = await picked.readAsBytes();
-      } else {
-        _pickedImage = picked;
-      }
-
-      await WalletPrefs.setReceiptImage(picked.path);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(" تم رفع إيصال الدفع بنجاح")),
-      );
-      setState(() {});
+      setState(() {
+        _imagePath = picked.path; // يعمل للويب والموبايل
+      });
     }
   }
 
-  Future<void> _simulateAdminApproval() async {
-    // محاكاة أن الأدمن أضاف الرصيد
-    await WalletPrefs.addBalance(50); // إضافة 50$
-    _loadBalance();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("💰 تمت إضافة 50\$ للمحفظة")),
+  /// ✅ إرسال الإيصال إلى الإدارة
+  Future<void> _sendReceipt() async {
+    if (_imagePath == null || amountController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("الرجاء اختيار صورة وإدخال المبلغ")),
+      );
+      return;
+    }
+
+    final amount = double.tryParse(amountController.text) ?? 0;
+    if (amount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("الرجاء إدخال مبلغ صحيح")),
+      );
+      return;
+    }
+
+    final receipt = Receipt(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      parentPhone: "0999999999", // يمكن استبدالها لاحقًا برقم المستخدم الحقيقي
+      amount: amount,
+      imagePath: _imagePath!,
     );
+
+    await WalletPrefs.addReceipt(receipt);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("تم إرسال الإيصال بانتظار موافقة الإدارة")),
+    );
+
+    setState(() {
+      _imagePath = null;
+      amountController.clear();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text("المحفظة"),
-        centerTitle: true,
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("images/booking.jpg"),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "رصيدك الحالي",
-                  style: TextStyle(color: Colors.white, fontSize: 22),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "\$$_balance",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 30),
-                ElevatedButton.icon(
-                  onPressed: _pickImage,
-                  icon: const Icon(Icons.upload_file),
-                  label: const Text("رفع إيصال الدفع"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.pinkAccent,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40, vertical: 14),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton.icon(
-                  onPressed: _simulateAdminApproval,
-                  icon: const Icon(Icons.admin_panel_settings),
-                  label: const Text("محاكاة موافقة الأدمن"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40, vertical: 14),
-                  ),
-                ),
-              ],
+      body: Stack(
+        children: [
+          // 🔹 الخلفية
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("images/booking.jpg"),
+                fit: BoxFit.cover,
+              ),
             ),
           ),
-        ),
+
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // 🔙 زر الرجوع + العنوان
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new,
+                            color: Colors.black),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      const Expanded(
+                        child: Text(
+                          "المحفظة الإلكترونية",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                            shadows: [
+                              Shadow(color: Colors.black54, blurRadius: 6)
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 48),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // ✅ الرصيد الحالي
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 8,
+                          offset: const Offset(2, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        const Text(
+                          "رصيدك الحالي",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "$balance ل.س",
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.skyBlue,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  // ✅ إدخال المبلغ
+                  TextField(
+                    controller: amountController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: "المبلغ",
+                      fillColor: Colors.white.withOpacity(0.9),
+                      filled: true,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+
+                  // ✅ اختيار صورة الإيصال
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      height: 180,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.85),
+                        borderRadius: BorderRadius.circular(20),
+                        border:
+                            Border.all(color: AppColors.skyBlue, width: 2.2),
+                      ),
+                      child: _imagePath == null
+                          ? const Center(
+                              child: Text(
+                                "اضغط لاختيار صورة الإيصال",
+                                style: TextStyle(color: Colors.black54),
+                              ),
+                            )
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(18),
+                              child: kIsWeb
+                                  ? Image.network(
+                                      _imagePath!,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.file(
+                                      File(_imagePath!),
+                                      fit: BoxFit.cover,
+                                    ),
+                            ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // ✅ زر إرسال الإيصال
+                  ElevatedButton.icon(
+                    onPressed: _sendReceipt,
+                    icon: const Icon(Icons.upload),
+                    label: const Text("إرسال الإيصال"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.skyBlue,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // 🧾 زر عرض الإيصالات
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const MyReceiptsScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.receipt_long),
+                    label: const Text("عرض إيصالاتي"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppColors.skyBlue,
+                      minimumSize: const Size(double.infinity, 48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

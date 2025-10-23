@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:pulse_of_sound/HomeScreens/bottomNavBar.dart';
 import '../model/consultation_models.dart';
 import '../utils/bookings_prefs.dart';
 import 'consultation_flow.dart';
@@ -43,7 +44,10 @@ class ConfirmBookingScreen extends StatelessWidget {
 
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (_) => const ConsultationTypeScreen()),
+      MaterialPageRoute(
+          builder: (_) => const BottomNavScreen(
+                initialIndex: 1,
+              )),
       (route) => false,
     );
   }

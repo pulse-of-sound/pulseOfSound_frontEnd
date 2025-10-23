@@ -6,6 +6,7 @@ import '../SuperAdminScreens/Admin/adminScreen.dart';
 import '../SuperAdminScreens/Childrens/chidScreen.dart';
 import '../SuperAdminScreens/Doctors/doctorsScreen.dart';
 import '../Colors/colors.dart';
+import '../SuperAdminScreens/Wallet/ReceiptsAdminScreen.dart';
 
 class AdminHome extends StatelessWidget {
   const AdminHome({super.key});
@@ -68,6 +69,11 @@ class AdminHome extends StatelessWidget {
                         "icons/icons8-children-64.png", const ChildrenPage()),
                     _buildGlassCard(context, "الأدمن",
                         "icons/icons8-admin-50.png", const Adminscreen()),
+                    _buildGlassCard(
+                        context,
+                        "الإيصالات",
+                        "icons/icons8-wallet-80.png",
+                        const ReceiptsAdminScreen()),
                   ],
                 ),
               ),
