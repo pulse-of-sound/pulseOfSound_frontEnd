@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:pulse_of_sound/Doctor/Screens/doctor_profile_screen.dart';
 import '../../Colors/colors.dart';
-import '../Doctor/doctor_articles_screen.dart';
-import '../Doctor/doctor_bookings_screen.dart';
-import '../Doctor/doctor_chat_screen.dart';
-import '../Doctor/doctor_reports_screen.dart';
-import '../Doctor/doctor_wallet_screen.dart';
+import '../Doctor/Screens/doctor_articles_screen.dart';
+import '../Doctor/Screens/doctor_bookings_screen.dart';
+import '../Doctor/Screens/doctor_chat_room.dart';
+import '../Doctor/Screens/doctor_chat_screen.dart';
+import '../Doctor/Screens/doctor_reports_screen.dart';
+import '../Doctor/Screens/doctor_wallet_screen.dart';
 
 class DoctorDashboard extends StatelessWidget {
   const DoctorDashboard({super.key});
@@ -12,6 +14,11 @@ class DoctorDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> cards = [
+      {
+        "title": "الملف الشخصي",
+        "icon": Icons.person,
+        "screen": const DoctorProfileScreen()
+      },
       {
         "title": "الاستشارات",
         "icon": Icons.calendar_month,
@@ -25,7 +32,7 @@ class DoctorDashboard extends StatelessWidget {
       {
         "title": "المحادثات",
         "icon": Icons.chat,
-        "screen": const DoctorChatScreen()
+        "screen": const DoctorChatMainScreen()
       },
       {
         "title": "المقالات",
@@ -35,7 +42,10 @@ class DoctorDashboard extends StatelessWidget {
       {
         "title": "التقارير الطبية",
         "icon": Icons.file_copy,
-        "screen": const DoctorReportsScreen()
+        "screen": const DoctorReportsScreen(
+          parentId: '',
+          parentName: '',
+        )
       },
     ];
 

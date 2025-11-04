@@ -78,7 +78,7 @@ class _ReceiptsAdminScreenState extends State<ReceiptsAdminScreen> {
     }
   }
 
-  /// 🟦 فتح الصورة بالحجم الكامل داخل حوار منبثق
+  ///  فتح الصورة بالحجم الكامل داخل حوار منبثق
   void _showFullImage(String path) {
     showDialog(
       context: context,
@@ -130,7 +130,7 @@ class _ReceiptsAdminScreenState extends State<ReceiptsAdminScreen> {
         SafeArea(
           child: Column(
             children: [
-              // 🔹 العنوان العلوي
+              //  العنوان العلوي
               Row(
                 children: [
                   IconButton(
@@ -155,7 +155,7 @@ class _ReceiptsAdminScreenState extends State<ReceiptsAdminScreen> {
               ),
               const SizedBox(height: 10),
 
-              // 🔹 قائمة الإيصالات
+              //  قائمة الإيصالات
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16),
@@ -197,7 +197,7 @@ class _ReceiptsAdminScreenState extends State<ReceiptsAdminScreen> {
                           trailing: receipt.status == "pending"
                               ? Column(
                                   mainAxisSize:
-                                      MainAxisSize.min, // 👈 الحل الأساسي
+                                      MainAxisSize.min, //  الحل الأساسي
                                   children: [
                                     Padding(
                                       padding: const EdgeInsets.only(bottom: 4),

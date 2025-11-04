@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class ArticleDetailScreen extends StatelessWidget {
-  final Map<String, String> article;
+  final Map<String, dynamic> article;
   const ArticleDetailScreen({super.key, required this.article});
 
   @override
@@ -32,7 +31,7 @@ class ArticleDetailScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  article["title"]!,
+                  article["title"] ?? "",
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 24,
@@ -43,17 +42,20 @@ class ArticleDetailScreen extends StatelessWidget {
               ),
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.asset(article["image"]!,
-                    height: 200, fit: BoxFit.cover),
+                child: Image.asset(
+                  article["image"] ?? "images/articles1.jpg",
+                  height: 200,
+                  fit: BoxFit.cover,
+                ),
               ),
               const SizedBox(height: 20),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    article["description"]! * 10, // نص مكرر مؤقتًا
+                    article["description"] ?? "",
                     textAlign: TextAlign.right,
-                    style: const TextStyle(fontSize: 16),
+                    style: const TextStyle(fontSize: 16, height: 1.6),
                   ),
                 ),
               ),

@@ -6,6 +6,7 @@ import '../Booking/screens/consultation_flow.dart';
 import '../Colors/colors.dart';
 import '../Levels/StageDetailScreen.dart';
 import '../Levels/levelsScreen.dart';
+import '../Parent/screens/ParentChatHome.dart';
 
 class BottomNavScreen extends StatefulWidget {
   final int initialIndex;
@@ -28,7 +29,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     LevelScreen(),
     ConsultationTypeScreen(),
     HomeScreen(),
-    const Center(child: Text("المحادثة", style: TextStyle(fontSize: 18))),
+    ParentChatHome(),
     const ArticlesScreen(),
   ];
 

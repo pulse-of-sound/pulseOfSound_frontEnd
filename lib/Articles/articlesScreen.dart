@@ -1,5 +1,6 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import '../../Doctor/utils/doctor_articles_prefs.dart';
 import 'articleDetailScreen.dart';
 
 class ArticlesScreen extends StatefulWidget {
@@ -10,27 +11,53 @@ class ArticlesScreen extends StatefulWidget {
 }
 
 class _ArticlesScreenState extends State<ArticlesScreen> {
-  final List<Map<String, String>> _articles = [
-    {
-      "title": "العناية بجهاز القوقعة",
-      "description":
-          "تعرف على أهم الخطوات للحفاظ على جهاز القوقعة بحالة ممتازة.",
-      "image": "images/articles1.jpg",
-    },
-    {
-      "title": "تمارين السمع للأطفال",
-      "description":
-          "أنشطة وتمارين تساعد الطفل على تحسين مهارات السمع بعد الزراعة.",
-      "image": "images/articles2.jpg",
-    },
-    {
-      "title": "المتابعة الطبية الدورية",
-      "description": "أهمية المتابعة المنتظمة مع الطبيب بعد عملية الزراعة.",
-      "image": "images/articles3.jpg",
-    },
-  ];
-
+  List<Map<String, dynamic>> _articles = [];
   String _searchQuery = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadArticles();
+  }
+
+  Future<void> _loadArticles() async {
+    // نحمل المقالات الموافق عليها فقط
+    final approved = await DoctorArticlesPrefs.loadApprovedArticles();
+
+    // لو لسه فاضية (للتجربة أول مرة) نحط المقالات القديمة تبعك
+    if (approved.isEmpty) {
+      _articles = [
+        {
+          "title": "العناية بجهاز القوقعة",
+          "description":
+              "تعرف على أهم الخطوات للحفاظ على جهاز القوقعة بحالة ممتازة.",
+          "image": "images/articles1.jpg",
+        },
+        {
+          "title": "تمارين السمع للأطفال",
+          "description":
+              "أنشطة وتمارين تساعد الطفل على تحسين مهارات السمع بعد الزراعة.",
+          "image": "images/articles2.jpg",
+        },
+        {
+          "title": "المتابعة الطبية الدورية",
+          "description": "أهمية المتابعة المنتظمة مع الطبيب بعد عملية الزراعة.",
+          "image": "images/articles3.jpg",
+        },
+      ];
+    } else {
+      // نحول المقالات من SharedPreferences إلى الشكل المطلوب
+      _articles = approved.map((a) {
+        return {
+          "title": a["title"],
+          "description": a["content"],
+          "image": "images/articles1.jpg", // ممكن لاحقاً الطبيب يرسل صورة
+        };
+      }).toList();
+    }
+
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {

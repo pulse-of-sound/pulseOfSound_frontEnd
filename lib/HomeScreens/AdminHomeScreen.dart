@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:pulse_of_sound/SuperAdminScreens/DashBoard/dashBoard.dart';
 import 'package:pulse_of_sound/SuperAdminScreens/Specialists/specialistScreen.dart';
 import '../SuperAdminScreens/Admin/adminScreen.dart';
+import '../SuperAdminScreens/AdminProfile/adminProfileScreen.dart';
+import '../SuperAdminScreens/Chats/AdminCommunityChatScreen.dart';
 import '../SuperAdminScreens/Childrens/chidScreen.dart';
 import '../SuperAdminScreens/Doctors/doctorsScreen.dart';
 import '../Colors/colors.dart';
@@ -56,6 +58,11 @@ class AdminHome extends StatelessWidget {
                   mainAxisSpacing: 16,
                   padding: const EdgeInsets.all(16),
                   children: [
+                    _buildGlassCard(
+                        context,
+                        " الملف الشخصي",
+                        "icons/icons8-dashboard-40.png",
+                        const AdminProfileScreen()),
                     _buildGlassCard(context, "لوحة التحكم",
                         "icons/icons8-dashboard-40.png", const DashboardPage()),
                     _buildGlassCard(context, "الأطباء",
@@ -74,6 +81,11 @@ class AdminHome extends StatelessWidget {
                         "الإيصالات",
                         "icons/icons8-wallet-80.png",
                         const ReceiptsAdminScreen()),
+                    _buildGlassCard(
+                        context,
+                        "مجتمع الأهالي",
+                        "icons/icons8-conversation-40.png",
+                        const AdminCommunityChatScreen()),
                   ],
                 ),
               ),

@@ -81,7 +81,7 @@ class _ConsultationTypeScreenState extends State<ConsultationTypeScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => ProviderListScreen(
+                                    builder: (_) => PlanStaticSelectionScreen(
                                         type: selectedType!, provider: p),
                                   ),
                                 );
