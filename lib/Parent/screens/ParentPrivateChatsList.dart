@@ -28,7 +28,7 @@ class ParentPrivateChatsListScreen extends StatelessWidget {
             Row(children: [
               IconButton(
                   icon:
-                      const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+                      const Icon(Icons.arrow_back_ios_new, color: Colors.black),
                   onPressed: () => Navigator.pop(context)),
               const Expanded(
                 child: Text("محادثاتي الخاصة",
@@ -36,7 +36,7 @@ class ParentPrivateChatsListScreen extends StatelessWidget {
                     style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white)),
+                        color: Colors.black)),
               ),
               const SizedBox(width: 40),
             ]),

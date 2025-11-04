@@ -54,7 +54,7 @@ class _LevelScreenState extends State<LevelScreen> {
           "المستويات",
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.pinkAccent,
+            color: Colors.black,
           ),
         ),
       ),

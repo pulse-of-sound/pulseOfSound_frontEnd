@@ -16,7 +16,7 @@ class WalletScreen extends StatefulWidget {
 
 class _WalletScreenState extends State<WalletScreen> {
   double balance = 0.0;
-  String? _imagePath; // ✅ بدل File image
+  String? _imagePath; //  بدل File image
   final TextEditingController amountController = TextEditingController();
 
   @override
@@ -30,7 +30,7 @@ class _WalletScreenState extends State<WalletScreen> {
     setState(() => balance = b);
   }
 
-  /// ✅ اختيار صورة الإيصال (يدعم Web و Mobile)
+  ///  اختيار صورة الإيصال (يدعم Web و Mobile)
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
@@ -41,7 +41,7 @@ class _WalletScreenState extends State<WalletScreen> {
     }
   }
 
-  /// ✅ إرسال الإيصال إلى الإدارة
+  ///  إرسال الإيصال إلى الإدارة
   Future<void> _sendReceipt() async {
     if (_imagePath == null || amountController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -82,7 +82,7 @@ class _WalletScreenState extends State<WalletScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // 🔹 الخلفية
+          //  الخلفية
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -98,7 +98,7 @@ class _WalletScreenState extends State<WalletScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // 🔙 زر الرجوع + العنوان
+                  //  زر الرجوع + العنوان
                   Row(
                     children: [
                       IconButton(
@@ -125,7 +125,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // ✅ الرصيد الحالي
+                  //  الرصيد الحالي
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -152,10 +152,9 @@ class _WalletScreenState extends State<WalletScreen> {
                         Text(
                           "$balance ل.س",
                           style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.skyBlue,
-                          ),
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.pinkAccent),
                         ),
                       ],
                     ),
@@ -163,7 +162,7 @@ class _WalletScreenState extends State<WalletScreen> {
 
                   const SizedBox(height: 25),
 
-                  // ✅ إدخال المبلغ
+                  //  إدخال المبلغ
                   TextField(
                     controller: amountController,
                     keyboardType: TextInputType.number,
@@ -178,7 +177,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   ),
                   const SizedBox(height: 15),
 
-                  // ✅ اختيار صورة الإيصال
+                  //  اختيار صورة الإيصال
                   GestureDetector(
                     onTap: _pickImage,
                     child: Container(
@@ -213,13 +212,13 @@ class _WalletScreenState extends State<WalletScreen> {
 
                   const SizedBox(height: 20),
 
-                  // ✅ زر إرسال الإيصال
+                  // زر إرسال الإيصال
                   ElevatedButton.icon(
                     onPressed: _sendReceipt,
                     icon: const Icon(Icons.upload),
                     label: const Text("إرسال الإيصال"),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.skyBlue,
+                      backgroundColor: Colors.pinkAccent,
                       foregroundColor: Colors.white,
                       minimumSize: const Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(
@@ -244,7 +243,7 @@ class _WalletScreenState extends State<WalletScreen> {
                     label: const Text("عرض إيصالاتي"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
-                      foregroundColor: AppColors.skyBlue,
+                      foregroundColor: Colors.pinkAccent,
                       minimumSize: const Size(double.infinity, 48),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),

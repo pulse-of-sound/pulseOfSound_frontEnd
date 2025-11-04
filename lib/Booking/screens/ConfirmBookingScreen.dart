@@ -22,7 +22,7 @@ class ConfirmBookingScreen extends StatelessWidget {
   Future<void> _confirmBooking(BuildContext context) async {
     final booking = Booking(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      parentId: "user_001", //  لاحقاً تستبدلها بـ id المستخدم من prefs
+      parentId: "user_001", //  لاحقاً  بـ id المستخدم من prefs
       parentName: "ولي الأمر",
       phone: "0999999999",
       type: type,

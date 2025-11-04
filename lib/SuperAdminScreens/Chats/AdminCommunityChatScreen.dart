@@ -1,4 +1,3 @@
-// lib/Admin/screens/admin_community_chat.dart
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -29,7 +28,6 @@ class _AdminCommunityChatScreenState extends State<AdminCommunityChatScreen> {
   Future<void> _loadMessages() async {
     final data = await DoctorChatService.loadCommunity();
     setState(() => messages = data);
-    // بعد تحميل الرسائل، انزلي تلقائياً لآخر رسالة
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
@@ -40,16 +38,9 @@ class _AdminCommunityChatScreenState extends State<AdminCommunityChatScreen> {
   Future<void> _sendMessage({String? imagePath}) async {
     final text = _controller.text.trim();
     if (text.isEmpty && imagePath == null) return;
-
     await DoctorChatService.addCommunity("الإدارة", text, imagePath: imagePath);
     _controller.clear();
     await _loadMessages();
-    // بعد تحميل الرسائل، انزلي تلقائياً لآخر رسالة
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-      }
-    });
   }
 
   Future<void> _pickImage() async {
@@ -70,79 +61,62 @@ class _AdminCommunityChatScreenState extends State<AdminCommunityChatScreen> {
     );
   }
 
-  Widget _buildMessageBubble(Map<String, dynamic> msg) {
+  Widget _messageBubble(Map<String, dynamic> msg) {
     final sender = msg["sender"] ?? "مستخدم";
-    final color = sender == "الإدارة"
-        ? AppColors.skyBlue.withOpacity(0.9)
-        : Colors.white.withOpacity(0.95);
-    final textColor = sender == "الإدارة" ? Colors.white : Colors.black87;
+    final isAdmin = sender == "الإدارة";
 
-    return Dismissible(
-      key: ValueKey(msg["id"]),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        color: Colors.redAccent,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
-      onDismissed: (_) => _deleteMessage(msg["id"]),
-      child: Align(
-        alignment:
-            sender == "الإدارة" ? Alignment.centerRight : Alignment.centerLeft,
-        child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(14),
+    final bubbleColor = isAdmin ? AppColors.skyBlue : Colors.grey.shade200;
+    final textColor = isAdmin ? Colors.white : Colors.black87;
+
+    return Align(
+      alignment: isAdmin ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.7,
+        ),
+        decoration: BoxDecoration(
+          color: bubbleColor,
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(14),
+            topRight: const Radius.circular(14),
+            bottomLeft: Radius.circular(isAdmin ? 14 : 0),
+            bottomRight: Radius.circular(isAdmin ? 0 : 14),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // اسم المرسل مع زر الحظر
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(sender,
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, color: textColor)),
-                  if (sender != "الإدارة")
-                    IconButton(
-                      icon: const Icon(Icons.block,
-                          color: Colors.redAccent, size: 18),
-                      onPressed: () => _banUser(sender),
-                    ),
-                ],
-              ),
-
-              const SizedBox(height: 5),
-
-              if (msg["image"] != null && msg["image"] != "")
-                ClipRRect(
+        ),
+        child: Column(
+          crossAxisAlignment:
+              isAdmin ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(sender,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                    color: textColor.withOpacity(0.8))),
+            if (msg["image"] != null && msg["image"].toString().isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 6, bottom: 6),
+                child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: kIsWeb
-                      ? Image.network(msg["image"], height: 150)
+                      ? Image.network(msg["image"], height: 140)
                       : Image.file(File(msg["image"]),
-                          height: 150, fit: BoxFit.cover),
-                ),
-              if (msg["text"] != null && msg["text"].toString().isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 6.0),
-                  child: Text(msg["text"], style: TextStyle(color: textColor)),
-                ),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Text(
-                  msg["time"] != null
-                      ? msg["time"].toString().substring(11, 16)
-                      : "",
-                  style: TextStyle(
-                      color: textColor.withOpacity(0.8), fontSize: 11),
+                          height: 140, fit: BoxFit.cover),
                 ),
               ),
-            ],
-          ),
+            if (msg["text"] != null && msg["text"].toString().isNotEmpty)
+              Text(msg["text"],
+                  style: TextStyle(fontSize: 15, color: textColor)),
+            const SizedBox(height: 3),
+            Text(
+              msg["time"] != null
+                  ? msg["time"].toString().substring(11, 16)
+                  : "",
+              style: TextStyle(color: textColor.withOpacity(0.7), fontSize: 10),
+            ),
+          ],
         ),
       ),
     );
@@ -181,10 +155,24 @@ class _AdminCommunityChatScreenState extends State<AdminCommunityChatScreen> {
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
-              padding: EdgeInsets.only(top: topPadding, bottom: 12),
+              padding: EdgeInsets.only(top: topPadding, bottom: 10),
               itemCount: messages.length,
-              itemBuilder: (context, index) =>
-                  _buildMessageBubble(messages[index]),
+              itemBuilder: (context, index) {
+                final msg = messages[index];
+                return Dismissible(
+                  key: ValueKey(msg["id"]),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    color: Colors.redAccent,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child:
+                        const Icon(Icons.delete, color: Colors.white, size: 26),
+                  ),
+                  onDismissed: (_) => _deleteMessage(msg["id"]),
+                  child: _messageBubble(msg),
+                );
+              },
             ),
           ),
           Container(

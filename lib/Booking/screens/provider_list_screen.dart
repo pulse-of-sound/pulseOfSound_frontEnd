@@ -78,7 +78,7 @@ class PlanStaticSelectionScreen extends StatelessWidget {
                         TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                 const SizedBox(height: 10),
 
-                /// 🔹 فقط هذا الجزء قابل للسكرول:
+                ///  فقط هذا الجزء قابل للسكرول:
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
@@ -89,7 +89,7 @@ class PlanStaticSelectionScreen extends StatelessWidget {
                             color: Colors.pink.shade50,
                             borderRadius: BorderRadius.circular(18),
                             border: Border.all(
-                                color: AppColors.pink.withOpacity(0.8),
+                                color: Colors.pinkAccent.withOpacity(0.8),
                                 width: 1.2),
                           ),
                           child: ListTile(
@@ -111,7 +111,7 @@ class PlanStaticSelectionScreen extends StatelessWidget {
                             trailing: Text(
                               "${plan["price"]} ل.س",
                               style: TextStyle(
-                                  color: AppColors.pink,
+                                  color: Colors.pinkAccent,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16),
                             ),

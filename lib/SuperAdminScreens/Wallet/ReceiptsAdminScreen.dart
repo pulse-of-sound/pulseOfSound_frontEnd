@@ -195,26 +195,24 @@ class _ReceiptsAdminScreenState extends State<ReceiptsAdminScreen> {
                             ],
                           ),
                           trailing: receipt.status == "pending"
-                              ? Column(
-                                  mainAxisSize:
-                                      MainAxisSize.min, //  الحل الأساسي
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 4),
-                                      child: IconButton(
-                                        icon: const Icon(Icons.check_circle,
+                              ? SizedBox(
+                                  height: 80, // 🔹 نعطي مساحة كافية للأزرار
+                                  child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () => _approveReceipt(index),
+                                        child: const Icon(Icons.check_circle,
                                             color: Colors.green, size: 28),
-                                        tooltip: "قبول الإيصال",
-                                        onPressed: () => _approveReceipt(index),
                                       ),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.cancel,
-                                          color: Colors.redAccent, size: 26),
-                                      tooltip: "رفض الإيصال",
-                                      onPressed: () => _rejectReceipt(index),
-                                    ),
-                                  ],
+                                      GestureDetector(
+                                        onTap: () => _rejectReceipt(index),
+                                        child: const Icon(Icons.cancel,
+                                            color: Colors.redAccent, size: 28),
+                                      ),
+                                    ],
+                                  ),
                                 )
                               : Icon(Icons.verified,
                                   color: _statusColor(receipt.status)),

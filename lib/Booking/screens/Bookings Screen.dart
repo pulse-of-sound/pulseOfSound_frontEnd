@@ -78,7 +78,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
         elevation: 0,
         title: const Text(
           "حجوزاتي",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
         ),
         centerTitle: true,
       ),

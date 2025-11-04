@@ -32,7 +32,7 @@ class ParentChatHome extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Colors.black,
                         shadows: [Shadow(color: Colors.black54, blurRadius: 6)],
                       ),
                     ),

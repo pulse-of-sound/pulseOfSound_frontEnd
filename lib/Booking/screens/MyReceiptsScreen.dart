@@ -15,7 +15,7 @@ class MyReceiptsScreen extends StatelessWidget {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("images/booking.jpg"), // عدّل حسب الصورة عندك
+                image: AssetImage("images/booking.jpg"),
                 fit: BoxFit.cover,
               ),
             ),
@@ -24,7 +24,7 @@ class MyReceiptsScreen extends StatelessWidget {
           SafeArea(
             child: Column(
               children: [
-                // 🔙 زر الرجوع + العنوان
+                //  زر الرجوع + العنوان
                 Row(
                   children: [
                     IconButton(
@@ -51,7 +51,7 @@ class MyReceiptsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
 
-                // 📋 قائمة الإيصالات
+                //  قائمة الإيصالات
                 Expanded(
                   child: FutureBuilder<List<Receipt>>(
                     future: _loadMyReceipts(),
@@ -109,7 +109,7 @@ class MyReceiptsScreen extends StatelessWidget {
     );
   }
 
-  /// 🧩 تحميل الإيصالات مع معالجة آمنة
+  ///  تحميل الإيصالات مع معالجة آمنة
   Future<List<Receipt>> _loadMyReceipts() async {
     final data = await WalletPrefs.loadReceipts();
 
@@ -123,7 +123,7 @@ class MyReceiptsScreen extends StatelessWidget {
         if (m is Map<String, dynamic>) return Receipt.fromMap(m);
         if (m is Map) return Receipt.fromMap(Map<String, dynamic>.from(m));
       } catch (e) {
-        debugPrint("⚠️ خطأ في تحويل الإيصال: $e");
+        debugPrint(" خطأ في تحويل الإيصال: $e");
       }
 
       return Receipt(
@@ -136,7 +136,7 @@ class MyReceiptsScreen extends StatelessWidget {
     }).toList();
   }
 
-  /// 🖼️ عرض الصورة (ملف أو أصول)
+  ///  عرض الصورة (ملف أو أصول)
   Widget _buildReceiptImage(String path) {
     if (path.isEmpty) {
       return const Icon(Icons.receipt_long, color: Colors.blueAccent, size: 45);
@@ -162,7 +162,7 @@ class MyReceiptsScreen extends StatelessWidget {
     }
   }
 
-  /// 🔤 النصوص والألوان حسب الحالة
+  ///  النصوص والألوان حسب الحالة
   String _getStatusText(String status) {
     switch (status) {
       case "approved":
