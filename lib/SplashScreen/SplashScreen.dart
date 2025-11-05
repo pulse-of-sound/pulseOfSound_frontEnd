@@ -4,7 +4,8 @@ import 'package:pulse_of_sound/LoginScreens/loginscreen.dart';
 import 'package:pulse_of_sound/HomeScreens/HomeScreen.dart';
 import 'package:pulse_of_sound/HomeScreens/AdminHomeScreen.dart';
 import 'package:pulse_of_sound/HomeScreens/DoctorHomeScreen.dart';
-import 'package:pulse_of_sound/utils/sharedPreferance.dart';
+
+import '../utils/shared_pref_helper.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -42,7 +43,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _navigateUser() {
-    bool hasSession = SharedPrefsHelper.getHasSession();
+    bool hasSession = SharedPrefsHelper.getSession();
     String? type = SharedPrefsHelper.getUserType();
 
     if (hasSession) {

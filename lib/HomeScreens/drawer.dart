@@ -6,6 +6,7 @@ import '../Booking/utils/bookings_prefs.dart';
 import '../Colors/colors.dart';
 import '../LoginScreens/loginscreen.dart';
 import '../Parent/screens/ParentReportsScreen.dart';
+import '../Profile/profile_drawer_screen.dart';
 
 class DrawerScreen extends StatefulWidget {
   const DrawerScreen({super.key});
@@ -67,6 +68,16 @@ class _DrawerScreenState extends State<DrawerScreen> {
               child: Icon(Icons.person, size: 40, color: Colors.grey),
             ),
             decoration: BoxDecoration(color: AppColors.pink),
+          ),
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text("الملف الشخصي"),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => ProfileDrawerScreen()),
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.wallet),

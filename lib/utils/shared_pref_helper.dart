@@ -3,12 +3,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SharedPrefsHelper {
   static SharedPreferences? _prefs;
 
-  /// ✅ تهيئة SharedPreferences
+  /// ✅ تهيئة SharedPreferences (مناداة بـ main)
   static Future init() async {
     _prefs = await SharedPreferences.getInstance();
   }
 
-  /// ------------------- الجلسة -------------------
+  // ------------------- الجلسة -------------------
   static Future setSession(bool hasSession) async {
     await _prefs?.setBool("hasSession", hasSession);
   }
@@ -17,7 +17,7 @@ class SharedPrefsHelper {
     return _prefs?.getBool("hasSession") ?? false;
   }
 
-  /// ------------------- نوع المستخدم -------------------
+  // ------------------- نوع المستخدم -------------------
   static Future setUserType(String type) async {
     await _prefs?.setString("userType", type);
   }
@@ -26,7 +26,24 @@ class SharedPrefsHelper {
     return _prefs?.getString("userType") ?? "guest";
   }
 
-  /// ------------------- بيانات المستخدم -------------------
+  // ------------------- بيانات المصادقة -------------------
+  static Future setToken(String token) async {
+    await _prefs?.setString("token", token);
+  }
+
+  static String? getToken() {
+    return _prefs?.getString("token");
+  }
+
+  static Future setUserId(String userId) async {
+    await _prefs?.setString("userId", userId);
+  }
+
+  static String? getUserId() {
+    return _prefs?.getString("userId");
+  }
+
+  // ------------------- بيانات المستخدم -------------------
   static Future setPhone(String phone) async {
     await _prefs?.setString("phone", phone);
   }
@@ -49,14 +66,6 @@ class SharedPrefsHelper {
 
   static String? getFatherName() {
     return _prefs?.getString("fatherName");
-  }
-
-  static Future setAge(int age) async {
-    await _prefs?.setInt("age", age);
-  }
-
-  static int? getAge() {
-    return _prefs?.getInt("age");
   }
 
   static Future setBirthDate(String date) async {
@@ -91,19 +100,17 @@ class SharedPrefsHelper {
     return _prefs?.getString("profileImage");
   }
 
-  /// ------------------- مسح البيانات -------------------
-  static Future clear() async {
-    await _prefs?.clear();
-  }
-
-  //المحفظة
+  // ------------------- بيانات المحفظة -------------------
   static Future<void> setWalletImage(String path) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("walletImage", path);
+    await _prefs?.setString("walletImage", path);
   }
 
   static Future<String?> getWalletImage() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString("walletImage");
+    return _prefs?.getString("walletImage");
+  }
+
+  // ------------------- مسح الكل -------------------
+  static Future clear() async {
+    await _prefs?.clear();
   }
 }

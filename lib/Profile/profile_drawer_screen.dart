@@ -1,17 +1,16 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:pulse_of_sound/PreTestIntro/preTestIntroScreen.dart';
 import '../utils/shared_pref_helper.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+class ProfileDrawerScreen extends StatefulWidget {
+  const ProfileDrawerScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<ProfileDrawerScreen> createState() => _ProfileDrawerScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _fatherNameController = TextEditingController();
@@ -19,33 +18,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _healthController = TextEditingController();
   String? _gender;
   File? _profileImage;
-
-  Future<void> _pickBirthDate() async {
-    DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime(2015, 1, 1),
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
-    );
-    if (picked != null) {
-      setState(() {
-        _birthDateController.text =
-            "${picked.day}/${picked.month}/${picked.year}";
-      });
-    }
-  }
-
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      setState(() {
-        _profileImage = File(pickedFile.path);
-      });
-      await SharedPrefsHelper.setProfileImage(pickedFile.path);
-    }
-  }
 
   @override
   void initState() {
@@ -75,17 +47,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await SharedPrefsHelper.setBirthDate(_birthDateController.text);
       await SharedPrefsHelper.setGender(_gender ?? "");
       await SharedPrefsHelper.setHealthStatus(_healthController.text);
+      if (_profileImage != null) {
+        await SharedPrefsHelper.setProfileImage(_profileImage!.path);
+      }
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const PreTestIntroScreen()),
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(" تم حفظ التعديلات بنجاح")),
       );
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() => _profileImage = File(pickedFile.path));
+      await SharedPrefsHelper.setProfileImage(pickedFile.path);
+    }
+  }
+
+  Future<void> _pickBirthDate() async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(2015, 1, 1),
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _birthDateController.text =
+            "${picked.day}/${picked.month}/${picked.year}";
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: const Text(
+          "الملف الشخصي",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: Stack(
         children: [
           // خلفية ناعمة
@@ -97,8 +106,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
           ),
-
-          // المحتوى
           SafeArea(
             child: SingleChildScrollView(
               child: Padding(
@@ -122,7 +129,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               : null,
                         ),
                       ),
-
                       const SizedBox(height: 30),
 
                       _buildField(
@@ -160,7 +166,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       color: Colors.pinkAccent),
 
                                   const SizedBox(width: 8),
-
                                   //  Dropdown فيه النص والسهم عاليمين
                                   Expanded(
                                     child: Align(
@@ -213,7 +218,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                       ),
-
                       _buildField(_healthController, "الحالة الصحية (اختياري)",
                           Icons.local_hospital,
                           isRequired: false),
@@ -234,7 +238,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             elevation: 6,
                           ),
                           child: const Text(
-                            "حفظ ومتابعة",
+                            "حفظ التعديلات",
                             style: TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold),
                           ),
