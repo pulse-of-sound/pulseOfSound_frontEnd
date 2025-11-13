@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'sharedPrefs.dart';
 import 'StageDetailScreen.dart';
+import 'group_test_screen.dart'; //  استدعاء شاشة الاختبار الجديدة
 
 class StageMapScreen extends StatefulWidget {
   final int levelNumber;
@@ -41,7 +42,7 @@ class _StageMapScreenState extends State<StageMapScreen> {
     return lastPlayDate != today;
   }
 
-  void _openStage(int stageNumber) {
+  void _openStage(int stageNumber) async {
     if (stageNumber > currentStage + 1) return;
 
     if (stageNumber == currentStage + 1 && !_canPlayToday()) {
@@ -51,7 +52,7 @@ class _StageMapScreenState extends State<StageMapScreen> {
       return;
     }
 
-    Navigator.push(
+    final passed = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => StageDetailScreen(
@@ -61,6 +62,42 @@ class _StageMapScreenState extends State<StageMapScreen> {
         ),
       ),
     );
+
+    if (passed == true) {
+      setState(() => currentStage = stageNumber);
+
+      //  إذا خلص آخر مرحلة بالمجموعة
+      if (stageNumber == 10) {
+        await Future.delayed(const Duration(milliseconds: 400));
+
+        //  فتح اختبار نهاية المجموعة
+        final testPassed = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => GroupTestScreen(
+              levelNumber: widget.levelNumber,
+              groupNumber: widget.groupNumber,
+            ),
+          ),
+        );
+
+        if (testPassed == true) {
+          //  نجح بالاختبار → نفتح المجموعة التالية
+          await SharedPrefsHelper.setInt(
+              "unlockedGroup_Level${widget.levelNumber}",
+              widget.groupNumber + 1);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("أحسنت! تم فتح المجموعة التالية ")),
+          );
+        } else {
+          //  فشل → عرض رسالة
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("حاول مجددًا لاجتياز الاختبار ")),
+          );
+        }
+      }
+    }
   }
 
   @override
@@ -74,10 +111,10 @@ class _StageMapScreenState extends State<StageMapScreen> {
         iconTheme: const IconThemeData(
           color: Colors.pinkAccent,
         ),
-        title: Text(
+        title: const Text(
           "خريطة المراحل",
-          style: const TextStyle(
-              fontWeight: FontWeight.bold, color: Colors.pinkAccent),
+          style:
+              TextStyle(fontWeight: FontWeight.bold, color: Colors.pinkAccent),
         ),
       ),
       body: Container(

@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SharedPrefsHelper {
   static SharedPreferences? _prefs;
 
-  /// ✅ تهيئة SharedPreferences (مناداة بـ main)
+  ///  تهيئة SharedPreferences (مناداة بـ main)
   static Future init() async {
     _prefs = await SharedPreferences.getInstance();
   }

@@ -28,7 +28,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   final List<Widget> _pages = [
     LevelScreen(),
     ConsultationTypeScreen(),
-    HomeScreen(),
+    ParentHomeScreen(),
     ParentChatHome(),
     const ArticlesScreen(),
   ];

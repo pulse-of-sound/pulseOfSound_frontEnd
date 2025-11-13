@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'sharedPrefs.dart';
 import 'StageMapScreen.dart';
+import 'utils/child_progress_prefs.dart';
 
 class GroupsScreen extends StatefulWidget {
   final int levelNumber;
@@ -35,7 +36,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
     setState(() {});
   }
 
-  void _openGroup(int index) {
+  void _openGroup(int index) async {
     if (index + 1 > unlockedGroup) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("الرجاء إنهاء المجموعة السابقة أولاً")),
@@ -43,6 +44,16 @@ class _GroupsScreenState extends State<GroupsScreen> {
       return;
     }
 
+    //  حفظ التقييم إنو الطفل فتح المجموعة
+    await ChildProgressPrefs.addDailyEvaluation({
+      "date": DateTime.now().toIso8601String(),
+      "level": widget.levelNumber,
+      "group": index + 1,
+      "stage": 0, // 0 لأنو لسا ما دخل مرحلة معينة
+      "event": "فتح مجموعة جديدة",
+    });
+
+    //  الانتقال إلى شاشة المراحل
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -58,9 +69,16 @@ class _GroupsScreenState extends State<GroupsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("مجموعات المستوى ${widget.levelNumber}"),
-        backgroundColor: Colors.pinkAccent,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         centerTitle: true,
+        iconTheme: const IconThemeData(
+          color: Colors.pinkAccent,
+        ),
+        title: Text(
+          "مجموعات المستوى ${widget.levelNumber}",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
       ),
       body: Container(
         decoration: const BoxDecoration(

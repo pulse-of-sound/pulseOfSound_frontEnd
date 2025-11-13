@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'sharedPrefs.dart';
+import 'utils/child_progress_prefs.dart';
 
 class StageGameScreen extends StatefulWidget {
   final int levelNumber;
@@ -51,19 +52,32 @@ class _StageGameScreenState extends State<StageGameScreen> {
     }
 
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    // 🔹 حفظ بيانات التقدم العادية
     await SharedPrefsHelper.setString(
-        "lastPlayDate_Level${widget.levelNumber}_Group${widget.groupNumber}",
-        today);
+      "lastPlayDate_Level${widget.levelNumber}_Group${widget.groupNumber}",
+      today,
+    );
     await SharedPrefsHelper.setInt(
       "level_${widget.levelNumber}_group_${widget.groupNumber}_stage",
       widget.stageNumber,
     );
 
+    //  حفظ تقييم الطفل لليوم
+    await ChildProgressPrefs.addDailyEvaluation({
+      "date": DateTime.now().toIso8601String(),
+      "level": widget.levelNumber,
+      "group": widget.groupNumber,
+      "stage": widget.stageNumber,
+      "score": 10, // مؤقتًا، ممكن نحط قيمة حسب أداء الطفل
+      "feedback": "أداء رائع في هذه المرحلة 🎯",
+    });
+
     setState(() => _completed = true);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text("أحسنت! لقد أنهيت المرحلة ${widget.stageNumber} 🎉"),
+        content: Text("أحسنت! لقد أنهيت المرحلة ${widget.stageNumber} "),
         backgroundColor: Colors.green,
       ),
     );

@@ -6,6 +6,7 @@ import '../../Colors/colors.dart';
 import '../utils/doctor_chat_prefs.dart';
 
 import 'doctor_reports_compose_screen.dart';
+import 'parent_profile_details.dart';
 
 class DoctorPrivateChatRoom extends StatefulWidget {
   final String parentId;
@@ -155,6 +156,24 @@ class _DoctorPrivateChatRoomState extends State<DoctorPrivateChatRoom> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
+          // 👤 أيقونة البروفايل — جديدة
+          IconButton(
+            icon:
+                const Icon(Icons.account_circle, color: Colors.white, size: 26),
+            tooltip: "عرض بروفايل وليّ الأمر",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ParentProfileDetailsScreen(
+                    parentId: widget.parentId,
+                  ),
+                ),
+              );
+            },
+          ),
+
+          // 🩺 الأيقونة القديمة لكتابة التقرير
           if (_sessionEnded)
             IconButton(
               icon: const Icon(Icons.note_alt_outlined, color: Colors.white),
@@ -169,7 +188,7 @@ class _DoctorPrivateChatRoomState extends State<DoctorPrivateChatRoom> {
                   ),
                 );
               },
-            )
+            ),
         ],
       ),
       body: Stack(children: [
