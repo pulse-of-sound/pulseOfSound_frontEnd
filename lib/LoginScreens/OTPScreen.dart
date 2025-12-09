@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:pulse_of_sound/LoginScreens/loginscreen.dart';
 import 'package:pulse_of_sound/OnBoarding/onBoarding.dart';
+import '../api/auth_api.dart';
 import '../utils/shared_pref_helper.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -54,23 +55,51 @@ class _OtpScreenState extends State<OtpScreen> {
   Future<void> _verifyOtp() async {
     String code = _controllers.map((c) => c.text).join();
 
-    if (code == "123456") {
-      await SharedPrefsHelper.setSession(true);
-      await SharedPrefsHelper.setPhone(widget.phone);
-      await SharedPrefsHelper.setUserType("user");
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const OnBoardingScreen()),
-      );
-    } else {
+    if (code.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("الكود غير صحيح"),
+        const SnackBar(content: Text("الرجاء إدخال رمز صحيح")),
+      );
+      return;
+    }
+
+    // أولاً: تحقق من صحة الـ OTP
+    final verify = await AuthAPI.verifyOTP(widget.phone, code);
+
+    if (verify["verified"] != true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("الكود غير صحيح")),
+      );
+      return;
+    }
+
+    // ثانياً: تسجيل الدخول
+    final login = await AuthAPI.loginWithMobile(widget.phone, code);
+
+    if (login.containsKey("error")) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(login["error"]),
           backgroundColor: Colors.redAccent,
         ),
       );
+      return;
     }
+
+    // حفظ البيانات
+    await SharedPrefsHelper.setSession(true);
+    await SharedPrefsHelper.setUserType("child");
+    await SharedPrefsHelper.setPhone(login["mobileNumber"] ?? widget.phone);
+    await SharedPrefsHelper.setName(login["username"] ?? "Child User");
+    
+    // الـ sessionToken قد يكون موجود أو نستخدم الـ ID
+    final token = login["sessionToken"] ?? login["id"] ?? "";
+    await SharedPrefsHelper.setToken(token);
+
+    // الانتقال للصفحة التالية
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const OnBoardingScreen()),
+    );
   }
 
   Widget _buildOtpBox(int index) {
@@ -112,7 +141,7 @@ class _OtpScreenState extends State<OtpScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset("images/login.jpg", fit: BoxFit.cover),
+          Image.asset("assets/images/login.jpg", fit: BoxFit.cover),
           Container(color: Colors.white.withOpacity(0.25)),
 
           // زر الرجوع

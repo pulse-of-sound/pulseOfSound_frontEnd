@@ -37,13 +37,13 @@ class _DoctorReportsScreenState extends State<DoctorReportsScreen> {
     await prefs.setString("reports_${widget.parentId}", jsonEncode(reports));
   }
 
-  void _sendReport() async {
+  Future<void> _sendReport() async {
     if (_controller.text.trim().isEmpty) return;
 
     final prefs = await SharedPreferences.getInstance();
     int currentCount =
         prefs.getInt("new_reports_count_${widget.parentId}") ?? 0;
-    prefs.setInt("new_reports_count_${widget.parentId}", currentCount + 1);
+    await prefs.setInt("new_reports_count_${widget.parentId}", currentCount + 1);
 
     final newReport = {
       "text": _controller.text.trim(),
@@ -57,6 +57,7 @@ class _DoctorReportsScreenState extends State<DoctorReportsScreen> {
     _controller.clear();
     await _saveReports();
 
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("تم إرسال التقرير بنجاح")),
     );

@@ -44,7 +44,10 @@ dependencies:
   smooth_page_indicator: ^1.2.1
   animate_do: ^4.2.0
   intl: ^0.20.2
-  uuid: ^4.5.1
+  uuid: ^3.0.7
+  http: ^0.13.5
+  parse_server_sdk: ^6.4.0
+  parse_server_sdk_flutter: ^8.0.0
  
 dev_dependencies:
   flutter_test:
@@ -70,8 +73,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - images/
-    - icons/
+    - assets/images/
+    - assets/icons/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

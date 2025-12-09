@@ -39,8 +39,9 @@ class _DoctorArticlesScreenState extends State<DoctorArticlesScreen> {
 
     titleController.clear();
     contentController.clear();
-    _loadArticles();
+    await _loadArticles();
 
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("تم إرسال المقال للمراجعة")),
     );

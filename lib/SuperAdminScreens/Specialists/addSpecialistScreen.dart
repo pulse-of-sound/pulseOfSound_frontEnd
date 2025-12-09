@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pulse_of_sound/SuperAdminScreens/Specialists/modelSpecialists.dart';
+import '../../api/user_api.dart';
+import '../../utils/shared_pref_helper.dart';
 
 class AddSpecialistPage extends StatefulWidget {
   const AddSpecialistPage({super.key});
@@ -18,6 +20,20 @@ class _AddDoctorPageState extends State<AddSpecialistPage> {
   final certificatesCtrl = TextEditingController();
   final experienceCtrl = TextEditingController();
   final workplaceCtrl = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    nameCtrl.dispose();
+    birthDateCtrl.dispose();
+    phoneCtrl.dispose();
+    passwordCtrl.dispose();
+    emailCtrl.dispose();
+    certificatesCtrl.dispose();
+    experienceCtrl.dispose();
+    workplaceCtrl.dispose();
+    super.dispose();
+  }
 
   Future<void> _pickBirthDate() async {
     DateTime? picked = await showDatePicker(
@@ -30,6 +46,50 @@ class _AddDoctorPageState extends State<AddSpecialistPage> {
       setState(() {
         birthDateCtrl.text = "${picked.day}/${picked.month}/${picked.year}";
       });
+    }
+  }
+
+  Future<void> _addSpecialist() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final sessionToken = await SharedPrefsHelper.getToken();
+      if (sessionToken == null || sessionToken.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('لم يتم العثور على جلسة'))
+        );
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      final result = await UserAPI.addEditSpecialist(
+        sessionToken,
+        fullName: nameCtrl.text.trim(),
+        username: nameCtrl.text.trim().replaceAll(' ', '_').toLowerCase(),
+        password: passwordCtrl.text,
+        mobile: phoneCtrl.text.trim(),
+        email: emailCtrl.text.trim(),
+      );
+
+      setState(() => _isLoading = false);
+
+      if (result.containsKey('error')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['error']), backgroundColor: Colors.red)
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم إضافة الأخصائي بنجاح'), backgroundColor: Colors.green)
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('خطأ: $e'), backgroundColor: Colors.red)
+      );
     }
   }
 
@@ -111,28 +171,22 @@ class _AddDoctorPageState extends State<AddSpecialistPage> {
                         ),
                         elevation: 6,
                       ),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          final doctor = Specialist(
-                            name: nameCtrl.text,
-                            birthDate: birthDateCtrl.text,
-                            phone: phoneCtrl.text,
-                            password: passwordCtrl.text,
-                            email: emailCtrl.text,
-                            certificates: certificatesCtrl.text,
-                            experience: experienceCtrl.text,
-                            workplace: workplaceCtrl.text,
-                          );
-                          Navigator.pop(context, doctor);
-                        }
-                      },
-                      child: const Text(
-                        "إضافة الأخصائي",
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white),
-                      ),
+                      onPressed: _isLoading ? null : _addSpecialist,
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text(
+                              "إضافة الأخصائي",
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            ),
                     ),
                   ],
                 ),

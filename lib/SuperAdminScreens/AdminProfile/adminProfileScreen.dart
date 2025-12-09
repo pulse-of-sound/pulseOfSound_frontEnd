@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pulse_of_sound/LoginScreens/loginscreen.dart';
 import 'package:pulse_of_sound/SuperAdminScreens/Admin/modelAdmin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../api/user_api.dart';
+import '../../utils/shared_pref_helper.dart';
 import '../../Colors/colors.dart';
 
 class AdminProfileScreen extends StatefulWidget {
@@ -21,6 +23,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
   final TextEditingController emailController = TextEditingController();
 
   bool isEditing = false;
+  bool _isLoading = false;
   double balance = 0.0;
   String? _imagePath;
 
@@ -28,6 +31,15 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
   void initState() {
     super.initState();
     _loadProfile();
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    specialtyController.dispose();
+    phoneController.dispose();
+    emailController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadProfile() async {
@@ -45,20 +57,97 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
   }
 
   Future<void> _saveProfile() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('admin_name', nameController.text.trim());
-    await prefs.setString('admin_specialty', specialtyController.text.trim());
-    await prefs.setString('admin_phone', phoneController.text.trim());
-    await prefs.setString('admin_email', emailController.text.trim());
-    if (_imagePath != null) await prefs.setString('adminr_image', _imagePath!);
-    setState(() => isEditing = false);
+    if (nameController.text.trim().isEmpty || emailController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('الرجاء ملء الاسم والبريد الإلكتروني'))
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final sessionToken = await SharedPrefsHelper.getToken();
+      if (sessionToken == null || sessionToken.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('لم يتم العثور على جلسة'))
+        );
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      final result = await UserAPI.updateMyAccount(
+        sessionToken,
+        fullName: nameController.text.trim(),
+        mobile: phoneController.text.trim(),
+        email: emailController.text.trim(),
+      );
+
+      setState(() => _isLoading = false);
+
+      if (result.containsKey('error')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['error']), backgroundColor: Colors.red)
+        );
+      } else {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('admin_name', nameController.text.trim());
+        await prefs.setString('admin_phone', phoneController.text.trim());
+        await prefs.setString('admin_email', emailController.text.trim());
+        
+        setState(() => isEditing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم حفظ التعديلات بنجاح'), backgroundColor: Colors.green)
+        );
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('خطأ: $e'), backgroundColor: Colors.red)
+      );
+    }
   }
 
   Future<void> _logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    if (context.mounted) {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => LoginScreen()));
+    bool confirm = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('تسجيل الخروج'),
+        content: const Text('هل تريد تسجيل الخروج؟'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('إلغاء'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            child: const Text('تسجيل الخروج'),
+          ),
+        ],
+      ),
+    ) ?? false;
+
+    if (!confirm) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final sessionToken = await SharedPrefsHelper.getToken();
+      if (sessionToken != null && sessionToken.isNotEmpty) {
+        await UserAPI.logout(sessionToken);
+      }
+    } catch (e) {
+      print('خطأ في تسجيل الخروج: $e');
+    }
+
+    if (mounted) {
+      await SharedPrefsHelper.clear();
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
     }
   }
 
@@ -167,7 +256,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                 //  الأزرار
                 if (!isEditing)
                   ElevatedButton.icon(
-                    onPressed: () => setState(() => isEditing = true),
+                    onPressed: _isLoading ? null : () => setState(() => isEditing = true),
                     icon: const Icon(Icons.edit),
                     label: const Text("تعديل البيانات"),
                     style: ElevatedButton.styleFrom(
@@ -180,8 +269,17 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                   )
                 else
                   ElevatedButton.icon(
-                    onPressed: _saveProfile,
-                    icon: const Icon(Icons.save_alt),
+                    onPressed: _isLoading ? null : _saveProfile,
+                    icon: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Icon(Icons.save_alt),
                     label: const Text("حفظ التعديلات"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
@@ -195,8 +293,17 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                 const SizedBox(height: 20),
 
                 ElevatedButton.icon(
-                  onPressed: _logout,
-                  icon: const Icon(Icons.logout),
+                  onPressed: _isLoading ? null : _logout,
+                  icon: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Icon(Icons.logout),
                   label: const Text("تسجيل الخروج"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.redAccent,

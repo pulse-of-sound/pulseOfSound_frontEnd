@@ -44,6 +44,7 @@ class _WalletScreenState extends State<WalletScreen> {
   ///  إرسال الإيصال إلى الإدارة
   Future<void> _sendReceipt() async {
     if (_imagePath == null || amountController.text.isEmpty) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("الرجاء اختيار صورة وإدخال المبلغ")),
       );
@@ -52,6 +53,7 @@ class _WalletScreenState extends State<WalletScreen> {
 
     final amount = double.tryParse(amountController.text) ?? 0;
     if (amount <= 0) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("الرجاء إدخال مبلغ صحيح")),
       );
@@ -67,6 +69,7 @@ class _WalletScreenState extends State<WalletScreen> {
 
     await WalletPrefs.addReceipt(receipt);
 
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("تم إرسال الإيصال بانتظار موافقة الإدارة")),
     );
@@ -131,11 +134,11 @@ class _WalletScreenState extends State<WalletScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.9),
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
                           color: Colors.black26,
                           blurRadius: 8,
-                          offset: const Offset(2, 4),
+                          offset: Offset(2, 4),
                         ),
                       ],
                     ),

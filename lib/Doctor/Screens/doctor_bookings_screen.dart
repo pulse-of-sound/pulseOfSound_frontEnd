@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../Booking/utils/wallet_prefs.dart';
-import '../../Colors/colors.dart';
 import '../utils/doctor_booking_prefs.dart';
 import '../utils/doctor_chat_prefs.dart';
 import '../utils/doctor_wallet_prefs.dart';
-// محفظة الأهل
 
 class DoctorBookingsScreen extends StatefulWidget {
   const DoctorBookingsScreen({super.key});
@@ -45,6 +43,7 @@ class _DoctorBookingsScreenState extends State<DoctorBookingsScreen> {
     // 🔹 خصم المبلغ من محفظة وليّ الأمر
     final success = await WalletPrefs.deduct(price);
     if (!success) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("رصيد وليّ الأمر غير كافٍ")),
       );
@@ -76,11 +75,13 @@ class _DoctorBookingsScreenState extends State<DoctorBookingsScreen> {
           "يمكنكم الآن بدء المحادثة.",
     );
 
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
           content: Text("تمت الموافقة على الحجز وإنشاء المحادثة الخاصة")),
     );
 
+    if (!mounted) return;
     _loadBookings();
   }
 
@@ -90,10 +91,12 @@ class _DoctorBookingsScreenState extends State<DoctorBookingsScreen> {
     booking["status"] = "rejected";
     await DoctorBookingPrefs.update(booking);
 
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("تم رفض الحجز")),
     );
 
+    if (!mounted) return;
     _loadBookings();
   }
 

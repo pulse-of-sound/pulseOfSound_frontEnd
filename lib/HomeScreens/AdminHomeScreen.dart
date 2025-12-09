@@ -8,7 +8,6 @@ import '../SuperAdminScreens/Articles/admin_articel_screen.dart';
 import '../SuperAdminScreens/Chats/AdminCommunityChatScreen.dart';
 import '../SuperAdminScreens/Childrens/chidScreen.dart';
 import '../SuperAdminScreens/Doctors/doctorsScreen.dart';
-import '../Colors/colors.dart';
 import '../SuperAdminScreens/Wallet/ReceiptsAdminScreen.dart';
 
 class AdminHome extends StatelessWidget {

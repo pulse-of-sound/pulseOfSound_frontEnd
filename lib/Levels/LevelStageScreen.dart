@@ -70,7 +70,7 @@ class _StageGameScreenState extends State<StageGameScreen> {
       "group": widget.groupNumber,
       "stage": widget.stageNumber,
       "score": 10, // مؤقتًا، ممكن نحط قيمة حسب أداء الطفل
-      "feedback": "أداء رائع في هذه المرحلة 🎯",
+      "feedback": "أداء رائع في هذه المرحلة ",
     });
 
     setState(() => _completed = true);

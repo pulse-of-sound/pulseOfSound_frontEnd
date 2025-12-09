@@ -137,15 +137,19 @@ class _ChildrenPageState extends State<ChildrenPage> {
                                   icon: const Icon(Icons.edit,
                                       color: Colors.blueAccent),
                                   onPressed: () async {
-                                    final updated = await Navigator.push(
+                                    // TODO: يجب جلب childId من API عند ربط شاشة الأطفال بالـ API
+                                    final result = await Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (_) =>
-                                            EditChildPage(child: child),
+                                            EditChildPage(
+                                              child: child,
+                                              childId: null, // سيتم تمرير childId عند ربط API
+                                            ),
                                       ),
                                     );
-                                    if (updated != null && updated is Child) {
-                                      _editChild(index, updated);
+                                    if (result == true) {
+                                      _editChild(index, child); // إعادة تحميل القائمة
                                     }
                                   },
                                 ),

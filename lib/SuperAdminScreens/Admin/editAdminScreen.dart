@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:pulse_of_sound/SuperAdminScreens/Admin/modelAdmin.dart';
+import '../../api/user_api.dart';
+import '../../utils/shared_pref_helper.dart';
 
 class EditAdminPage extends StatefulWidget {
   final Admin admin;
-  const EditAdminPage({super.key, required this.admin});
+  final String? adminId; // ID من API
+  final String? originalUsername; // Username الأصلي من API
+  const EditAdminPage({super.key, required this.admin, this.adminId, this.originalUsername});
 
   @override
   State<EditAdminPage> createState() => _EdiAdminPageState();
@@ -16,6 +20,7 @@ class _EdiAdminPageState extends State<EditAdminPage> {
   late TextEditingController phoneCtrl;
   late TextEditingController passwordCtrl;
   late TextEditingController emailCtrl;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -25,6 +30,64 @@ class _EdiAdminPageState extends State<EditAdminPage> {
     phoneCtrl = TextEditingController(text: widget.admin.phone);
     passwordCtrl = TextEditingController(text: widget.admin.password);
     emailCtrl = TextEditingController(text: widget.admin.email ?? "");
+  }
+
+  @override
+  void dispose() {
+    nameCtrl.dispose();
+    birthDateCtrl.dispose();
+    phoneCtrl.dispose();
+    passwordCtrl.dispose();
+    emailCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _updateAdmin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final sessionToken = await SharedPrefsHelper.getToken();
+      if (sessionToken == null || sessionToken.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('لم يتم العثور على جلسة'))
+        );
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      // استخدام username الأصلي من API إذا كان متوفراً
+      String username = widget.originalUsername ?? 
+          widget.admin.name.trim().replaceAll(' ', '_').toLowerCase();
+      
+      final result = await UserAPI.addEditAdmin(
+        sessionToken,
+        fullName: nameCtrl.text.trim(),
+        username: username,
+        password: passwordCtrl.text.isNotEmpty ? passwordCtrl.text : "temp123",
+        mobile: phoneCtrl.text.trim(),
+        email: emailCtrl.text.trim(),
+      );
+
+      setState(() => _isLoading = false);
+
+      if (result.containsKey('error')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['error']), backgroundColor: Colors.red)
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم تحديث بيانات الأدمن بنجاح'), backgroundColor: Colors.green)
+        );
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('خطأ: $e'), backgroundColor: Colors.red)
+      );
+    }
   }
 
   Future<void> _pickBirthDate() async {
@@ -110,23 +173,20 @@ class _EdiAdminPageState extends State<EditAdminPage> {
                         ),
                         elevation: 6,
                       ),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          final updatedDoctor = Admin(
-                            name: nameCtrl.text,
-                            birthDate: birthDateCtrl.text,
-                            phone: phoneCtrl.text,
-                            password: passwordCtrl.text,
-                            email: emailCtrl.text,
-                          );
-                          Navigator.pop(context, updatedDoctor);
-                        }
-                      },
-                      child: const Text(
-                        "حفظ التعديلات",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
+                      onPressed: _isLoading ? null : _updateAdmin,
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text(
+                              "حفظ التعديلات",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
                     ),
                   ],
                 ),

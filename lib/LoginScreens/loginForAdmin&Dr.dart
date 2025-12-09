@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../HomeScreens/AdminHomeScreen.dart';
 import '../HomeScreens/DoctorHomeScreen.dart';
+import '../api/user_api.dart';
 import '../utils/shared_pref_helper.dart';
 import 'loginscreen.dart';
 
@@ -19,30 +20,48 @@ class _LoginForAdminAndDrState extends State<LoginForAdminAndDr> {
     String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
 
-    if (username == "admin" && password == "1234") {
-      await SharedPrefsHelper.setSession(true);
-      await SharedPrefsHelper.setUserType("admin");
-      await SharedPrefsHelper.setName("Admin");
+    if (username.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("الرجاء ملء جميع الحقول")),
+      );
+      return;
+    }
 
+    final result = await UserAPI.loginUser(username, password);
+
+    if (result.containsKey("error")) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(result["error"]), backgroundColor: Colors.redAccent),
+      );
+      return;
+    }
+
+    String role = result["role"] ?? "User";
+    await SharedPrefsHelper.setSession(true);
+    await SharedPrefsHelper.setUserType(role);
+    await SharedPrefsHelper.setName(result["fullName"]);
+    await SharedPrefsHelper.setToken(result["sessionToken"]);
+
+    // دعم SUPER_ADMIN و Admin
+    if (role == "Admin" || role == "SUPER_ADMIN") {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const AdminHome()),
       );
-    } else if (username == "doctor" && password == "4321") {
-      await SharedPrefsHelper.setSession(true);
-      await SharedPrefsHelper.setUserType("doctor");
-      await SharedPrefsHelper.setName("Doctor");
-
+    } else if (role == "Doctor") {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const DoctorDashboard()),
+      );
+    } else if (role == "Specialist") {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const DoctorDashboard()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("اسم المستخدم أو كلمة المرور غير صحيحة"),
-          backgroundColor: Colors.redAccent,
-        ),
+        SnackBar(content: Text("دور المستخدم غير مدعوم: $role")),
       );
     }
   }
@@ -55,7 +74,7 @@ class _LoginForAdminAndDrState extends State<LoginForAdminAndDr> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset("images/login.jpg", fit: BoxFit.cover),
+          Image.asset("assets/images/login.jpg", fit: BoxFit.cover),
           Container(color: Colors.white.withOpacity(0.25)),
           Positioned(
             top: 40,

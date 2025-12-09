@@ -57,9 +57,8 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
   Future<void> _logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
-    if (context.mounted) {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => LoginScreen()));
-    }
+    if (!mounted) return;
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
   }
 
   Future<void> _pickImage() async {

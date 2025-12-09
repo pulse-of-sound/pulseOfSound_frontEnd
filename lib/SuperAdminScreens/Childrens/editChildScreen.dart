@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'modelChild.dart';
+import '../../api/child_api.dart';
+import '../../utils/shared_pref_helper.dart';
 
 class EditChildPage extends StatefulWidget {
   final Child child;
-  const EditChildPage({super.key, required this.child});
+  final String? childId; // ID من API
+  const EditChildPage({super.key, required this.child, this.childId});
 
   @override
   State<EditChildPage> createState() => _EditChildPageState();
@@ -14,6 +17,7 @@ class _EditChildPageState extends State<EditChildPage> {
   late TextEditingController nameController;
   late TextEditingController birthDateController;
   late TextEditingController parentPhoneController;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -22,6 +26,68 @@ class _EditChildPageState extends State<EditChildPage> {
     birthDateController = TextEditingController(text: widget.child.birthDate);
     parentPhoneController =
         TextEditingController(text: widget.child.parentPhone);
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    birthDateController.dispose();
+    parentPhoneController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _updateChild() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      if (widget.childId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('معرف الطفل غير موجود'))
+        );
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      // تحويل تاريخ الميلاد من DD/MM/YYYY إلى YYYY-MM-DD
+      String? birthdate;
+      if (birthDateController.text.isNotEmpty) {
+        try {
+          final parts = birthDateController.text.split('/');
+          if (parts.length == 3) {
+            birthdate = "${parts[2]}-${parts[1].padLeft(2, '0')}-${parts[0].padLeft(2, '0')}";
+          }
+        } catch (e) {
+          print("خطأ في تحويل التاريخ: $e");
+        }
+      }
+
+      final result = await ChildProfileAPI.createOrUpdateChildProfile(
+        childId: widget.childId!,
+        name: nameController.text.trim(),
+        birthdate: birthdate,
+        // يمكن إضافة حقول أخرى إذا كانت متوفرة في النموذج
+      );
+
+      setState(() => _isLoading = false);
+
+      if (result.containsKey('error')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['error']), backgroundColor: Colors.red)
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم تحديث بيانات الطفل بنجاح'), backgroundColor: Colors.green)
+        );
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('خطأ: $e'), backgroundColor: Colors.red)
+      );
+    }
   }
 
   Future<void> _pickBirthDate() async {
@@ -108,21 +174,20 @@ class _EditChildPageState extends State<EditChildPage> {
                         ),
                         elevation: 6,
                       ),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          final updated = Child(
-                            name: nameController.text,
-                            birthDate: birthDateController.text,
-                            parentPhone: parentPhoneController.text,
-                          );
-                          Navigator.pop(context, updated);
-                        }
-                      },
-                      child: const Text(
-                        "حفظ التعديلات",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
+                      onPressed: _isLoading ? null : _updateChild,
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text(
+                              "حفظ التعديلات",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
                     ),
                     const SizedBox(height: 14),
                   ],

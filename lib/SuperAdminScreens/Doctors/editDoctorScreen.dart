@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'modelDoctor.dart';
+import '../../api/user_api.dart';
+import '../../utils/shared_pref_helper.dart';
 
 class EditDoctorPage extends StatefulWidget {
   final Doctor doctor;
-  const EditDoctorPage({super.key, required this.doctor});
+  final String? doctorId; // ID من API
+  final String? originalUsername; // Username الأصلي من API
+  const EditDoctorPage({super.key, required this.doctor, this.doctorId, this.originalUsername});
 
   @override
   State<EditDoctorPage> createState() => _EditDoctorPageState();
@@ -19,6 +23,7 @@ class _EditDoctorPageState extends State<EditDoctorPage> {
   late TextEditingController certificatesCtrl;
   late TextEditingController experienceCtrl;
   late TextEditingController workplaceCtrl;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -33,6 +38,67 @@ class _EditDoctorPageState extends State<EditDoctorPage> {
     experienceCtrl =
         TextEditingController(text: widget.doctor.experience ?? "");
     workplaceCtrl = TextEditingController(text: widget.doctor.workplace ?? "");
+  }
+
+  @override
+  void dispose() {
+    nameCtrl.dispose();
+    birthDateCtrl.dispose();
+    phoneCtrl.dispose();
+    passwordCtrl.dispose();
+    emailCtrl.dispose();
+    certificatesCtrl.dispose();
+    experienceCtrl.dispose();
+    workplaceCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _updateDoctor() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final sessionToken = await SharedPrefsHelper.getToken();
+      if (sessionToken == null || sessionToken.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('لم يتم العثور على جلسة'))
+        );
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      // استخدام username الأصلي من API إذا كان متوفراً
+      String username = widget.originalUsername ?? 
+          widget.doctor.name.trim().replaceAll(' ', '_').toLowerCase();
+      
+      final result = await UserAPI.addEditDoctor(
+        sessionToken,
+        fullName: nameCtrl.text.trim(),
+        username: username,
+        password: passwordCtrl.text.isNotEmpty ? passwordCtrl.text : "temp123", // إذا كانت فارغة، نستخدم كلمة مرور مؤقتة
+        mobile: phoneCtrl.text.trim(),
+        email: emailCtrl.text.trim(),
+      );
+
+      setState(() => _isLoading = false);
+
+      if (result.containsKey('error')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['error']), backgroundColor: Colors.red)
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم تحديث بيانات الطبيب بنجاح'), backgroundColor: Colors.green)
+        );
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('خطأ: $e'), backgroundColor: Colors.red)
+      );
+    }
   }
 
   Future<void> _pickBirthDate() async {
@@ -121,26 +187,20 @@ class _EditDoctorPageState extends State<EditDoctorPage> {
                         ),
                         elevation: 6,
                       ),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          final updatedDoctor = Doctor(
-                            name: nameCtrl.text,
-                            birthDate: birthDateCtrl.text,
-                            phone: phoneCtrl.text,
-                            password: passwordCtrl.text,
-                            email: emailCtrl.text,
-                            certificates: certificatesCtrl.text,
-                            experience: experienceCtrl.text,
-                            workplace: workplaceCtrl.text,
-                          );
-                          Navigator.pop(context, updatedDoctor);
-                        }
-                      },
-                      child: const Text(
-                        "حفظ التعديلات",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
+                      onPressed: _isLoading ? null : _updateDoctor,
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text(
+                              "حفظ التعديلات",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
                     ),
                   ],
                 ),

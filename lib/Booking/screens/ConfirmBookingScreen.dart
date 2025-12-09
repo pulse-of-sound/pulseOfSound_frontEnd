@@ -3,9 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:pulse_of_sound/HomeScreens/bottomNavBar.dart';
 import '../model/consultation_models.dart';
 import '../utils/bookings_prefs.dart';
-import 'consultation_flow.dart';
 
-class ConfirmBookingScreen extends StatelessWidget {
+class ConfirmBookingScreen extends StatefulWidget {
   final ProviderModel provider;
   final String type;
   final String planTitle;
@@ -19,21 +18,28 @@ class ConfirmBookingScreen extends StatelessWidget {
     required this.price,
   });
 
-  Future<void> _confirmBooking(BuildContext context) async {
+  @override
+  State<ConfirmBookingScreen> createState() => _ConfirmBookingScreenState();
+}
+
+class _ConfirmBookingScreenState extends State<ConfirmBookingScreen> {
+  Future<void> _confirmBooking() async {
     final booking = Booking(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      parentId: "user_001", //  لاحقاً  بـ id المستخدم من prefs
+      parentId: "user_001",
       parentName: "ولي الأمر",
       phone: "0999999999",
-      type: type,
-      provider: provider,
-      plan: planTitle,
-      price: price,
+      type: widget.type,
+      provider: widget.provider,
+      plan: widget.planTitle,
+      price: widget.price,
       date: DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now()),
       status: BookingStatus.pending,
     );
 
     await BookingsPrefs.add(booking);
+
+    if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -41,6 +47,8 @@ class ConfirmBookingScreen extends StatelessWidget {
         backgroundColor: Colors.green,
       ),
     );
+
+    if (!mounted) return;
 
     Navigator.pushAndRemoveUntil(
       context,
@@ -81,19 +89,19 @@ class ConfirmBookingScreen extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text("النوع: $type", textAlign: TextAlign.right),
+                  Text("النوع: ${widget.type}", textAlign: TextAlign.right),
                   const SizedBox(height: 8),
-                  Text("المختص: ${provider.name}", textAlign: TextAlign.right),
+                  Text("المختص: ${widget.provider.name}", textAlign: TextAlign.right),
                   const SizedBox(height: 8),
-                  Text("الخطة: $planTitle", textAlign: TextAlign.right),
+                  Text("الخطة: ${widget.planTitle}", textAlign: TextAlign.right),
                   const SizedBox(height: 8),
-                  Text("السعر: $price \$", textAlign: TextAlign.right),
+                  Text("السعر: ${widget.price} \$", textAlign: TextAlign.right),
                   const SizedBox(height: 25),
                   Center(
                     child: ElevatedButton.icon(
                       icon: const Icon(Icons.check_circle_outline),
                       label: const Text("تأكيد الحجز"),
-                      onPressed: () => _confirmBooking(context),
+                      onPressed: _confirmBooking,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.pinkAccent,
                         padding: const EdgeInsets.symmetric(

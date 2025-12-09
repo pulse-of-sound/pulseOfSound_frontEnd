@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:flutter/services.dart';
 import 'package:pulse_of_sound/LoginScreens/loginForAdmin&Dr.dart';
+import '../api/auth_api.dart';
 import '../utils/shared_pref_helper.dart';
 import 'OTPScreen.dart';
 
@@ -24,13 +25,28 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    await SharedPrefsHelper.setSession(true);
-    await SharedPrefsHelper.setPhone(completePhoneNumber!);
-    await SharedPrefsHelper.setUserType("user");
+    String normalizedPhone =
+        completePhoneNumber!.replaceAll(" ", "").replaceFirst("+963", "0");
+
+    print("NORMALIZED = $normalizedPhone");
+
+    final result = await AuthAPI.generateOTP(normalizedPhone);
+
+    print("OTP_RESPONSE = $result");
+
+    if (result.containsKey("error")) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(result["error"]), backgroundColor: Colors.redAccent),
+      );
+      return;
+    }
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => OtpScreen(phone: completePhoneNumber!)),
+      MaterialPageRoute(
+        builder: (_) => OtpScreen(phone: normalizedPhone),
+      ),
     );
   }
 
@@ -42,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset("images/login.jpg", fit: BoxFit.cover),
+          Image.asset("assets/images/login.jpg", fit: BoxFit.cover),
           Container(color: Colors.white.withOpacity(0.25)),
 
           // المحتوى
@@ -52,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: FadeInUp(
                   duration: const Duration(milliseconds: 700),
                   child: Container(
-                    width: width * 0.8, // ⬅️ الحقول داخل الإطار
+                    width: width * 0.8, //  الحقول داخل الإطار
                     padding: const EdgeInsets.symmetric(
                         horizontal: 18, vertical: 28),
                     decoration: BoxDecoration(

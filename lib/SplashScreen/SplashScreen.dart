@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:parse_server_sdk/parse_server_sdk.dart';
+
 import 'package:pulse_of_sound/LoginScreens/loginscreen.dart';
 import 'package:pulse_of_sound/HomeScreens/HomeScreen.dart';
 import 'package:pulse_of_sound/HomeScreens/AdminHomeScreen.dart';
 import 'package:pulse_of_sound/HomeScreens/DoctorHomeScreen.dart';
-
 import '../utils/shared_pref_helper.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -24,7 +25,7 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // Animation for logo
+    // ======= تشغيل الأنيميشن =======
     _logoController =
         AnimationController(vsync: this, duration: const Duration(seconds: 3));
 
@@ -38,9 +39,21 @@ class _SplashScreenState extends State<SplashScreen>
 
     _logoController.forward();
 
-    // Navigation after 3.5s
+    // ======= اختبار الاتصال بـ Parse =======
+    _testParseConnection();
+
+    // ======= الانتقال بعد 4 ثوان =======
     Timer(const Duration(seconds: 4), _navigateUser);
   }
+
+  // اختبار الاتصال بالسيرفر (Parse Health Check)
+
+  void _testParseConnection() async {
+    final response = await Parse().healthCheck();
+    debugPrint("Parse Health Check: ${response.success}");
+  }
+
+  // توجيه المستخدم حسب حالته
 
   void _navigateUser() {
     bool hasSession = SharedPrefsHelper.getSession();
@@ -77,6 +90,8 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
+  // واجهة الـ Splash Screen
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,9 +100,9 @@ class _SplashScreenState extends State<SplashScreen>
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color(0xFF5CD1FF), // أزرق سماوي
-              Color(0xFFFF9AE1), // زهري
-              Color(0xFFFFE27D), // أصفر باهت
+              Color(0xFF5CD1FF),
+              Color(0xFFFF9AE1),
+              Color(0xFFFFE27D),
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -107,7 +122,7 @@ class _SplashScreenState extends State<SplashScreen>
                     height: 200,
                     decoration: BoxDecoration(
                       image: const DecorationImage(
-                        image: AssetImage("images/logoColorful.png"), //  الصورة
+                        image: AssetImage("assets/images/logoColorful.png"),
                         fit: BoxFit.contain,
                       ),
                       boxShadow: [
@@ -121,7 +136,6 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                   const SizedBox(height: 40),
 
-                  // النص الرئيسي
                   const Text(
                     "Pulse of Sound",
                     style: TextStyle(
@@ -140,7 +154,6 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                   const SizedBox(height: 12),
 
-                  // الشعار الفرعي
                   const Text(
                     "Learn • Play • Happiness",
                     style: TextStyle(
@@ -151,7 +164,6 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                   const SizedBox(height: 30),
 
-                  // خط التحميل السفلي
                   SizedBox(
                     width: 120,
                     child: LinearProgressIndicator(

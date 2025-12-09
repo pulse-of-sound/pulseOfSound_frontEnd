@@ -4,7 +4,6 @@ import 'package:pulse_of_sound/Articles/articlesScreen.dart';
 import 'package:pulse_of_sound/HomeScreens/HomeScreen.dart';
 import '../Booking/screens/consultation_flow.dart';
 import '../Colors/colors.dart';
-import '../Levels/StageDetailScreen.dart';
 import '../Levels/levelsScreen.dart';
 import '../Parent/screens/ParentChatHome.dart';
 
@@ -26,10 +25,10 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   }
 
   final List<Widget> _pages = [
-    LevelScreen(),
-    ConsultationTypeScreen(),
-    ParentHomeScreen(),
-    ParentChatHome(),
+    const LevelScreen(),
+    const ConsultationTypeScreen(),
+    const ParentHomeScreen(),
+    const ParentChatHome(),
     const ArticlesScreen(),
   ];
 
@@ -48,7 +47,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
         width: 65,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             colors: [AppColors.skyBlue, AppColors.babyPink],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,

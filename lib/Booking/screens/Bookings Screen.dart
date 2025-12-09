@@ -31,6 +31,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
     booking.status = BookingStatus.cancelled;
     await BookingsPrefs.update(booking);
     await _loadBookings();
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("تم إلغاء الحجز بنجاح")),
     );

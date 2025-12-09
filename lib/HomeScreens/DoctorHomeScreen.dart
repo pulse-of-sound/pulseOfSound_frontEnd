@@ -3,7 +3,6 @@ import 'package:pulse_of_sound/Doctor/Screens/doctor_profile_screen.dart';
 import '../../Colors/colors.dart';
 import '../Doctor/Screens/doctor_articles_screen.dart';
 import '../Doctor/Screens/doctor_bookings_screen.dart';
-import '../Doctor/Screens/doctor_chat_room.dart';
 import '../Doctor/Screens/doctor_chat_screen.dart';
 import '../Doctor/Screens/doctor_reports_screen.dart';
 import '../Doctor/Screens/doctor_wallet_screen.dart';

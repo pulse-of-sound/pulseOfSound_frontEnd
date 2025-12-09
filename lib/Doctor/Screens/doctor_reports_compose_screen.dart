@@ -24,6 +24,7 @@ class _DoctorReportsComposeScreenState
     if (_controller.text.trim().isEmpty) return;
     await DoctorReportsPrefs.addReport(
         widget.parentId, widget.parentName, _controller.text.trim());
+    if (!mounted) return;
     Navigator.pop(context);
   }
 

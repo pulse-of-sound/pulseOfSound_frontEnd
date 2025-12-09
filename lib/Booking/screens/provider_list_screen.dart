@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../Colors/colors.dart';
 import '../model/consultation_models.dart';
 import 'plan_selection_screen.dart';
 
@@ -110,7 +109,7 @@ class PlanStaticSelectionScreen extends StatelessWidget {
                             ),
                             trailing: Text(
                               "${plan["price"]} ل.س",
-                              style: TextStyle(
+                              style: const TextStyle(
                                   color: Colors.pinkAccent,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pulse_of_sound/SuperAdminScreens/Admin/modelAdmin.dart';
+import '../../api/user_api.dart';
+import '../../utils/shared_pref_helper.dart';
 
 class AddAdminPage extends StatefulWidget {
   const AddAdminPage({super.key});
@@ -15,6 +16,17 @@ class _AddAdminPageState extends State<AddAdminPage> {
   final phoneCtrl = TextEditingController();
   final passwordCtrl = TextEditingController();
   final emailCtrl = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    nameCtrl.dispose();
+    birthDateCtrl.dispose();
+    phoneCtrl.dispose();
+    passwordCtrl.dispose();
+    emailCtrl.dispose();
+    super.dispose();
+  }
 
   Future<void> _pickBirthDate() async {
     DateTime? picked = await showDatePicker(
@@ -27,6 +39,51 @@ class _AddAdminPageState extends State<AddAdminPage> {
       setState(() {
         birthDateCtrl.text = "${picked.day}/${picked.month}/${picked.year}";
       });
+    }
+  }
+
+  Future<void> _addAdmin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final sessionToken = await SharedPrefsHelper.getToken();
+      if (sessionToken == null || sessionToken.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('لم يتم العثور على جلسة'))
+        );
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      final result = await UserAPI.addEditAdmin(
+        sessionToken,
+        fullName: nameCtrl.text.trim(),
+        username: nameCtrl.text.trim().replaceAll(' ', '_').toLowerCase(),
+        password: passwordCtrl.text,
+        mobile: phoneCtrl.text.trim(),
+        email: emailCtrl.text.trim(),
+      );
+
+      setState(() => _isLoading = false);
+
+      if (result.containsKey('error')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['error']), backgroundColor: Colors.red)
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم إضافة الأدمن بنجاح'), backgroundColor: Colors.green)
+        );
+        // إرجاع true لإعادة تحميل القائمة
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('خطأ: $e'), backgroundColor: Colors.red)
+      );
     }
   }
 
@@ -105,25 +162,22 @@ class _AddAdminPageState extends State<AddAdminPage> {
                         ),
                         elevation: 6,
                       ),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          final doctor = Admin(
-                            name: nameCtrl.text,
-                            birthDate: birthDateCtrl.text,
-                            phone: phoneCtrl.text,
-                            password: passwordCtrl.text,
-                            email: emailCtrl.text,
-                          );
-                          Navigator.pop(context, doctor);
-                        }
-                      },
-                      child: const Text(
-                        "إضافة الأدمن",
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white),
-                      ),
+                      onPressed: _isLoading ? null : _addAdmin,
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text(
+                              "إضافة الأدمن",
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            ),
                     ),
                   ],
                 ),

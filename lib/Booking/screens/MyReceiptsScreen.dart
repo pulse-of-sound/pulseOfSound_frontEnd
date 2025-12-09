@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../../Colors/colors.dart';
 import '../../Booking/utils/wallet_prefs.dart';
 import '../../SuperAdminScreens/Wallet/ReceiptModel.dart';
 
@@ -113,7 +112,9 @@ class MyReceiptsScreen extends StatelessWidget {
   Future<List<Receipt>> _loadMyReceipts() async {
     final data = await WalletPrefs.loadReceipts();
 
-    if (data is! List) return [];
+    if (data == null || data is! List) {
+      return [];
+    }
 
     final List<dynamic> list = List<dynamic>.from(data);
 

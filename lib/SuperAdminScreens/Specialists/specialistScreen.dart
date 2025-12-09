@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:pulse_of_sound/Colors/colors.dart';
+import '../../api/user_api.dart';
+import '../../utils/shared_pref_helper.dart';
 import 'package:pulse_of_sound/SuperAdminScreens/Specialists/modelSpecialists.dart';
 
 import 'addSpecialistScreen.dart';
-
 import 'editSpecialistScreen.dart';
 
 class Specialistscreen extends StatefulWidget {
@@ -14,42 +15,45 @@ class Specialistscreen extends StatefulWidget {
 }
 
 class _SpecialistscreenState extends State<Specialistscreen> {
-  List<Specialist> specialists = [
-    Specialist(
-      name: "أ. أحمد",
-      birthDate: "10/3/1985",
-      phone: "0999999999",
-      password: "1234",
-      email: "ahmad@mail.com",
-      certificates: "دكتوراه في الطب النفسي",
-      experience: "10 سنوات",
-      workplace: "مشفى السلام",
-    ),
-    Specialist(
-      name: "أ. أحمد",
-      birthDate: "10/3/1985",
-      phone: "0999999999",
-      password: "1234",
-      email: "ahmad@mail.com",
-      certificates: "دكتوراه في الطب العلاجي",
-      experience: "10 سنوات",
-      workplace: "مشفى السلام",
-    ),
-  ];
-
-  List<Specialist> filteredSpecialists = [];
+  List<Map<String, dynamic>> specialists = [];
+  List<Map<String, dynamic>> filteredSpecialists = [];
   final TextEditingController searchController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    filteredSpecialists = specialists;
+    _loadSpecialists();
+  }
+
+  Future<void> _loadSpecialists() async {
+    setState(() => _isLoading = true);
+    try {
+      final sessionToken = await SharedPrefsHelper.getToken();
+      if (sessionToken != null && sessionToken.isNotEmpty) {
+        final specialistsList = await UserAPI.getAllSpecialists(sessionToken);
+        setState(() {
+          specialists = specialistsList;
+          filteredSpecialists = specialistsList;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      print('خطأ في تحميل الأخصائيين: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
   }
 
   void _filterSpecialist(String query) {
     final filtered = specialists.where((specialist) {
-      final nameMatch = specialist.name.contains(query);
-      final phoneMatch = specialist.phone.contains(query);
+      final nameMatch = (specialist['fullName'] ?? specialist['username'] ?? '').toString().contains(query);
+      final phoneMatch = (specialist['mobile'] ?? '').toString().contains(query);
       return nameMatch || phoneMatch;
     }).toList();
 
@@ -57,26 +61,67 @@ class _SpecialistscreenState extends State<Specialistscreen> {
   }
 
   void _addSpecialist(Specialist specialist) {
-    setState(() {
-      specialists.add(specialist);
-      filteredSpecialists = specialists;
-    });
+    _loadSpecialists();
   }
 
-  void _editSpecialist(int index, Specialist updated) {
-    setState(() {
-      specialists[index] = updated;
-      filteredSpecialists = specialists;
-    });
+  Future<void> _editSpecialist(int index) async {
+    final specialistData = filteredSpecialists[index];
+    final specialist = Specialist(
+      name: specialistData['fullName'] ?? specialistData['username'] ?? '',
+      phone: specialistData['mobile'] ?? '',
+      email: specialistData['email'],
+      password: '', // لن نعرض كلمة المرور
+      birthDate: '',
+      certificates: '',
+      experience: '',
+      workplace: '',
+    );
+    
+    final specialistId = specialistData['id'] ?? specialistData['objectId'];
+    final username = specialistData['username'] ?? '';
+    
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditSpecialistPage(
+          specialist: specialist,
+          specialistId: specialistId,
+          originalUsername: username, // تمرير username الأصلي
+        ),
+      ),
+    );
+    
+    if (result == true) {
+      _loadSpecialists();
+    }
   }
 
-  void _deleteSpecialist(int index) async {
-    bool confirm = await _showConfirmDialog(specialists[index].name);
+  Future<void> _deleteSpecialist(int index) async {
+    final specialistName = filteredSpecialists[index]['fullName'] ?? 'الأخصائي';
+    bool confirm = await _showConfirmDialog(specialistName);
     if (confirm) {
-      setState(() {
-        specialists.removeAt(index);
-        filteredSpecialists = specialists;
-      });
+      try {
+        final sessionToken = await SharedPrefsHelper.getToken();
+        final specialistId = filteredSpecialists[index]['objectId'] ?? filteredSpecialists[index]['id'];
+        
+        if (sessionToken != null && sessionToken.isNotEmpty && specialistId != null) {
+          final result = await UserAPI.deleteSpecialist(sessionToken, specialistId);
+          if (!result.containsKey('error')) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('تم حذف الأخصائي بنجاح'), backgroundColor: Colors.green)
+            );
+            _loadSpecialists();
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(result['error']), backgroundColor: Colors.red)
+            );
+          }
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('خطأ: $e'), backgroundColor: Colors.red)
+        );
+      }
     }
   }
 
@@ -190,90 +235,93 @@ class _SpecialistscreenState extends State<Specialistscreen> {
 
                   //  القائمة
                   Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: filteredSpecialists.length,
-                      itemBuilder: (context, index) {
-                        final specialist = filteredSpecialists[index];
-                        return Card(
-                          color: Colors.white.withOpacity(0.9),
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
-                          elevation: 6,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 12),
-                            child: Row(
-                              children: [
-                                const CircleAvatar(
-                                  backgroundColor: AppColors.skyBlue,
-                                  radius: 26,
-                                  child:
-                                      Icon(Icons.person, color: Colors.white),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        specialist.name,
-                                        style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      Text(
-                                        "هاتف: ${specialist.phone}",
-                                        style: const TextStyle(
-                                            fontSize: 13,
-                                            color: Colors.black54),
-                                      ),
-                                      if (specialist.birthDate != null &&
-                                          specialist.birthDate!.isNotEmpty)
-                                        Text(
-                                          "تاريخ الميلاد: ${specialist.birthDate}",
-                                          style: const TextStyle(
-                                              fontSize: 13,
-                                              color: Colors.black54),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.edit,
-                                          color: Colors.blueAccent),
-                                      onPressed: () async {
-                                        final updated = await Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => EditSpecialistPage(
-                                                specialist: specialist),
-                                          ),
-                                        );
-                                        if (updated != null &&
-                                            updated is Specialist) {
-                                          _editSpecialist(index, updated);
-                                        }
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete,
-                                          color: Colors.redAccent),
-                                      onPressed: () => _deleteSpecialist(index),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                    child: _isLoading
+                        ? const Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
-                          ),
-                        );
-                      },
-                    ),
+                          )
+                        : filteredSpecialists.isEmpty
+                            ? const Center(
+                                child: Text(
+                                  'لا يوجد أخصائيين',
+                                  style: TextStyle(color: Colors.white, fontSize: 18),
+                                ),
+                              )
+                            : ListView.builder(
+                                padding: const EdgeInsets.all(16),
+                                itemCount: filteredSpecialists.length,
+                                itemBuilder: (context, index) {
+                                  final specialist = filteredSpecialists[index];
+                                  final specialistName = specialist['fullName'] ?? specialist['username'] ?? 'بدون اسم';
+                                  final specialistPhone = specialist['mobile'] ?? 'بدون رقم';
+                                  
+                                  return Card(
+                                    color: Colors.white.withOpacity(0.9),
+                                    margin: const EdgeInsets.symmetric(vertical: 8),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16)),
+                                    elevation: 6,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 14, vertical: 12),
+                                      child: Row(
+                                        children: [
+                                          const CircleAvatar(
+                                            backgroundColor: AppColors.skyBlue,
+                                            radius: 26,
+                                            child:
+                                                Icon(Icons.person, color: Colors.white),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  specialistName,
+                                                  style: const TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight: FontWeight.bold),
+                                                ),
+                                                Text(
+                                                  "هاتف: $specialistPhone",
+                                                  style: const TextStyle(
+                                                      fontSize: 13,
+                                                      color: Colors.black54),
+                                                ),
+                                                if (specialist['email'] != null && specialist['email']!.isNotEmpty)
+                                                  Text(
+                                                    "بريد: ${specialist['email']}",
+                                                    style: const TextStyle(
+                                                        fontSize: 13,
+                                                        color: Colors.black54),
+                                                  ),
+                                              ],
+                                            ),
+                                          ),
+                                          Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              IconButton(
+                                                icon: const Icon(Icons.edit,
+                                                    color: Colors.blue),
+                                                onPressed: () => _editSpecialist(index),
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(Icons.delete,
+                                                    color: Colors.redAccent),
+                                                onPressed: () => _deleteSpecialist(index),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                   ),
                 ],
               ),

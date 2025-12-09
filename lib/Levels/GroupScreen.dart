@@ -36,7 +36,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
     setState(() {});
   }
 
-  void _openGroup(int index) async {
+  Future<void> _openGroup(int index) async {
     if (index + 1 > unlockedGroup) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("الرجاء إنهاء المجموعة السابقة أولاً")),
@@ -53,6 +53,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
       "event": "فتح مجموعة جديدة",
     });
 
+    if (!mounted) return;
     //  الانتقال إلى شاشة المراحل
     Navigator.push(
       context,

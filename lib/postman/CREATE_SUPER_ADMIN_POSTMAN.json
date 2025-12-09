@@ -1,0 +1,354 @@
+{
+  "info": {
+    "name": "Create Super Admin",
+    "description": "Postman Collection لإنشاء سوبر أدمن جديد خطوة بخطوة",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:1337/api/functions",
+      "type": "string"
+    },
+    {
+      "key": "parse_url",
+      "value": "http://localhost:1337/parse",
+      "type": "string"
+    },
+    {
+      "key": "app_id",
+      "value": "cDUPSpkhbmD0e1TFND3rYkw7TrrdHXqNyXgoOa3PpLPSd5NJb7",
+      "type": "string"
+    },
+    {
+      "key": "master_key",
+      "value": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "session_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "الخطوة 1: إنشاء أدمن جديد",
+      "item": [
+        {
+          "name": "Create Admin (بدون Session Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Admin created successfully', function () {",
+                  "    pm.expect(response).to.have.property('userId');",
+                  "    pm.expect(response).to.have.property('username');",
+                  "    pm.expect(response.message).to.include('successfully');",
+                  "});",
+                  "",
+                  "// حفظ User ID للاستخدام في الخطوات التالية",
+                  "if (response.userId) {",
+                  "    pm.collectionVariables.set('user_id', response.userId);",
+                  "    pm.environment.set('user_id', response.userId);",
+                  "    console.log('✅ Admin created with ID:', response.userId);",
+                  "    console.log('✅ Username:', response.username);",
+                  "    console.log('✅ Role:', response.role);",
+                  "    console.log('');",
+                  "    console.log('⚠️ ملاحظة: الدور الحالي هو', response.role);",
+                  "    console.log('⚠️ يجب تعيين دور SUPER_ADMIN من Parse Dashboard');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Parse-Application-Id",
+                "value": "{{app_id}}"
+              },
+              {
+                "key": "X-Parse-Master-Key",
+                "value": "{{master_key}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"سوبر أدمن\",\n  \"username\": \"super_admin\",\n  \"password\": \"SuperAdmin123\",\n  \"mobile\": \"0999999999\",\n  \"email\": \"superadmin@test.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/addEditAdmin",
+              "host": ["{{base_url}}"],
+              "path": ["addEditAdmin"]
+            },
+            "description": "إنشاء أدمن جديد باستخدام Master Key فقط (بدون Session Token).\n\n**ملاحظة:** بعد إنشاء الأدمن، يجب تعيين دور SUPER_ADMIN من Parse Dashboard."
+          }
+        }
+      ]
+    },
+    {
+      "name": "الخطوة 2: التحقق من المستخدم",
+      "item": [
+        {
+          "name": "Get User Details (with role)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('User exists', function () {",
+                  "    pm.expect(response).to.have.property('objectId');",
+                  "    pm.expect(response).to.have.property('username');",
+                  "});",
+                  "",
+                  "// التحقق من الدور",
+                  "if (response.role) {",
+                  "    const roleName = response.role.name || response.role;",
+                  "    console.log('✅ الدور الحالي:', roleName);",
+                  "    ",
+                  "    if (roleName === 'SUPER_ADMIN' || roleName === 'SuperAdmin') {",
+                  "        console.log('✅ الدور صحيح! المستخدم هو SUPER_ADMIN');",
+                  "        pm.test('User is SUPER_ADMIN', function () {",
+                  "            pm.expect(roleName === 'SUPER_ADMIN' || roleName === 'SuperAdmin').to.be.true;",
+                  "        });",
+                  "    } else {",
+                  "        console.log('⚠️ الدور:', roleName);",
+                  "        console.log('⚠️ يجب تعيين دور SUPER_ADMIN من Parse Dashboard');",
+                  "    }",
+                  "} else {",
+                  "    console.log('⚠️ لا يوجد دور محدد للمستخدم');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Parse-Application-Id",
+                "value": "{{app_id}}"
+              },
+              {
+                "key": "X-Parse-Master-Key",
+                "value": "{{master_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{parse_url}}/classes/_User/{{user_id}}?include=role",
+              "host": ["{{parse_url}}"],
+              "path": ["classes", "_User", "{{user_id}}"],
+              "query": [
+                {
+                  "key": "include",
+                  "value": "role"
+                }
+              ]
+            },
+            "description": "الحصول على تفاصيل المستخدم مع الدور.\n\n**استخدم user_id من الخطوة 1**"
+          }
+        }
+      ]
+    },
+    {
+      "name": "الخطوة 3: تسجيل الدخول",
+      "item": [
+        {
+          "name": "Login as Super Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Login successful', function () {",
+                  "    pm.expect(response).to.have.property('sessionToken');",
+                  "    pm.expect(response).to.have.property('username');",
+                  "});",
+                  "",
+                  "// حفظ Session Token",
+                  "if (response.sessionToken) {",
+                  "    pm.collectionVariables.set('session_token', response.sessionToken);",
+                  "    pm.environment.set('session_token', response.sessionToken);",
+                  "    console.log('✅ تم تسجيل الدخول بنجاح!');",
+                  "    console.log('✅ Session Token:', response.sessionToken);",
+                  "    console.log('✅ Username:', response.username);",
+                  "    console.log('✅ Full Name:', response.fullName);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Parse-Application-Id",
+                "value": "{{app_id}}"
+              },
+              {
+                "key": "X-Parse-Master-Key",
+                "value": "{{master_key}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"super_admin\",\n  \"password\": \"SuperAdmin123\",\n  \"platform\": \"flutter\",\n  \"locale\": \"ar\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/loginUser",
+              "host": ["{{base_url}}"],
+              "path": ["loginUser"]
+            },
+            "description": "تسجيل الدخول كسوبر أدمن.\n\n**استخدم نفس username و password من الخطوة 1**"
+          }
+        }
+      ]
+    },
+    {
+      "name": "الخطوة 4: اختبار الصلاحيات",
+      "item": [
+        {
+          "name": "Test: Get All Admins",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "if (Array.isArray(response)) {",
+                  "    console.log('✅ تم جلب', response.length, 'أدمن');",
+                  "    pm.test('Got admins list', function () {",
+                  "        pm.expect(response).to.be.an('array');",
+                  "    });",
+                  "} else if (response.error) {",
+                  "    console.log('❌ خطأ:', response.error);",
+                  "    console.log('⚠️ قد يكون الدور غير صحيح');",
+                  "    pm.test('Should have SUPER_ADMIN role', function () {",
+                  "        pm.expect(response.error).to.not.include('Access denied');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Parse-Application-Id",
+                "value": "{{app_id}}"
+              },
+              {
+                "key": "X-Parse-Session-Token",
+                "value": "{{session_token}}"
+              },
+              {
+                "key": "X-Parse-Master-Key",
+                "value": "{{master_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/getAllAdmins",
+              "host": ["{{base_url}}"],
+              "path": ["getAllAdmins"]
+            },
+            "description": "اختبار جلب قائمة الأدمن.\n\n**يجب أن يعمل فقط إذا كان المستخدم SUPER_ADMIN**"
+          }
+        },
+        {
+          "name": "Test: Delete Doctor",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Parse-Application-Id",
+                "value": "{{app_id}}"
+              },
+              {
+                "key": "X-Parse-Master-Key",
+                "value": "{{master_key}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctorId\": \"doctor_id_here\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/deleteDoctor",
+              "host": ["{{base_url}}"],
+              "path": ["deleteDoctor"]
+            },
+            "description": "اختبار حذف طبيب.\n\n**استبدل doctor_id_here بـ ID طبيب موجود**"
+          }
+        }
+      ]
+    }
+  ]
+}
+
