@@ -112,7 +112,7 @@ class MyReceiptsScreen extends StatelessWidget {
   Future<List<Receipt>> _loadMyReceipts() async {
     final data = await WalletPrefs.loadReceipts();
 
-    if (data == null || data is! List) {
+    if (data is! List) {
       return [];
     }
 

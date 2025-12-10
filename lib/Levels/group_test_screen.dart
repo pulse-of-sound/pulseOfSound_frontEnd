@@ -88,7 +88,7 @@ class _GroupTestScreenState extends State<GroupTestScreen> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("لقد أجبت على ${_score} من ${_questions.length}"),
+                Text("لقد أجبت على $_score من ${_questions.length}"),
                 const SizedBox(height: 12),
                 LinearProgressIndicator(
                   value: _questions.isEmpty ? 0 : _score / _questions.length,
@@ -181,7 +181,7 @@ class _GroupTestScreenState extends State<GroupTestScreen> {
                       minHeight: 8,
                       backgroundColor: Colors.white70,
                       valueColor:
-                          AlwaysStoppedAnimation<Color>(Colors.pinkAccent),
+                          const AlwaysStoppedAnimation<Color>(Colors.pinkAccent),
                     ),
                   ),
                   const SizedBox(height: 24),

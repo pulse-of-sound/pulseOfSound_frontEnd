@@ -4,7 +4,6 @@ import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:flutter/services.dart';
 import 'package:pulse_of_sound/LoginScreens/loginForAdmin&Dr.dart';
 import '../api/auth_api.dart';
-import '../utils/shared_pref_helper.dart';
 import 'OTPScreen.dart';
 
 class LoginScreen extends StatefulWidget {

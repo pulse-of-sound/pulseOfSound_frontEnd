@@ -134,7 +134,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                     if (_currentPage == _pages.length - 1) {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => ProfileScreen()),
+                        MaterialPageRoute(builder: (_) => const ProfileScreen()),
                       );
                     } else {
                       _controller.nextPage(

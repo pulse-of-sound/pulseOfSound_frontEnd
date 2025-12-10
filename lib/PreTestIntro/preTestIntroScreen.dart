@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../Colors/colors.dart';
 import 'preTestScreen.dart';
 
 class PreTestIntroScreen extends StatelessWidget {

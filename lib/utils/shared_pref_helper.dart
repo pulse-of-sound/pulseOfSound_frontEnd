@@ -28,11 +28,18 @@ class SharedPrefsHelper {
 
   // ------------------- بيانات المصادقة -------------------
   static Future setToken(String token) async {
+    print(" DEBUG SharedPrefsHelper.setToken: storing token = '$token'");
+    print(" DEBUG SharedPrefsHelper.setToken: token length = ${token.length}");
     await _prefs?.setString("token", token);
+    final verify = _prefs?.getString("token");
+    print(" DEBUG SharedPrefsHelper.setToken: verified stored token = '$verify'");
   }
 
   static String? getToken() {
-    return _prefs?.getString("token");
+    final token = _prefs?.getString("token");
+    print(" DEBUG SharedPrefsHelper.getToken: retrieving token = '$token'");
+    print(" DEBUG SharedPrefsHelper.getToken: token length = ${token?.length}");
+    return token;
   }
 
   static Future setUserId(String userId) async {
@@ -112,5 +119,30 @@ class SharedPrefsHelper {
   // ------------------- مسح الكل -------------------
   static Future clear() async {
     await _prefs?.clear();
+  }
+
+  // ------------------- التحقق من الأدوار -------------------
+  /// التحقق من أن المستخدم هو SuperAdmin
+  static bool isSuperAdmin() {
+    final role = getUserType();
+    final normalizedRole = role.toUpperCase();
+    return normalizedRole == "SUPER_ADMIN" || normalizedRole == "SUPERADMIN" || role == "SuperAdmin";
+  }
+
+  /// التحقق من أن المستخدم هو Admin
+  static bool isAdmin() {
+    final role = getUserType();
+    final normalizedRole = role.toUpperCase();
+    return normalizedRole == "ADMIN" || normalizedRole == "SUPER_ADMIN" || normalizedRole == "SUPERADMIN" || role == "SuperAdmin";
+  }
+
+  /// التحقق من أن المستخدم لديه صلاحيات SuperAdmin أو Admin
+  static bool hasAdminPermissions() {
+    return isAdmin();
+  }
+
+  /// التحقق من أن المستخدم لديه صلاحيات SuperAdmin فقط
+  static bool hasSuperAdminPermissions() {
+    return isSuperAdmin();
   }
 }

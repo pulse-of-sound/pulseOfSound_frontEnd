@@ -140,11 +140,11 @@ class _StageMapScreenState extends State<StageMapScreen> {
                     color: isUnlocked
                         ? Colors.pinkAccent
                         : Colors.grey.withOpacity(0.6),
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                         color: Colors.black26,
                         blurRadius: 4,
-                        offset: const Offset(2, 2),
+                        offset: Offset(2, 2),
                       ),
                     ],
                   ),

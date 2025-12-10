@@ -73,7 +73,7 @@ class _OtpScreenState extends State<OtpScreen> {
     }
 
     // ثانياً: تسجيل الدخول
-    final login = await AuthAPI.loginWithMobile(widget.phone, code);
+    final login = await AuthAPI.loginAfterOTP(widget.phone);
 
     if (login.containsKey("error")) {
       ScaffoldMessenger.of(context).showSnackBar(

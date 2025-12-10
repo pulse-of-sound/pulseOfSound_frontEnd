@@ -63,12 +63,12 @@ class SharedPrefsHelper {
   //  لتخزين آخر تاريخ لعب
   static Future<void> setLastPlayDate(int level, int group, String date) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('lastPlayDate_Level${level}_Group${group}', date);
+    await prefs.setString('lastPlayDate_Level${level}_Group$group', date);
   }
 
   static Future<String?> getLastPlayDate(int level, int group) async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('lastPlayDate_Level${level}_Group${group}');
+    return prefs.getString('lastPlayDate_Level${level}_Group$group');
   }
 
   //  لتخزين المجموعة المفتوحة بالمستوى

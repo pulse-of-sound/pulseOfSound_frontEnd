@@ -50,9 +50,9 @@ class _LevelScreenState extends State<LevelScreen> {
         iconTheme: const IconThemeData(
           color: Colors.pinkAccent,
         ),
-        title: Text(
+        title: const Text(
           "المستويات",
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.pinkAccent,
           ),

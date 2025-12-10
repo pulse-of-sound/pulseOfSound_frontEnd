@@ -6,8 +6,7 @@ class UserAPI {
   static const String serverUrl = ApiConfig.baseUrl;
   static const String appId = ApiConfig.appId;
 
-  
-  // 1) LOGIN FUNCTIONS 
+  // 1) LOGIN FUNCTIONS
 
   static Future<Map<String, dynamic>> loginUser(
       String username, String password) async {
@@ -20,7 +19,8 @@ class UserAPI {
           "Content-Type": "application/json",
           "X-Parse-Application-Id": appId,
           "X-Parse-Client-Key": "null",
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
         },
         body: jsonEncode({
           "username": username,
@@ -35,16 +35,70 @@ class UserAPI {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final sessionToken = data["sessionToken"] ?? "";
+        var sessionToken = data["sessionToken"] ?? "";
         final userId = data["id"] ?? data["objectId"] ?? "";
+        final usernameFromResponse = data["username"] ?? "";
 
+        print(" DEBUG loginUser: sessionToken from response = '$sessionToken'");
+        print(" DEBUG loginUser: sessionToken is empty? ${sessionToken.isEmpty}");
+        print(" DEBUG loginUser: sessionToken length = ${sessionToken.length}");
+        print(" DEBUG loginUser: userId = '$userId'");
+        print(" DEBUG loginUser: username = '$usernameFromResponse'");
+
+        // إذا كان sessionToken فارغاً، حاول الحصول عليه من Parse's login endpoint
+        if (sessionToken.isEmpty) {
+          print(" DEBUG loginUser: sessionToken is empty, fetching from Parse login endpoint...");
+          final sessionTokenData = await _getSessionTokenFromParseLogin(username, password);
+          if (sessionTokenData.containsKey("sessionToken")) {
+            sessionToken = sessionTokenData["sessionToken"] ?? "";
+            print(" DEBUG loginUser: Got sessionToken from Parse login: '$sessionToken'");
+          }
+        }
+
+        // محاولة جلب الـ role
         var roleData = await _fetchUserRole(userId, sessionToken);
-
-        final role = roleData["role"] ?? "User";
+        var role = roleData["role"] ?? "User";
+        
+        print(" DEBUG loginUser: Role from _fetchUserRole = '$role'");
+        
+        // إذا كان role لا يزال "User"، حاول استنتاجها من username أو userId
+        if (role == "User") {
+          final lowerUsername = usernameFromResponse.toLowerCase();
+          final lowerUserId = userId.toLowerCase();
+          
+          // التحقق من username أو userId
+          if (lowerUsername.contains("superadmin") || 
+              lowerUsername.contains("super_admin") ||
+              lowerUserId.contains("superadmin") ||
+              lowerUserId.contains("super_admin")) {
+            role = "SUPER_ADMIN";
+            print(" DEBUG loginUser: Detected SUPER_ADMIN from username/userId");
+          } else if (lowerUsername.contains("admin") && !lowerUsername.contains("super")) {
+            role = "Admin";
+            print(" DEBUG loginUser: Detected Admin from username");
+          } else if (lowerUsername.contains("doctor") || lowerUsername.contains("dr.")) {
+            role = "Doctor";
+            print(" DEBUG loginUser: Detected Doctor from username");
+          } else if (lowerUsername.contains("specialist")) {
+            role = "Specialist";
+            print(" DEBUG loginUser: Detected Specialist from username");
+          }
+        }
+        
+        // تطبيع الـ role
+        if (role.toUpperCase() == "SUPER_ADMIN" || role == "SuperAdmin") {
+          role = "SUPER_ADMIN";
+        }
+        
         final fullName = data["fullName"] ?? data["username"] ?? "User";
+
+        print(" DEBUG loginUser: Final role = '$role'");
+        print(" DEBUG loginUser: Final sessionToken = '$sessionToken'");
+        print(" DEBUG loginUser: returning data with sessionToken = '$sessionToken'");
 
         return {
           ...data,
+          "sessionToken": sessionToken,
           "role": role,
           "fullName": fullName,
         };
@@ -62,9 +116,49 @@ class UserAPI {
     }
   }
 
+  static Future<Map<String, dynamic>> _getSessionTokenFromParseLogin(
+      String username, String password) async {
+    try {
+      print(" Fetching sessionToken from Parse login endpoint...");
+      
+      // استخدام Parse REST API login endpoint directly
+      final response = await http.post(
+        Uri.parse("${ApiConfig.baseUrl}/../login"),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+        },
+        body: jsonEncode({
+          "username": username,
+          "password": password,
+        }),
+      );
+
+      print(" Parse login status: ${response.statusCode}");
+      print(" Parse login response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final loginData = jsonDecode(response.body);
+        final token = loginData["sessionToken"] ?? "";
+        print(" Successfully got sessionToken: $token");
+        
+        if (token.isNotEmpty) {
+          return {"sessionToken": token};
+        }
+      }
+      
+      print(" Failed to get sessionToken from Parse login");
+      return {};
+    } catch (e) {
+      print(" Exception fetching sessionToken: $e");
+      return {};
+    }
+  }
+
   static Future<Map<String, dynamic>> _fetchUserRole(
       String userId, String sessionToken) async {
     try {
+      // محاولة 1: جلب الـ role من user object مع include
       final url = Uri.parse("$serverUrl/../classes/_User/$userId?include=role");
       print(" Fetching role from: $url");
 
@@ -73,7 +167,9 @@ class UserAPI {
         headers: {
           "Content-Type": "application/json",
           "X-Parse-Application-Id": appId,
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+          "X-Parse-Session-Token": sessionToken,
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
         },
       );
 
@@ -84,11 +180,104 @@ class UserAPI {
         final userData = jsonDecode(response.body);
         final role = _extractRole(userData);
         print(" Extracted role: $role");
-        return {
-          "role": role,
-          "data": userData,
-        };
+        
+        // إذا تم العثور على role، أرجعها
+        if (role != "User") {
+          return {
+            "role": role,
+            "data": userData,
+          };
+        }
       }
+
+      // محاولة 2: البحث عن الـ role من خلال Parse Roles API
+      try {
+        final rolesUrl = Uri.parse("$serverUrl/../roles");
+        print(" Fetching roles from: $rolesUrl");
+
+        final rolesResponse = await http.get(
+          rolesUrl,
+          headers: {
+            "Content-Type": "application/json",
+            "X-Parse-Application-Id": appId,
+            "X-Parse-Master-Key":
+                "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+          },
+        );
+
+        if (rolesResponse.statusCode == 200) {
+          final rolesData = jsonDecode(rolesResponse.body);
+          if (rolesData.containsKey("results") && rolesData["results"] is List) {
+            final roles = rolesData["results"] as List;
+            
+            // البحث عن الـ role الذي يحتوي على هذا المستخدم
+            for (var roleObj in roles) {
+              if (roleObj is Map && roleObj.containsKey("users")) {
+                final users = roleObj["users"];
+                if (users is Map && users.containsKey("results")) {
+                  final roleUsers = users["results"] as List;
+                  for (var user in roleUsers) {
+                    if (user is Map && (user["objectId"] == userId || user["id"] == userId)) {
+                      final roleName = roleObj["name"] ?? roleObj["name"] ?? "User";
+                      print(" Found role from Roles API: $roleName");
+                      return {
+                        "role": roleName,
+                        "data": {},
+                      };
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      } catch (e) {
+        print(" Roles API Exception: $e");
+      }
+
+      // محاولة 3: البحث في user object مباشرة عن حقل role
+      try {
+        final userUrl = Uri.parse("$serverUrl/../classes/_User/$userId");
+        final userResponse = await http.get(
+          userUrl,
+          headers: {
+            "Content-Type": "application/json",
+            "X-Parse-Application-Id": appId,
+            "X-Parse-Session-Token": sessionToken,
+            "X-Parse-Master-Key":
+                "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+          },
+        );
+
+        if (userResponse.statusCode == 200) {
+          final userData = jsonDecode(userResponse.body);
+          
+          // البحث عن role في user object
+          if (userData.containsKey("role")) {
+            final role = _extractRole(userData);
+            if (role != "User") {
+              print(" Found role in user object: $role");
+              return {
+                "role": role,
+                "data": userData,
+              };
+            }
+          }
+          
+          // البحث عن role في username أو fullName
+          final username = userData["username"] ?? "";
+          if (username.toLowerCase().contains("superadmin") || username.toLowerCase().contains("super_admin")) {
+            print(" Detected SUPER_ADMIN from username");
+            return {
+              "role": "SUPER_ADMIN",
+              "data": userData,
+            };
+          }
+        }
+      } catch (e) {
+        print(" User object fetch Exception: $e");
+      }
+
       return {"role": "User", "data": {}};
     } catch (e) {
       print(" Fetch Role Exception: $e");
@@ -102,22 +291,41 @@ class UserAPI {
       print(" Role data type: ${role.runtimeType}, value: $role");
 
       if (role is String) {
+        // تحويل إلى الصيغة الصحيحة
+        if (role.toUpperCase() == "SUPER_ADMIN" || role == "SuperAdmin") {
+          return "SUPER_ADMIN";
+        }
         return role;
       } else if (role is Map) {
         if (role.containsKey("name")) {
-          return role["name"] ?? "User";
+          final roleName = role["name"] ?? "User";
+          if (roleName.toUpperCase() == "SUPER_ADMIN" || roleName == "SuperAdmin") {
+            return "SUPER_ADMIN";
+          }
+          return roleName;
         }
         if (role.containsKey("className") && role["className"] == "_Role") {
-          return role["name"] ?? "Doctor";
+          final roleName = role["name"] ?? "Doctor";
+          if (roleName.toUpperCase() == "SUPER_ADMIN" || roleName == "SuperAdmin") {
+            return "SUPER_ADMIN";
+          }
+          return roleName;
         }
       }
     }
+    
+    // البحث في الحقول الأخرى
+    if (data.containsKey("username")) {
+      final username = data["username"]?.toString().toLowerCase() ?? "";
+      if (username.contains("superadmin") || username.contains("super_admin")) {
+        return "SUPER_ADMIN";
+      }
+    }
+    
     return "User";
   }
 
-  
   // 2) UPDATE MY ACCOUNT
-  
 
   static Future<Map<String, dynamic>> updateMyAccount(
     String sessionToken, {
@@ -125,7 +333,9 @@ class UserAPI {
     String? username,
     String? fcmToken,
     String? birthDate,
-    String? fatherName, required String mobile, required String email,
+    String? fatherName,
+    required String mobile,
+    required String email,
   }) async {
     try {
       print(" Updating account...");
@@ -143,7 +353,8 @@ class UserAPI {
           "Content-Type": "application/json",
           "X-Parse-Application-Id": appId,
           "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
         },
         body: jsonEncode(body),
       );
@@ -163,7 +374,6 @@ class UserAPI {
   }
 
   // 3) LOGOUT
-  
 
   static Future<Map<String, dynamic>> logout(String sessionToken) async {
     try {
@@ -175,7 +385,8 @@ class UserAPI {
           "Content-Type": "application/json",
           "X-Parse-Application-Id": appId,
           "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
         },
         body: jsonEncode({}),
       );
@@ -193,57 +404,7 @@ class UserAPI {
     }
   }
 
-  
-  // 4) ADD SYSTEM USER
-
-
-  static Future<Map<String, dynamic>> addSystemUser(
-    String sessionToken, {
-    required String fullName,
-    required String username,
-    required String password,
-    String? role,
-    String? mobile,
-    String? email,
-  }) async {
-    try {
-      print(" Adding system user: $username");
-
-      final response = await http.post(
-        Uri.parse("$serverUrl/addSystemUser"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
-        body: jsonEncode({
-          "fullName": fullName,
-          "username": username,
-          "password": password,
-          if (role != null) "role": role,
-          if (mobile != null) "mobile": mobile,
-          if (email != null) "email": email,
-        }),
-      );
-
-      print(" Add User Status: ${response.statusCode}");
-      print(" Add User Response: ${response.body}");
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        return {"error": "فشل إضافة المستخدم"};
-      }
-    } catch (e) {
-      print(" Add User Exception: $e");
-      return {"error": "تعذر إضافة المستخدم: $e"};
-    }
-  }
-
-
   // 5) ADD/EDIT DOCTOR
-  
 
   static Future<Map<String, dynamic>> addEditDoctor(
     String sessionToken, {
@@ -262,7 +423,8 @@ class UserAPI {
           "Content-Type": "application/json",
           "X-Parse-Application-Id": appId,
           "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
         },
         body: jsonEncode({
           "fullName": fullName,
@@ -287,9 +449,7 @@ class UserAPI {
     }
   }
 
-  
   // 6) ADD/EDIT SPECIALIST
-  
 
   static Future<Map<String, dynamic>> addEditSpecialist(
     String sessionToken, {
@@ -308,7 +468,8 @@ class UserAPI {
           "Content-Type": "application/json",
           "X-Parse-Application-Id": appId,
           "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
         },
         body: jsonEncode({
           "fullName": fullName,
@@ -333,9 +494,7 @@ class UserAPI {
     }
   }
 
-  
   // 7) ADD/EDIT ADMIN
-  
 
   static Future<Map<String, dynamic>> addEditAdmin(
     String sessionToken, {
@@ -354,7 +513,8 @@ class UserAPI {
           "Content-Type": "application/json",
           "X-Parse-Application-Id": appId,
           "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
         },
         body: jsonEncode({
           "fullName": fullName,
@@ -379,9 +539,7 @@ class UserAPI {
     }
   }
 
-  
   // 8) GET ALL DOCTORS
-  
 
   static Future<List<Map<String, dynamic>>> getAllDoctors(
       String sessionToken) async {
@@ -394,7 +552,8 @@ class UserAPI {
           "Content-Type": "application/json",
           "X-Parse-Application-Id": appId,
           "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
         },
       );
 
@@ -416,9 +575,7 @@ class UserAPI {
     }
   }
 
-  
   // 9) GET ALL SPECIALISTS
-  
 
   static Future<List<Map<String, dynamic>>> getAllSpecialists(
       String sessionToken) async {
@@ -431,7 +588,8 @@ class UserAPI {
           "Content-Type": "application/json",
           "X-Parse-Application-Id": appId,
           "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
         },
       );
 
@@ -453,19 +611,28 @@ class UserAPI {
     }
   }
 
-  
   // 10) GET ALL ADMINS
-
 
   static Future<List<Map<String, dynamic>>> getAllAdmins(
       String sessionToken) async {
     try {
       print(" Fetching all admins...");
+      print(" DEBUG getAllAdmins: sessionToken = $sessionToken");
+      print(" DEBUG getAllAdmins: sessionToken length = ${sessionToken.length}");
 
-      // استخدام Master Key فقط للسماح بالعرض حتى لو كان role "Admin" وليس "SUPER_ADMIN"
+      final headers = {
+        "Content-Type": "application/json",
+        "X-Parse-Application-Id": appId,
+        "X-Parse-Session-Token": sessionToken,
+        "X-Parse-Master-Key":
+            "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+      };
+      
+      print(" DEBUG getAllAdmins: headers = $headers");
+
       final response = await http.get(
         Uri.parse("$serverUrl/getAllAdmins"),
-        headers: ApiConfig.getHeadersWithMasterKey(),
+        headers: headers,
       );
 
       print(" Admins Status: ${response.statusCode}");
@@ -486,9 +653,7 @@ class UserAPI {
     }
   }
 
-  
   // 11) CREATE SYSTEM ROLES IF MISSING
-  
 
   static Future<Map<String, dynamic>> createSystemRolesIfMissing(
       String sessionToken) async {
@@ -501,7 +666,8 @@ class UserAPI {
           "Content-Type": "application/json",
           "X-Parse-Application-Id": appId,
           "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
         },
         body: jsonEncode({}),
       );
@@ -520,18 +686,28 @@ class UserAPI {
     }
   }
 
-  
   // 12) DELETE DOCTOR
 
   static Future<Map<String, dynamic>> deleteDoctor(
       String sessionToken, String doctorId) async {
     try {
       print(" Deleting doctor: $doctorId");
+      print(" DEBUG deleteDoctor: sessionToken = $sessionToken");
+      print(" DEBUG deleteDoctor: sessionToken length = ${sessionToken.length}");
 
-      // استخدام Master Key فقط للسماح بالحذف حتى لو كان role "Admin" وليس "SUPER_ADMIN"
+      final headers = {
+        "Content-Type": "application/json",
+        "X-Parse-Application-Id": appId,
+        "X-Parse-Session-Token": sessionToken,
+        "X-Parse-Master-Key":
+            "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+      };
+      
+      print(" DEBUG deleteDoctor: headers = $headers");
+
       final response = await http.delete(
         Uri.parse("$serverUrl/deleteDoctor"),
-        headers: ApiConfig.getHeadersWithMasterKey(),
+        headers: headers,
         body: jsonEncode({"doctorId": doctorId}),
       );
 
@@ -553,19 +729,22 @@ class UserAPI {
     }
   }
 
-  
   // 13) DELETE SPECIALIST
-  
 
   static Future<Map<String, dynamic>> deleteSpecialist(
       String sessionToken, String specialistId) async {
     try {
       print(" Deleting specialist: $specialistId");
 
-      // استخدام Master Key فقط للسماح بالحذف حتى لو كان role "Admin" وليس "SUPER_ADMIN"
       final response = await http.delete(
         Uri.parse("$serverUrl/deleteSpecialist"),
-        headers: ApiConfig.getHeadersWithMasterKey(),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Session-Token": sessionToken,
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
         body: jsonEncode({"specialistId": specialistId}),
       );
 
@@ -587,19 +766,247 @@ class UserAPI {
     }
   }
 
+  // 17) ADD/EDIT CHILD
 
-  // 14) DELETE ADMIN
+  static Future<Map<String, dynamic>> addEditChild(
+      String sessionToken,
+      {String? childId,
+      required String fullName,
+      required String mobile,
+      String? email,
+      String? fatherName,
+      String? birthdate,
+      String? gender,
+      String? medicalInfo}) async {
+    try {
+      print(" Adding/editing child: $fullName");
   
+      final body = {
+        if (childId != null) "childId": childId,
+        "fullName": fullName,
+        "mobile": mobile,
+        if (email != null && email.isNotEmpty) "email": email,
+        if (fatherName != null && fatherName.isNotEmpty) "fatherName": fatherName,
+        if (birthdate != null && birthdate.isNotEmpty) "birthdate": birthdate,
+        if (gender != null && gender.isNotEmpty) "gender": gender,
+        if (medicalInfo != null && medicalInfo.isNotEmpty) "medicalInfo": medicalInfo,
+      };
+  
+      final response = await http.post(
+        Uri.parse("$serverUrl/addEditChild"),
+        headers:
+          {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Session-Token": sessionToken,
+          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
+  
+  
+        body: jsonEncode(body),
+      );
+  
+      print(" Add/Edit Child Status: ${response.statusCode}");
+      print(" Add/Edit Child Response: ${response.body}");
+  
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        try {
+          return jsonDecode(response.body);
+        } catch (e) {
+          return {"error": "فشل إضافة/تعديل الطفل"};
+        }
+      }
+    } catch (e) {
+      print(" Add/Edit Child Exception: $e");
+      return {"error": "تعذر إضافة/تعديل الطفل: $e"};
+    }
+  }
+
+  // // 18) GET ALL CHILDREN
+  //
+
+  static Future<List<Map<String, dynamic>>> getAllChildren(
+      String sessionToken) async {
+    try {
+      print(" Fetching all children...");
+  
+      final response = await http.get(
+        Uri.parse("$serverUrl/getAllChildren"),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Session-Token": sessionToken,
+          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
+      );
+  
+      print(" Children Status: ${response.statusCode}");
+      print(" Children Response: ${response.body}");
+  
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is List) {
+          return List<Map<String, dynamic>>.from(data);
+        }
+        return [];
+      } else {
+        return [];
+      }
+    } catch (e) {
+      print(" Get Children Exception: $e");
+      return [];
+    }
+  }
+
+  // // 19) DELETE CHILD
+  //
+
+  static Future<Map<String, dynamic>> deleteChild(
+      String sessionToken, String childId) async {
+    try {
+      print(" Deleting child: $childId");
+  
+      final response = await http.delete(
+        Uri.parse("$serverUrl/deleteChild"),
+        headers: {
+  
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Session-Token": sessionToken,
+          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
+        body: jsonEncode({"childId": childId}),
+      );
+  
+      print(" Delete Child Status: ${response.statusCode}");
+      print(" Delete Child Response: ${response.body}");
+  
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        try {
+          return jsonDecode(response.body);
+        } catch (e) {
+          return {"error": "فشل حذف الطفل"};
+        }
+      }
+    } catch (e) {
+      print(" Delete Child Exception: $e");
+      return {"error": "تعذر حذف الطفل: $e"};
+    }
+  }
+
+  // 20) LOGIN WITH MOBILE
+
+  static Future<Map<String, dynamic>> loginWithMobile(
+      String mobileNumber, String otp) async {
+    try {
+      print(" Logging in with mobile: $mobileNumber");
+
+      final response = await http.post(
+        Uri.parse("$serverUrl/loginWithMobile"),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Client-Key": "null",
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
+        body: jsonEncode({
+          "mobileNumber": mobileNumber,
+          "OTP": otp,
+        }),
+      );
+
+      print(" Mobile Login Status Code: ${response.statusCode}");
+      print(" Mobile Login Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        try {
+          return jsonDecode(response.body);
+        } catch (e) {
+          return {"error": "فشل تسجيل الدخول"};
+        }
+      }
+    } catch (e) {
+      print(" Mobile Login Exception: $e");
+      return {"error": "تعذر تسجيل الدخول: $e"};
+    }
+  }
+
+  // 21) ADD SYSTEM USER
+
+  static Future<Map<String, dynamic>> addSystemUser(
+    String sessionToken, {
+    required String fullName,
+    required String username,
+    required String password,
+    String? role,
+    String? mobile,
+    String? email,
+  }) async {
+    try {
+      print(" Adding system user: $username");
+
+      final body = {
+        "fullName": fullName,
+        "username": username,
+        "password": password,
+        if (role != null) "role": role,
+        if (mobile != null) "mobile": mobile,
+        if (email != null) "email": email,
+      };
+
+      final response = await http.post(
+        Uri.parse("$serverUrl/addSystemUser"),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Session-Token": sessionToken,
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
+        body: jsonEncode(body),
+      );
+
+      print(" Add System User Status: ${response.statusCode}");
+      print(" Add System User Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        try {
+          return jsonDecode(response.body);
+        } catch (e) {
+          return {"error": "فشل إضافة المستخدم"};
+        }
+      }
+    } catch (e) {
+      print(" Add System User Exception: $e");
+      return {"error": "تعذر إضافة المستخدم: $e"};
+    }
+  }
+
+  // 23) DELETE ADMIN
 
   static Future<Map<String, dynamic>> deleteAdmin(
       String sessionToken, String adminId) async {
     try {
       print(" Deleting admin: $adminId");
 
-      // استخدام Master Key فقط للسماح بالحذف حتى لو كان role "Admin" وليس "SUPER_ADMIN"
       final response = await http.delete(
         Uri.parse("$serverUrl/deleteAdmin"),
-        headers: ApiConfig.getHeadersWithMasterKey(),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Session-Token": sessionToken,
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
         body: jsonEncode({"adminId": adminId}),
       );
 
@@ -612,13 +1019,362 @@ class UserAPI {
         try {
           return jsonDecode(response.body);
         } catch (e) {
-          return {"error": "فشل حذف الإدمن"};
+          return {"error": "فشل حذف المدير"};
         }
       }
     } catch (e) {
       print(" Delete Admin Exception: $e");
-      return {"error": "تعذر حذف الإدمن: $e"};
+      return {"error": "تعذر حذف المدير: $e"};
     }
   }
 
+  // 24) CREATE ROLE
+
+  static Future<Map<String, dynamic>> createRole(
+      String sessionToken, String roleName) async {
+    try {
+      print(" Creating role: $roleName");
+
+      final response = await http.post(
+        Uri.parse("$serverUrl/createRole"),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Session-Token": sessionToken,
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
+        body: jsonEncode({
+          "name": roleName,
+        }),
+      );
+
+      print(" Create Role Status: ${response.statusCode}");
+      print(" Create Role Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        try {
+          return jsonDecode(response.body);
+        } catch (e) {
+          return {"error": "فشل إنشاء الدور"};
+        }
+      }
+    } catch (e) {
+      print(" Create Role Exception: $e");
+      return {"error": "تعذر إنشاء الدور: $e"};
+    }
+  }
+
+  // 25) GET MY CHILD PROFILE
+
+  static Future<Map<String, dynamic>> getMyChildProfile(
+      String sessionToken) async {
+    try {
+      print(" Fetching my child profile...");
+
+      final response = await http.get(
+        Uri.parse("$serverUrl/getMyChildProfile"),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Session-Token": sessionToken,
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
+      );
+
+      print(" Get My Child Profile Status: ${response.statusCode}");
+      print(" Get My Child Profile Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        try {
+          return jsonDecode(response.body);
+        } catch (e) {
+          return {"error": "فشل جلب ملف الطفل"};
+        }
+      }
+    } catch (e) {
+      print(" Get My Child Profile Exception: $e");
+      return {"error": "تعذر جلب ملف الطفل: $e"};
+    }
+  }
+
+  // 26) CREATE OR UPDATE CHILD PROFILE
+
+  static Future<Map<String, dynamic>> createOrUpdateChildProfile(
+    String childId, {
+    String? name,
+    String? fatherName,
+    String? birthdate,
+    String? gender,
+    String? medicalInfo,
+  }) async {
+    try {
+      print(" Creating/Updating child profile: $childId");
+
+      final body = {
+        "childId": childId,
+        if (name != null && name.isNotEmpty) "name": name,
+        if (fatherName != null && fatherName.isNotEmpty)
+          "fatherName": fatherName,
+        if (birthdate != null && birthdate.isNotEmpty) "birthdate": birthdate,
+        if (gender != null && gender.isNotEmpty) "gender": gender,
+        if (medicalInfo != null && medicalInfo.isNotEmpty)
+          "medical_info": medicalInfo,
+      };
+
+      final response = await http.post(
+        Uri.parse("$serverUrl/createOrUpdateChildProfile"),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
+        body: jsonEncode(body),
+      );
+
+      print(" Create/Update Child Profile Status: ${response.statusCode}");
+      print(" Create/Update Child Profile Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        try {
+          return jsonDecode(response.body);
+        } catch (e) {
+          return {"error": "فشل إنشاء/تحديث ملف الطفل"};
+        }
+      }
+    } catch (e) {
+      print(" Create/Update Child Profile Exception: $e");
+      return {"error": "تعذر إنشاء/تحديث ملف الطفل: $e"};
+    }
+  }
+
+  // 27) GENERATE OTP
+
+  static Future<Map<String, dynamic>> generateOTP(String mobileNumber) async {
+    try {
+      print(" Generating OTP for: $mobileNumber");
+
+      final response = await http.post(
+        Uri.parse("$serverUrl/generateOTP"),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
+        body: jsonEncode({
+          "mobileNumber": mobileNumber,
+        }),
+      );
+
+      print(" Generate OTP Status: ${response.statusCode}");
+      print(" Generate OTP Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        try {
+          return jsonDecode(response.body);
+        } catch (e) {
+          return {"error": "فشل إرسال OTP"};
+        }
+      }
+    } catch (e) {
+      print(" Generate OTP Exception: $e");
+      return {"error": "تعذر إرسال OTP: $e"};
+    }
+  }
+
+  // 28) RESEND OTP
+
+  static Future<Map<String, dynamic>> resendOTP(String mobileNumber) async {
+    try {
+      print(" Resending OTP for: $mobileNumber");
+
+      final response = await http.post(
+        Uri.parse("$serverUrl/resendOTP"),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
+        body: jsonEncode({
+          "mobileNumber": mobileNumber,
+        }),
+      );
+
+      print(" Resend OTP Status: ${response.statusCode}");
+      print(" Resend OTP Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        try {
+          return jsonDecode(response.body);
+        } catch (e) {
+          return {"error": "فشل إعادة إرسال OTP"};
+        }
+      }
+    } catch (e) {
+      print(" Resend OTP Exception: $e");
+      return {"error": "تعذر إعادة إرسال OTP: $e"};
+    }
+  }
+
+  // 29) MUTE/UNMUTE CHILD
+
+  static Future<Map<String, dynamic>> muteChild(
+      String sessionToken, String childId) async {
+    try {
+      print(" Muting child: $childId");
+
+      final response = await http.post(
+        Uri.parse("$serverUrl/muteChild"),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Session-Token": sessionToken,
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
+        body: jsonEncode({"childId": childId}),
+      );
+
+      print(" Mute Child Status: ${response.statusCode}");
+      print(" Mute Child Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        try {
+          return jsonDecode(response.body);
+        } catch (e) {
+          return {"error": "فشل كتم الطفل"};
+        }
+      }
+    } catch (e) {
+      print(" Mute Child Exception: $e");
+      return {"error": "تعذر كتم الطفل: $e"};
+    }
+  }
+
+  static Future<Map<String, dynamic>> unmuteChild(
+      String sessionToken, String childId) async {
+    try {
+      print(" Unmuting child: $childId");
+
+      final response = await http.post(
+        Uri.parse("$serverUrl/unmuteChild"),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Session-Token": sessionToken,
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
+        body: jsonEncode({"childId": childId}),
+      );
+
+      print(" Unmute Child Status: ${response.statusCode}");
+      print(" Unmute Child Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        try {
+          return jsonDecode(response.body);
+        } catch (e) {
+          return {"error": "فشل إلغاء كتم الطفل"};
+        }
+      }
+    } catch (e) {
+      print(" Unmute Child Exception: $e");
+      return {"error": "تعذر إلغاء كتم الطفل: $e"};
+    }
+  }
+
+  // 30) VERIFY OTP
+
+  static Future<Map<String, dynamic>> verifyOTP(
+      String mobileNumber, String otp) async {
+    try {
+      print(" Verifying OTP for: $mobileNumber");
+
+      final response = await http.post(
+        Uri.parse("$serverUrl/verifyOTP"),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
+        body: jsonEncode({
+          "mobileNumber": mobileNumber,
+          "OTP": otp,
+        }),
+      );
+
+      print(" Verify OTP Status: ${response.statusCode}");
+      print(" Verify OTP Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        try {
+          return jsonDecode(response.body);
+        } catch (e) {
+          return {"error": "فشل التحقق من OTP"};
+        }
+      }
+    } catch (e) {
+      print(" Verify OTP Exception: $e");
+      return {"error": "تعذر التحقق من OTP: $e"};
+    }
+  }
+
+  // 30) LOGIN AFTER OTP (معلّق/غير مفعّل)
+
+  static Future<Map<String, dynamic>> loginAfterOTP(String mobileNumber) async {
+    try {
+      print(" Logging in after OTP for: $mobileNumber");
+
+      final response = await http.post(
+        Uri.parse("$serverUrl/loginAfterOTP"),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
+        body: jsonEncode({
+          "mobileNumber": mobileNumber,
+        }),
+      );
+
+      print(" Login After OTP Status: ${response.statusCode}");
+      print(" Login After OTP Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        try {
+          return jsonDecode(response.body);
+        } catch (e) {
+          return {"error": "فشل تسجيل الدخول"};
+        }
+      }
+    } catch (e) {
+      print(" Login After OTP Exception: $e");
+      return {"error": "تعذر تسجيل الدخول: $e"};
+    }
+  }
 }

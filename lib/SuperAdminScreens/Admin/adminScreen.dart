@@ -23,6 +23,19 @@ class _AdminScreenState extends State<Adminscreen> {
   @override
   void initState() {
     super.initState();
+    // التحقق من الصلاحيات - فقط SuperAdmin يمكنه الوصول
+    if (!SharedPrefsHelper.isSuperAdmin()) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('ليس لديك صلاحية للوصول إلى هذه الصفحة'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      });
+      return;
+    }
     _loadAdmins();
   }
 
@@ -30,6 +43,11 @@ class _AdminScreenState extends State<Adminscreen> {
     setState(() => _isLoading = true);
     try {
       final sessionToken = await SharedPrefsHelper.getToken();
+      print(" DEBUG _loadAdmins: sessionToken = '$sessionToken'");
+      print(" DEBUG _loadAdmins: sessionToken is null? ${sessionToken == null}");
+      print(" DEBUG _loadAdmins: sessionToken isEmpty? ${sessionToken?.isEmpty ?? 'N/A'}");
+      print(" DEBUG _loadAdmins: sessionToken length = ${sessionToken?.length}");
+      
       if (sessionToken != null && sessionToken.isNotEmpty) {
         final adminsList = await UserAPI.getAllAdmins(sessionToken);
         setState(() {
@@ -327,21 +345,22 @@ class _AdminScreenState extends State<Adminscreen> {
                                               ],
                                             ),
                                           ),
-                                          Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              IconButton(
-                                                icon: const Icon(Icons.edit,
-                                                    color: Colors.blue),
-                                                onPressed: () => _editAdmin(index),
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(Icons.delete,
-                                                    color: Colors.redAccent),
-                                                onPressed: () => _deleteAdmin(index),
-                                              ),
-                                            ],
-                                          ),
+                                          if (SharedPrefsHelper.isSuperAdmin())
+                                            Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                IconButton(
+                                                  icon: const Icon(Icons.edit,
+                                                      color: Colors.blue),
+                                                  onPressed: () => _editAdmin(index),
+                                                ),
+                                                IconButton(
+                                                  icon: const Icon(Icons.delete,
+                                                      color: Colors.redAccent),
+                                                  onPressed: () => _deleteAdmin(index),
+                                                ),
+                                              ],
+                                            ),
                                         ],
                                       ),
                                     ),
@@ -356,21 +375,23 @@ class _AdminScreenState extends State<Adminscreen> {
         ],
       ),
 
-      // 🔹 زر الإضافة
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.skyBlue,
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AddAdminPage()),
-          );
-          // إذا تمت الإضافة بنجاح، أعد تحميل القائمة
-          if (result == true) {
-            _loadAdmins();
-          }
-        },
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+      // 🔹 زر الإضافة - فقط لـ SuperAdmin
+      floatingActionButton: SharedPrefsHelper.isSuperAdmin()
+          ? FloatingActionButton(
+              backgroundColor: AppColors.skyBlue,
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AddAdminPage()),
+                );
+                // إذا تمت الإضافة بنجاح، أعد تحميل القائمة
+                if (result == true) {
+                  _loadAdmins();
+                }
+              },
+              child: const Icon(Icons.add, color: Colors.white),
+            )
+          : null,
     );
   }
 }

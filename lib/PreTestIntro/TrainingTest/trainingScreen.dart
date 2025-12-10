@@ -61,7 +61,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
               Navigator.pop(context);
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => PreTestIntroScreen()),
+                MaterialPageRoute(builder: (_) => const PreTestIntroScreen()),
               );
             },
             child: const Text("رجوع"),

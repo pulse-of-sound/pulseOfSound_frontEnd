@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../Booking/utils/wallet_prefs.dart';
-import '../../Colors/colors.dart';
 import 'ReceiptModel.dart';
 
 class ReceiptsAdminScreen extends StatefulWidget {

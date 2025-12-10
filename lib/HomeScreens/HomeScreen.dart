@@ -49,8 +49,8 @@ class _ParentHomeScreenState extends State<ParentHomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(
-                  child: const Text(
+                const Center(
+                  child: Text(
                     "تقييمات الطفل الأخيرة ",
                     style: TextStyle(
                       color: Colors.black,

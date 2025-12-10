@@ -1,48 +1,40 @@
 import 'package:flutter/material.dart';
-import 'modelChild.dart';
 import '../../api/user_api.dart';
 import '../../utils/shared_pref_helper.dart';
 
-class EditChildPage extends StatefulWidget {
-  final Child child;
-  final String? childId; // ID من API
-  const EditChildPage({super.key, required this.child, this.childId});
+class AddChildScreen extends StatefulWidget {
+  const AddChildScreen({super.key});
 
   @override
-  State<EditChildPage> createState() => _EditChildPageState();
+  State<AddChildScreen> createState() => _AddChildScreenState();
 }
 
-class _EditChildPageState extends State<EditChildPage> {
+class _AddChildScreenState extends State<AddChildScreen> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController nameController;
-  late TextEditingController birthDateController;
-  late TextEditingController parentPhoneController;
+  final nameCtrl = TextEditingController();
+  final phoneCtrl = TextEditingController();
+  final emailCtrl = TextEditingController();
+  final fatherNameCtrl = TextEditingController();
+  final birthdateCtrl = TextEditingController();
   bool _isLoading = false;
 
   @override
-  void initState() {
-    super.initState();
-    nameController = TextEditingController(text: widget.child.name);
-    birthDateController = TextEditingController(text: widget.child.birthDate);
-    parentPhoneController =
-        TextEditingController(text: widget.child.parentPhone);
-  }
-
-  @override
   void dispose() {
-    nameController.dispose();
-    birthDateController.dispose();
-    parentPhoneController.dispose();
+    nameCtrl.dispose();
+    phoneCtrl.dispose();
+    emailCtrl.dispose();
+    fatherNameCtrl.dispose();
+    birthdateCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> _updateChild() async {
+  Future<void> _addChild() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
     try {
-      final sessionToken = await SharedPrefsHelper.getToken();
+      final sessionToken = SharedPrefsHelper.getToken();
       if (sessionToken == null || sessionToken.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('لم يتم العثور على جلسة'))
@@ -51,24 +43,13 @@ class _EditChildPageState extends State<EditChildPage> {
         return;
       }
 
-      String? birthdate;
-      if (birthDateController.text.isNotEmpty) {
-        try {
-          final parts = birthDateController.text.split('/');
-          if (parts.length == 3) {
-            birthdate = "${parts[2]}-${parts[1].padLeft(2, '0')}-${parts[0].padLeft(2, '0')}";
-          }
-        } catch (e) {
-          print("خطأ في تحويل التاريخ: $e");
-        }
-      }
-
       // final result = await UserAPI.addEditChild(
       //   sessionToken,
-      //   childId: widget.childId,
-      //   fullName: nameController.text.trim(),
-      //   mobile: parentPhoneController.text.trim(),
-      //   birthdate: birthdate,
+      //   fullName: nameCtrl.text.trim(),
+      //   mobile: phoneCtrl.text.trim(),
+      //   email: emailCtrl.text.trim(),
+      //   fatherName: fatherNameCtrl.text.trim(),
+      //   birthdate: birthdateCtrl.text.trim(),
       // );
 
       setState(() => _isLoading = false);
@@ -81,7 +62,7 @@ class _EditChildPageState extends State<EditChildPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('هذه الميزة معطلة حالياً'), backgroundColor: Colors.orange)
         );
-        Navigator.pop(context, true);
+        Navigator.pop(context);
       // }
     } catch (e) {
       setState(() => _isLoading = false);
@@ -100,8 +81,7 @@ class _EditChildPageState extends State<EditChildPage> {
     );
     if (picked != null) {
       setState(() {
-        birthDateController.text =
-            "${picked.day}/${picked.month}/${picked.year}";
+        birthdateCtrl.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
       });
     }
   }
@@ -111,7 +91,6 @@ class _EditChildPageState extends State<EditChildPage> {
     return Scaffold(
       body: Stack(
         children: [
-          // الخلفية
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -121,7 +100,6 @@ class _EditChildPageState extends State<EditChildPage> {
             ),
           ),
 
-          // المحتوى
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -129,7 +107,6 @@ class _EditChildPageState extends State<EditChildPage> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    // شريط علوي فيه زر رجوع والعنوان
                     Row(
                       children: [
                         IconButton(
@@ -139,7 +116,7 @@ class _EditChildPageState extends State<EditChildPage> {
                         ),
                         const Expanded(
                           child: Text(
-                            "تعديل بيانات الطفل",
+                            "إضافة طفل جديد",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 22,
@@ -159,10 +136,14 @@ class _EditChildPageState extends State<EditChildPage> {
                     ),
                     const SizedBox(height: 25),
 
-                    _buildField("اسم الطفل", nameController, required: true),
-                    _buildDateField("تاريخ الميلاد", birthDateController),
-                    _buildField("هاتف ولي الأمر", parentPhoneController,
+                    _buildField("اسم الطفل", nameCtrl, required: true),
+                    _buildField("رقم هاتف ولي الأمر", phoneCtrl,
                         required: true, keyboard: TextInputType.phone),
+                    _buildField("البريد الإلكتروني", emailCtrl,
+                        keyboard: TextInputType.emailAddress),
+                    _buildField("اسم الأب", fatherNameCtrl),
+                    _buildDateField("تاريخ الميلاد", birthdateCtrl),
+
                     const SizedBox(height: 30),
 
                     ElevatedButton(
@@ -175,7 +156,7 @@ class _EditChildPageState extends State<EditChildPage> {
                         ),
                         elevation: 6,
                       ),
-                      onPressed: _isLoading ? null : _updateChild,
+                      onPressed: _isLoading ? null : _addChild,
                       child: _isLoading
                           ? const SizedBox(
                               height: 24,
@@ -185,7 +166,7 @@ class _EditChildPageState extends State<EditChildPage> {
                               ),
                             )
                           : const Text(
-                              "حفظ التعديلات",
+                              "إضافة الطفل",
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),
@@ -219,7 +200,7 @@ class _EditChildPageState extends State<EditChildPage> {
           ),
           enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30),
-              borderSide: BorderSide(color: Colors.transparent)),
+              borderSide: const BorderSide(color: Colors.transparent)),
           focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30),
               borderSide:
@@ -245,7 +226,7 @@ class _EditChildPageState extends State<EditChildPage> {
           ),
           enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30),
-              borderSide: BorderSide(color: Colors.transparent)),
+              borderSide: const BorderSide(color: Colors.transparent)),
           focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30),
               borderSide:

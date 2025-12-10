@@ -67,7 +67,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final sessionToken = await SharedPrefsHelper.getToken();
+      final sessionToken = SharedPrefsHelper.getToken();
       if (sessionToken == null || sessionToken.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('لم يتم العثور على جلسة'))
@@ -133,7 +133,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final sessionToken = await SharedPrefsHelper.getToken();
+      final sessionToken = SharedPrefsHelper.getToken();
       if (sessionToken != null && sessionToken.isNotEmpty) {
         await UserAPI.logout(sessionToken);
       }

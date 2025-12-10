@@ -38,13 +38,31 @@ class _LoginForAdminAndDrState extends State<LoginForAdminAndDr> {
     }
 
     String role = result["role"] ?? "User";
+    print(" DEBUG loginForAdmin&Dr: result role = '$role'");
+    print(" DEBUG loginForAdmin&Dr: result contains sessionToken? ${result.containsKey('sessionToken')}");
+    print(" DEBUG loginForAdmin&Dr: sessionToken value = '${result['sessionToken']}'");
+    print(" DEBUG loginForAdmin&Dr: full result keys = ${result.keys.toList()}");
+    
+    // تطبيع الـ role
+    if (role.toUpperCase() == "SUPER_ADMIN" || role == "SuperAdmin") {
+      role = "SUPER_ADMIN";
+    } else if (role == "Admin") {
+      role = "Admin";
+    }
+    
     await SharedPrefsHelper.setSession(true);
     await SharedPrefsHelper.setUserType(role);
-    await SharedPrefsHelper.setName(result["fullName"]);
+    await SharedPrefsHelper.setName(result["fullName"] ?? result["username"] ?? "User");
     await SharedPrefsHelper.setToken(result["sessionToken"]);
+    
+    final storedToken = await SharedPrefsHelper.getToken();
+    final storedRole = SharedPrefsHelper.getUserType();
+    print(" DEBUG loginForAdmin&Dr: token after storing = '$storedToken'");
+    print(" DEBUG loginForAdmin&Dr: stored token length = ${storedToken?.length}");
+    print(" DEBUG loginForAdmin&Dr: stored role = '$storedRole'");
 
-    // دعم SUPER_ADMIN و Admin
-    if (role == "Admin" || role == "SUPER_ADMIN") {
+    // دعم SuperAdmin و Admin
+    if (role == "Admin" || role == "SuperAdmin" || role == "SUPER_ADMIN") {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const AdminHome()),

@@ -76,7 +76,7 @@ class _DrawerScreenState extends State<DrawerScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => ProfileDrawerScreen()),
+                MaterialPageRoute(builder: (_) => const ProfileDrawerScreen()),
               );
             },
           ),
@@ -86,7 +86,7 @@ class _DrawerScreenState extends State<DrawerScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => WalletScreen()),
+                MaterialPageRoute(builder: (_) => const WalletScreen()),
               );
             },
           ),

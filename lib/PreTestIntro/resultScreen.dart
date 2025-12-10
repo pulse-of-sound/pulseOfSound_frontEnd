@@ -46,11 +46,11 @@ class ResultScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.white.withOpacity(0.8),
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
                           color: Colors.black26,
                           blurRadius: 8,
-                          offset: const Offset(2, 4),
+                          offset: Offset(2, 4),
                         ),
                       ],
                     ),
@@ -167,7 +167,7 @@ class ResultScreen extends StatelessWidget {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (_) => Pretestscreen()),
+                                    builder: (_) => const Pretestscreen()),
                               );
                             },
                             style: ElevatedButton.styleFrom(
@@ -190,7 +190,7 @@ class ResultScreen extends StatelessWidget {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (_) => TrainingScreen()),
+                                    builder: (_) => const TrainingScreen()),
                               );
                             },
                             style: ElevatedButton.styleFrom(

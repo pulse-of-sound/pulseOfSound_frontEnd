@@ -55,7 +55,7 @@ class _AddDoctorPageState extends State<AddDoctorPage> {
     setState(() => _isLoading = true);
 
     try {
-      final sessionToken = await SharedPrefsHelper.getToken();
+      final sessionToken = SharedPrefsHelper.getToken();
       if (sessionToken == null || sessionToken.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('لم يتم العثور على جلسة'))
@@ -216,10 +216,10 @@ class _AddDoctorPageState extends State<AddDoctorPage> {
             ),
             enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
-                borderSide: BorderSide(color: Colors.transparent)),
+                borderSide: const BorderSide(color: Colors.transparent)),
             focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
-                borderSide: BorderSide(color: Colors.blueAccent, width: 1.5)),
+                borderSide: const BorderSide(color: Colors.blueAccent, width: 1.5)),
             suffixIcon:
                 const Icon(Icons.calendar_today, color: Colors.blueAccent),
             contentPadding:
@@ -252,10 +252,10 @@ class _AddDoctorPageState extends State<AddDoctorPage> {
             ),
             enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
-                borderSide: BorderSide(color: Colors.transparent)),
+                borderSide: const BorderSide(color: Colors.transparent)),
             focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
-                borderSide: BorderSide(color: Colors.white, width: 1.5)),
+                borderSide: const BorderSide(color: Colors.white, width: 1.5)),
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
@@ -273,11 +273,11 @@ class _AddDoctorPageState extends State<AddDoctorPage> {
     return BoxDecoration(
       color: Colors.white.withOpacity(0.85),
       borderRadius: BorderRadius.circular(20),
-      boxShadow: [
+      boxShadow: const [
         BoxShadow(
           color: Colors.black26,
           blurRadius: 6,
-          offset: const Offset(2, 3),
+          offset: Offset(2, 3),
         ),
       ],
     );

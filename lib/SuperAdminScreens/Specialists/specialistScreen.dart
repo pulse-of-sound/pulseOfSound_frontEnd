@@ -23,6 +23,19 @@ class _SpecialistscreenState extends State<Specialistscreen> {
   @override
   void initState() {
     super.initState();
+    // التحقق من الصلاحيات - SuperAdmin و Admin يمكنهم الوصول
+    if (!SharedPrefsHelper.hasAdminPermissions()) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('ليس لديك صلاحية للوصول إلى هذه الصفحة'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      });
+      return;
+    }
     _loadSpecialists();
   }
 
@@ -301,21 +314,22 @@ class _SpecialistscreenState extends State<Specialistscreen> {
                                               ],
                                             ),
                                           ),
-                                          Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              IconButton(
-                                                icon: const Icon(Icons.edit,
-                                                    color: Colors.blue),
-                                                onPressed: () => _editSpecialist(index),
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(Icons.delete,
-                                                    color: Colors.redAccent),
-                                                onPressed: () => _deleteSpecialist(index),
-                                              ),
-                                            ],
-                                          ),
+                                          if (SharedPrefsHelper.hasAdminPermissions())
+                                            Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                IconButton(
+                                                  icon: const Icon(Icons.edit,
+                                                      color: Colors.blue),
+                                                  onPressed: () => _editSpecialist(index),
+                                                ),
+                                                IconButton(
+                                                  icon: const Icon(Icons.delete,
+                                                      color: Colors.redAccent),
+                                                  onPressed: () => _deleteSpecialist(index),
+                                                ),
+                                              ],
+                                            ),
                                         ],
                                       ),
                                     ),
@@ -330,18 +344,20 @@ class _SpecialistscreenState extends State<Specialistscreen> {
         ],
       ),
 
-      //  زر الإضافة
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.skyBlue,
-        onPressed: () async {
-          final newDoctor = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AddSpecialistPage()),
-          );
-          if (newDoctor != null) _addSpecialist(newDoctor);
-        },
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+      //  زر الإضافة - متاح لـ SuperAdmin و Admin
+      floatingActionButton: SharedPrefsHelper.hasAdminPermissions()
+          ? FloatingActionButton(
+              backgroundColor: AppColors.skyBlue,
+              onPressed: () async {
+                final newDoctor = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AddSpecialistPage()),
+                );
+                if (newDoctor != null) _addSpecialist(newDoctor);
+              },
+              child: const Icon(Icons.add, color: Colors.white),
+            )
+          : null,
     );
   }
 }

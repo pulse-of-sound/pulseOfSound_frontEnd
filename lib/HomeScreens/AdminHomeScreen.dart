@@ -9,6 +9,7 @@ import '../SuperAdminScreens/Chats/AdminCommunityChatScreen.dart';
 import '../SuperAdminScreens/Childrens/chidScreen.dart';
 import '../SuperAdminScreens/Doctors/doctorsScreen.dart';
 import '../SuperAdminScreens/Wallet/ReceiptsAdminScreen.dart';
+import '../utils/shared_pref_helper.dart';
 
 class AdminHome extends StatelessWidget {
   const AdminHome({super.key});
@@ -52,46 +53,74 @@ class AdminHome extends StatelessWidget {
 
               //  شبكة الكروت
               Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    _buildGlassCard(
-                        context,
-                        " الملف الشخصي",
-                        "icons/icons8-dashboard-40.png",
-                        const AdminProfileScreen()),
-                    _buildGlassCard(context, "لوحة التحكم",
-                        "icons/icons8-dashboard-40.png", const DashboardPage()),
-                    _buildGlassCard(context, "الأطباء",
-                        "icons/icons8-doctors-60.png", const DoctorsPage()),
-                    _buildGlassCard(
-                        context,
-                        "الأخصائيين",
-                        "icons/icons8-mental-health-64.png",
-                        const Specialistscreen()),
-                    _buildGlassCard(context, "الأطفال",
-                        "icons/icons8-children-64.png", const ChildrenPage()),
-                    _buildGlassCard(context, "الأدمن",
-                        "icons/icons8-admin-50.png", const Adminscreen()),
-                    _buildGlassCard(
-                        context,
-                        "الإيصالات",
-                        "icons/icons8-wallet-80.png",
-                        const ReceiptsAdminScreen()),
-                    _buildGlassCard(
-                        context,
-                        "مجتمع الأهالي",
-                        "icons/icons8-conversation-40.png",
-                        const AdminCommunityChatScreen()),
-                    _buildGlassCard(
-                        context,
-                        "المقالات",
-                        "icons/icons8-article-48.png",
-                        const AdminReviewArticlesScreen()),
-                  ],
+                child: Builder(
+                  builder: (context) {
+                    final isSuperAdmin = SharedPrefsHelper.isSuperAdmin();
+                    final isAdmin = SharedPrefsHelper.isAdmin();
+                    
+                    List<Widget> cards = [
+                      _buildGlassCard(
+                          context,
+                          " الملف الشخصي",
+                          "icons/icons8-dashboard-40.png",
+                          const AdminProfileScreen()),
+                      _buildGlassCard(context, "لوحة التحكم",
+                          "icons/icons8-dashboard-40.png", const DashboardPage()),
+                    ];
+
+                    // الأطباء - متاح لـ SuperAdmin و Admin
+                    if (isAdmin) {
+                      cards.add(_buildGlassCard(context, "الأطباء",
+                          "icons/icons8-doctors-60.png", const DoctorsPage()));
+                    }
+
+                    // الأخصائيين - متاح لـ SuperAdmin و Admin
+                    if (isAdmin) {
+                      cards.add(_buildGlassCard(
+                          context,
+                          "الأخصائيين",
+                          "icons/icons8-mental-health-64.png",
+                          const Specialistscreen()));
+                    }
+
+                    // الأطفال - متاح لـ SuperAdmin و Admin
+                    if (isAdmin) {
+                      cards.add(_buildGlassCard(context, "الأطفال",
+                          "icons/icons8-children-64.png", const ChildrenPage()));
+                    }
+
+                    // الأدمن - متاح فقط لـ SuperAdmin
+                    if (isSuperAdmin) {
+                      cards.add(_buildGlassCard(context, "الأدمن",
+                          "icons/icons8-admin-50.png", const Adminscreen()));
+                    }
+
+                    cards.addAll([
+                      _buildGlassCard(
+                          context,
+                          "الإيصالات",
+                          "icons/icons8-wallet-80.png",
+                          const ReceiptsAdminScreen()),
+                      _buildGlassCard(
+                          context,
+                          "مجتمع الأهالي",
+                          "icons/icons8-conversation-40.png",
+                          const AdminCommunityChatScreen()),
+                      _buildGlassCard(
+                          context,
+                          "المقالات",
+                          "icons/icons8-article-48.png",
+                          const AdminReviewArticlesScreen()),
+                    ]);
+
+                    return GridView.count(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      padding: const EdgeInsets.all(16),
+                      children: cards,
+                    );
+                  },
                 ),
               ),
             ],

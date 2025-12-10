@@ -24,8 +24,8 @@ class ParentChatHome extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                Row(children: [
-                  const Expanded(
+                const Row(children: [
+                  Expanded(
                     child: Text(
                       "المحادثات",
                       textAlign: TextAlign.center,
@@ -37,7 +37,7 @@ class ParentChatHome extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 40),
+                  SizedBox(width: 40),
                 ]),
                 const SizedBox(height: 40),
                 Row(

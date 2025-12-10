@@ -5,6 +5,7 @@ import 'package:parse_server_sdk/parse_server_sdk.dart';
 import 'package:pulse_of_sound/Colors/theme.dart';
 import 'package:pulse_of_sound/SplashScreen/SplashScreen.dart';
 import 'TEST/APITestScreen.dart';
+import 'TEST/SuperAdminPermissionsTest.dart';
 
 import 'utils/shared_pref_helper.dart';
 
@@ -43,6 +44,8 @@ class MyApp extends StatelessWidget {
             home: const SplashScreen(),
             routes: {
               '/test': (context) => const APITestScreen(),
+              '/superadmin-test': (context) =>
+                  const SuperAdminPermissionsTest(),
             });
       },
     );

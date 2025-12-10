@@ -78,7 +78,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
         ),
         title: Text(
           "مجموعات المستوى ${widget.levelNumber}",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
       body: Container(

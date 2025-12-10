@@ -45,14 +45,14 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
       floatingActionButton: Container(
         height: 65,
         width: 65,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             colors: [AppColors.skyBlue, AppColors.babyPink],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
               color: Colors.black26,
               blurRadius: 8,

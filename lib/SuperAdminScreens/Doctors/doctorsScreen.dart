@@ -24,6 +24,19 @@ class _DoctorsPageState extends State<DoctorsPage> {
   @override
   void initState() {
     super.initState();
+    // التحقق من الصلاحيات - SuperAdmin و Admin يمكنهم الوصول
+    if (!SharedPrefsHelper.hasAdminPermissions()) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('ليس لديك صلاحية للوصول إلى هذه الصفحة'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      });
+      return;
+    }
     _loadDoctors();
   }
 
@@ -104,6 +117,10 @@ class _DoctorsPageState extends State<DoctorsPage> {
       try {
         final sessionToken = await SharedPrefsHelper.getToken();
         final doctorId = filteredDoctors[index]['objectId'] ?? filteredDoctors[index]['id'];
+        
+        print(" DEBUG: sessionToken = $sessionToken");
+        print(" DEBUG: sessionToken length = ${sessionToken?.length}");
+        print(" DEBUG: doctorId = $doctorId");
         
         if (sessionToken != null && sessionToken.isNotEmpty && doctorId != null) {
           final result = await UserAPI.deleteDoctor(sessionToken, doctorId);
@@ -302,21 +319,22 @@ class _DoctorsPageState extends State<DoctorsPage> {
                                               ],
                                             ),
                                           ),
-                                          Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              IconButton(
-                                                icon: const Icon(Icons.edit,
-                                                    color: Colors.blue),
-                                                onPressed: () => _editDoctor(index),
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(Icons.delete,
-                                                    color: Colors.redAccent),
-                                                onPressed: () => _deleteDoctor(index),
-                                              ),
-                                            ],
-                                          ),
+                                          if (SharedPrefsHelper.hasAdminPermissions())
+                                            Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                IconButton(
+                                                  icon: const Icon(Icons.edit,
+                                                      color: Colors.blue),
+                                                  onPressed: () => _editDoctor(index),
+                                                ),
+                                                IconButton(
+                                                  icon: const Icon(Icons.delete,
+                                                      color: Colors.redAccent),
+                                                  onPressed: () => _deleteDoctor(index),
+                                                ),
+                                              ],
+                                            ),
                                         ],
                                       ),
                                     ),
@@ -331,18 +349,20 @@ class _DoctorsPageState extends State<DoctorsPage> {
         ],
       ),
 
-      //  زر الإضافة
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.skyBlue,
-        onPressed: () async {
-          final newDoctor = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AddDoctorPage()),
-          );
-          if (newDoctor != null) _addDoctor(newDoctor);
-        },
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+      //  زر الإضافة - متاح لـ SuperAdmin و Admin
+      floatingActionButton: SharedPrefsHelper.hasAdminPermissions()
+          ? FloatingActionButton(
+              backgroundColor: AppColors.skyBlue,
+              onPressed: () async {
+                final newDoctor = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AddDoctorPage()),
+                );
+                if (newDoctor != null) _addDoctor(newDoctor);
+              },
+              child: const Icon(Icons.add, color: Colors.white),
+            )
+          : null,
     );
   }
 }

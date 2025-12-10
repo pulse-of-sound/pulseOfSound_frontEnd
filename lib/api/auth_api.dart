@@ -211,5 +211,43 @@ class AuthAPI {
   }
 
 
+  static Future<Map<String, dynamic>> loginAfterOTP(String mobile) async {
+    try {
+      print(" Logging in after OTP for: $mobile");
+
+      final response = await http.post(
+        Uri.parse("$serverUrl/loginAfterOTP"),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Client-Key": "null",
+          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
+        body: jsonEncode({
+          "mobileNumber": mobile,
+          "platform": "flutter",
+          "locale": "ar",
+        }),
+      );
+
+      print(" Login After OTP Status Code: ${response.statusCode}");
+      print(" Login After OTP Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else if (response.statusCode == 404) {
+        return {"error": "دور هذا المستخدم غير مدعوم للتسجيل عبر OTP. يرجى استخدام اسم المستخدم وكلمة المرور."};
+      } else {
+        try {
+          return jsonDecode(response.body);
+        } catch (e) {
+          return {"error": "خطأ: ${response.statusCode} - ${response.body}"};
+        }
+      }
+    } catch (e) {
+      print(" Login After OTP Exception: $e");
+      return {"error": "تعذر الاتصال بالخادم: $e"};
+    }
+  }
   
 }
