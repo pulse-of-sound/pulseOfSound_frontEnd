@@ -42,7 +42,7 @@ class _SpecialistscreenState extends State<Specialistscreen> {
   Future<void> _loadSpecialists() async {
     setState(() => _isLoading = true);
     try {
-      final sessionToken = await SharedPrefsHelper.getToken();
+      final sessionToken = SharedPrefsHelper.getToken();
       if (sessionToken != null && sessionToken.isNotEmpty) {
         final specialistsList = await UserAPI.getAllSpecialists(sessionToken);
         setState(() {
@@ -114,7 +114,7 @@ class _SpecialistscreenState extends State<Specialistscreen> {
     bool confirm = await _showConfirmDialog(specialistName);
     if (confirm) {
       try {
-        final sessionToken = await SharedPrefsHelper.getToken();
+        final sessionToken = SharedPrefsHelper.getToken();
         final specialistId = filteredSpecialists[index]['objectId'] ?? filteredSpecialists[index]['id'];
         
         if (sessionToken != null && sessionToken.isNotEmpty && specialistId != null) {

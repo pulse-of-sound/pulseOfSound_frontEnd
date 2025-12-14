@@ -24,8 +24,16 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    String normalizedPhone =
-        completePhoneNumber!.replaceAll(" ", "").replaceFirst("+963", "0");
+    String normalizedPhone = completePhoneNumber!.replaceAll(" ", "");
+    
+    // إزالة الصفر الإضافي إذا كان موجوداً (+9630... → +963...)
+    if (normalizedPhone.startsWith("+9630")) {
+      normalizedPhone = "+963${normalizedPhone.substring(5)}";
+    } else if (normalizedPhone.startsWith("0")) {
+      normalizedPhone = "+963${normalizedPhone.substring(1)}";
+    } else if (!normalizedPhone.startsWith("+963")) {
+      normalizedPhone = "+963$normalizedPhone";
+    }
 
     print("NORMALIZED = $normalizedPhone");
 

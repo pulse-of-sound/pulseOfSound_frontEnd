@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../api/user_api.dart';
 import '../../utils/shared_pref_helper.dart';
-import 'modelDoctor.dart';
 
 class AddDoctorPage extends StatefulWidget {
   const AddDoctorPage({super.key});

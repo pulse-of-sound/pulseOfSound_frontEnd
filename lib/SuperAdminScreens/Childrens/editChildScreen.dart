@@ -42,7 +42,7 @@ class _EditChildPageState extends State<EditChildPage> {
     setState(() => _isLoading = true);
 
     try {
-      final sessionToken = await SharedPrefsHelper.getToken();
+      final sessionToken = SharedPrefsHelper.getToken();
       if (sessionToken == null || sessionToken.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('لم يتم العثور على جلسة'))
@@ -219,7 +219,7 @@ class _EditChildPageState extends State<EditChildPage> {
           ),
           enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30),
-              borderSide: BorderSide(color: Colors.transparent)),
+              borderSide: const BorderSide(color: Colors.transparent)),
           focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30),
               borderSide:
@@ -245,7 +245,7 @@ class _EditChildPageState extends State<EditChildPage> {
           ),
           enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30),
-              borderSide: BorderSide(color: Colors.transparent)),
+              borderSide: const BorderSide(color: Colors.transparent)),
           focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30),
               borderSide:

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pulse_of_sound/Articles/articlesScreen.dart';
-import 'package:pulse_of_sound/HomeScreens/HomeScreen.dart';
 import 'package:pulse_of_sound/PreTestIntro/TrainingTest/trainingScreen.dart';
 import 'package:pulse_of_sound/PreTestIntro/preTestScreen.dart';
 

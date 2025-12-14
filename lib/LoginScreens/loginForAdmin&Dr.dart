@@ -55,7 +55,7 @@ class _LoginForAdminAndDrState extends State<LoginForAdminAndDr> {
     await SharedPrefsHelper.setName(result["fullName"] ?? result["username"] ?? "User");
     await SharedPrefsHelper.setToken(result["sessionToken"]);
     
-    final storedToken = await SharedPrefsHelper.getToken();
+    final storedToken = SharedPrefsHelper.getToken();
     final storedRole = SharedPrefsHelper.getUserType();
     print(" DEBUG loginForAdmin&Dr: token after storing = '$storedToken'");
     print(" DEBUG loginForAdmin&Dr: stored token length = ${storedToken?.length}");

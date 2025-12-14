@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'api_config.dart';
 
 class UserAPI {
-  static const String serverUrl = ApiConfig.baseUrl;
+  static final String serverUrl = ApiConfig.baseUrl;
   static const String appId = ApiConfig.appId;
 
   // 1) LOGIN FUNCTIONS
@@ -40,43 +40,50 @@ class UserAPI {
         final usernameFromResponse = data["username"] ?? "";
 
         print(" DEBUG loginUser: sessionToken from response = '$sessionToken'");
-        print(" DEBUG loginUser: sessionToken is empty? ${sessionToken.isEmpty}");
+        print(
+            " DEBUG loginUser: sessionToken is empty? ${sessionToken.isEmpty}");
         print(" DEBUG loginUser: sessionToken length = ${sessionToken.length}");
         print(" DEBUG loginUser: userId = '$userId'");
         print(" DEBUG loginUser: username = '$usernameFromResponse'");
 
         // إذا كان sessionToken فارغاً، حاول الحصول عليه من Parse's login endpoint
         if (sessionToken.isEmpty) {
-          print(" DEBUG loginUser: sessionToken is empty, fetching from Parse login endpoint...");
-          final sessionTokenData = await _getSessionTokenFromParseLogin(username, password);
+          print(
+              " DEBUG loginUser: sessionToken is empty, fetching from Parse login endpoint...");
+          final sessionTokenData =
+              await _getSessionTokenFromParseLogin(username, password);
           if (sessionTokenData.containsKey("sessionToken")) {
             sessionToken = sessionTokenData["sessionToken"] ?? "";
-            print(" DEBUG loginUser: Got sessionToken from Parse login: '$sessionToken'");
+            print(
+                " DEBUG loginUser: Got sessionToken from Parse login: '$sessionToken'");
           }
         }
 
         // محاولة جلب الـ role
         var roleData = await _fetchUserRole(userId, sessionToken);
         var role = roleData["role"] ?? "User";
-        
+
         print(" DEBUG loginUser: Role from _fetchUserRole = '$role'");
-        
+
         // إذا كان role لا يزال "User"، حاول استنتاجها من username أو userId
         if (role == "User") {
           final lowerUsername = usernameFromResponse.toLowerCase();
           final lowerUserId = userId.toLowerCase();
-          
+
           // التحقق من username أو userId
-          if (lowerUsername.contains("superadmin") || 
+          if (lowerUsername.contains("superadmin") ||
               lowerUsername.contains("super_admin") ||
               lowerUserId.contains("superadmin") ||
               lowerUserId.contains("super_admin")) {
             role = "SUPER_ADMIN";
-            print(" DEBUG loginUser: Detected SUPER_ADMIN from username/userId");
-          } else if (lowerUsername.contains("admin") && !lowerUsername.contains("super")) {
+            print(
+                " DEBUG loginUser: Detected SUPER_ADMIN from username/userId");
+          } else if (lowerUsername.contains("admin") &&
+              !lowerUsername.contains("super")) {
             role = "Admin";
             print(" DEBUG loginUser: Detected Admin from username");
-          } else if (lowerUsername.contains("doctor") || lowerUsername.contains("dr.")) {
+          } else if (lowerUsername.contains("doctor") ||
+              lowerUsername.contains("dr.")) {
             role = "Doctor";
             print(" DEBUG loginUser: Detected Doctor from username");
           } else if (lowerUsername.contains("specialist")) {
@@ -84,17 +91,18 @@ class UserAPI {
             print(" DEBUG loginUser: Detected Specialist from username");
           }
         }
-        
+
         // تطبيع الـ role
         if (role.toUpperCase() == "SUPER_ADMIN" || role == "SuperAdmin") {
           role = "SUPER_ADMIN";
         }
-        
+
         final fullName = data["fullName"] ?? data["username"] ?? "User";
 
         print(" DEBUG loginUser: Final role = '$role'");
         print(" DEBUG loginUser: Final sessionToken = '$sessionToken'");
-        print(" DEBUG loginUser: returning data with sessionToken = '$sessionToken'");
+        print(
+            " DEBUG loginUser: returning data with sessionToken = '$sessionToken'");
 
         return {
           ...data,
@@ -120,7 +128,7 @@ class UserAPI {
       String username, String password) async {
     try {
       print(" Fetching sessionToken from Parse login endpoint...");
-      
+
       // استخدام Parse REST API login endpoint directly
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/../login"),
@@ -141,12 +149,12 @@ class UserAPI {
         final loginData = jsonDecode(response.body);
         final token = loginData["sessionToken"] ?? "";
         print(" Successfully got sessionToken: $token");
-        
+
         if (token.isNotEmpty) {
           return {"sessionToken": token};
         }
       }
-      
+
       print(" Failed to get sessionToken from Parse login");
       return {};
     } catch (e) {
@@ -180,7 +188,7 @@ class UserAPI {
         final userData = jsonDecode(response.body);
         final role = _extractRole(userData);
         print(" Extracted role: $role");
-        
+
         // إذا تم العثور على role، أرجعها
         if (role != "User") {
           return {
@@ -207,9 +215,10 @@ class UserAPI {
 
         if (rolesResponse.statusCode == 200) {
           final rolesData = jsonDecode(rolesResponse.body);
-          if (rolesData.containsKey("results") && rolesData["results"] is List) {
+          if (rolesData.containsKey("results") &&
+              rolesData["results"] is List) {
             final roles = rolesData["results"] as List;
-            
+
             // البحث عن الـ role الذي يحتوي على هذا المستخدم
             for (var roleObj in roles) {
               if (roleObj is Map && roleObj.containsKey("users")) {
@@ -217,8 +226,10 @@ class UserAPI {
                 if (users is Map && users.containsKey("results")) {
                   final roleUsers = users["results"] as List;
                   for (var user in roleUsers) {
-                    if (user is Map && (user["objectId"] == userId || user["id"] == userId)) {
-                      final roleName = roleObj["name"] ?? roleObj["name"] ?? "User";
+                    if (user is Map &&
+                        (user["objectId"] == userId || user["id"] == userId)) {
+                      final roleName =
+                          roleObj["name"] ?? roleObj["name"] ?? "User";
                       print(" Found role from Roles API: $roleName");
                       return {
                         "role": roleName,
@@ -251,7 +262,7 @@ class UserAPI {
 
         if (userResponse.statusCode == 200) {
           final userData = jsonDecode(userResponse.body);
-          
+
           // البحث عن role في user object
           if (userData.containsKey("role")) {
             final role = _extractRole(userData);
@@ -263,10 +274,11 @@ class UserAPI {
               };
             }
           }
-          
+
           // البحث عن role في username أو fullName
           final username = userData["username"] ?? "";
-          if (username.toLowerCase().contains("superadmin") || username.toLowerCase().contains("super_admin")) {
+          if (username.toLowerCase().contains("superadmin") ||
+              username.toLowerCase().contains("super_admin")) {
             print(" Detected SUPER_ADMIN from username");
             return {
               "role": "SUPER_ADMIN",
@@ -299,21 +311,23 @@ class UserAPI {
       } else if (role is Map) {
         if (role.containsKey("name")) {
           final roleName = role["name"] ?? "User";
-          if (roleName.toUpperCase() == "SUPER_ADMIN" || roleName == "SuperAdmin") {
+          if (roleName.toUpperCase() == "SUPER_ADMIN" ||
+              roleName == "SuperAdmin") {
             return "SUPER_ADMIN";
           }
           return roleName;
         }
         if (role.containsKey("className") && role["className"] == "_Role") {
           final roleName = role["name"] ?? "Doctor";
-          if (roleName.toUpperCase() == "SUPER_ADMIN" || roleName == "SuperAdmin") {
+          if (roleName.toUpperCase() == "SUPER_ADMIN" ||
+              roleName == "SuperAdmin") {
             return "SUPER_ADMIN";
           }
           return roleName;
         }
       }
     }
-    
+
     // البحث في الحقول الأخرى
     if (data.containsKey("username")) {
       final username = data["username"]?.toString().toLowerCase() ?? "";
@@ -321,11 +335,43 @@ class UserAPI {
         return "SUPER_ADMIN";
       }
     }
-    
+
     return "User";
   }
 
-  // 2) UPDATE MY ACCOUNT
+  // 2) GET MY PROFILE
+
+  static Future<Map<String, dynamic>> getMyProfile(String sessionToken) async {
+    try {
+      print(" Fetching profile...");
+
+      final response = await http.post(
+        Uri.parse("$serverUrl/getMyProfile"),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Session-Token": sessionToken,
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
+        body: jsonEncode({}),
+      );
+
+      print(" Fetch Status: ${response.statusCode}");
+      print(" Fetch Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        return {"error": "فشل جلب البيانات"};
+      }
+    } catch (e) {
+      print(" Fetch Exception: $e");
+      return {"error": "تعذر جلب البيانات: $e"};
+    }
+  }
+
+  // 3) UPDATE MY ACCOUNT
 
   static Future<Map<String, dynamic>> updateMyAccount(
     String sessionToken, {
@@ -334,8 +380,7 @@ class UserAPI {
     String? fcmToken,
     String? birthDate,
     String? fatherName,
-    required String mobile,
-    required String email,
+    Map<String, dynamic>? profilePic,
   }) async {
     try {
       print(" Updating account...");
@@ -346,6 +391,7 @@ class UserAPI {
       if (fcmToken != null) body["fcm_token"] = fcmToken;
       if (birthDate != null) body["birthDate"] = birthDate;
       if (fatherName != null) body["fatherName"] = fatherName;
+      if (profilePic != null) body["profilePic"] = profilePic;
 
       final response = await http.post(
         Uri.parse("$serverUrl/updateMyAccount"),
@@ -618,7 +664,8 @@ class UserAPI {
     try {
       print(" Fetching all admins...");
       print(" DEBUG getAllAdmins: sessionToken = $sessionToken");
-      print(" DEBUG getAllAdmins: sessionToken length = ${sessionToken.length}");
+      print(
+          " DEBUG getAllAdmins: sessionToken length = ${sessionToken.length}");
 
       final headers = {
         "Content-Type": "application/json",
@@ -627,7 +674,7 @@ class UserAPI {
         "X-Parse-Master-Key":
             "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
       };
-      
+
       print(" DEBUG getAllAdmins: headers = $headers");
 
       final response = await http.get(
@@ -693,7 +740,8 @@ class UserAPI {
     try {
       print(" Deleting doctor: $doctorId");
       print(" DEBUG deleteDoctor: sessionToken = $sessionToken");
-      print(" DEBUG deleteDoctor: sessionToken length = ${sessionToken.length}");
+      print(
+          " DEBUG deleteDoctor: sessionToken length = ${sessionToken.length}");
 
       final headers = {
         "Content-Type": "application/json",
@@ -702,7 +750,7 @@ class UserAPI {
         "X-Parse-Master-Key":
             "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
       };
-      
+
       print(" DEBUG deleteDoctor: headers = $headers");
 
       final response = await http.delete(
@@ -768,8 +816,7 @@ class UserAPI {
 
   // 17) ADD/EDIT CHILD
 
-  static Future<Map<String, dynamic>> addEditChild(
-      String sessionToken,
+  static Future<Map<String, dynamic>> addEditChild(String sessionToken,
       {String? childId,
       required String fullName,
       required String mobile,
@@ -780,35 +827,35 @@ class UserAPI {
       String? medicalInfo}) async {
     try {
       print(" Adding/editing child: $fullName");
-  
+
       final body = {
         if (childId != null) "childId": childId,
         "fullName": fullName,
         "mobile": mobile,
         if (email != null && email.isNotEmpty) "email": email,
-        if (fatherName != null && fatherName.isNotEmpty) "fatherName": fatherName,
+        if (fatherName != null && fatherName.isNotEmpty)
+          "fatherName": fatherName,
         if (birthdate != null && birthdate.isNotEmpty) "birthdate": birthdate,
         if (gender != null && gender.isNotEmpty) "gender": gender,
-        if (medicalInfo != null && medicalInfo.isNotEmpty) "medicalInfo": medicalInfo,
+        if (medicalInfo != null && medicalInfo.isNotEmpty)
+          "medicalInfo": medicalInfo,
       };
-  
+
       final response = await http.post(
         Uri.parse("$serverUrl/addEditChild"),
-        headers:
-          {
+        headers: {
           "Content-Type": "application/json",
           "X-Parse-Application-Id": appId,
           "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
         },
-  
-  
         body: jsonEncode(body),
       );
-  
+
       print(" Add/Edit Child Status: ${response.statusCode}");
       print(" Add/Edit Child Response: ${response.body}");
-  
+
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
@@ -831,20 +878,21 @@ class UserAPI {
       String sessionToken) async {
     try {
       print(" Fetching all children...");
-  
+
       final response = await http.get(
         Uri.parse("$serverUrl/getAllChildren"),
         headers: {
           "Content-Type": "application/json",
           "X-Parse-Application-Id": appId,
           "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
         },
       );
-  
+
       print(" Children Status: ${response.statusCode}");
       print(" Children Response: ${response.body}");
-  
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data is List) {
@@ -867,22 +915,22 @@ class UserAPI {
       String sessionToken, String childId) async {
     try {
       print(" Deleting child: $childId");
-  
+
       final response = await http.delete(
         Uri.parse("$serverUrl/deleteChild"),
         headers: {
-  
           "Content-Type": "application/json",
           "X-Parse-Application-Id": appId,
           "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
         },
         body: jsonEncode({"childId": childId}),
       );
-  
+
       print(" Delete Child Status: ${response.statusCode}");
       print(" Delete Child Response: ${response.body}");
-  
+
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {

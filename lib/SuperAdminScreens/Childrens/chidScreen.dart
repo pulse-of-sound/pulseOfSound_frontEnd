@@ -48,7 +48,7 @@ class _ChildrenPageState extends State<ChildrenPage> {
   Future<void> _loadChildren() async {
     setState(() => _isLoading = true);
     try {
-      final sessionToken = await SharedPrefsHelper.getToken();
+      final sessionToken = SharedPrefsHelper.getToken();
       if (sessionToken != null && sessionToken.isNotEmpty) {
         final childrenList = await UserAPI.getAllChildren(sessionToken);
         setState(() {
@@ -91,7 +91,7 @@ class _ChildrenPageState extends State<ChildrenPage> {
     bool confirm = await _showConfirmDialog(context, childName);
     if (confirm) {
       try {
-        final sessionToken = await SharedPrefsHelper.getToken();
+        final sessionToken = SharedPrefsHelper.getToken();
         final childId = filteredChildren[index]['objectId'] ??
             filteredChildren[index]['id'];
 
@@ -152,7 +152,7 @@ class _ChildrenPageState extends State<ChildrenPage> {
 
     if (confirm) {
       try {
-        final sessionToken = await SharedPrefsHelper.getToken();
+        final sessionToken = SharedPrefsHelper.getToken();
         final childId = filteredChildren[index]['objectId'] ??
             filteredChildren[index]['id'];
 
@@ -269,10 +269,10 @@ class _ChildrenPageState extends State<ChildrenPage> {
                             child: ListTile(
                               contentPadding: const EdgeInsets.symmetric(
                                   vertical: 10, horizontal: 14),
-                              leading: CircleAvatar(
+                              leading: const CircleAvatar(
                                 radius: 26,
                                 backgroundColor: AppColors.skyBlue,
-                                child: const Icon(Icons.child_care,
+                                child: Icon(Icons.child_care,
                                     color: Colors.white, size: 28),
                               ),
                               title: Text(

@@ -49,6 +49,39 @@ class AuthAPI {
     }
   }
 
+  static Future<Map<String, dynamic>> resendOTP(String mobile) async {
+    try {
+      print(" Resending OTP for: $mobile");
+
+      final response = await http.post(
+        Uri.parse("$serverUrl/resendOTP"),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Client-Key": "null",
+          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
+        body: jsonEncode({"mobileNumber": mobile}),
+      );
+
+      print(" Resend OTP Status Code: ${response.statusCode}");
+      print(" Resend OTP Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        try {
+          return jsonDecode(response.body);
+        } catch (e) {
+          return {"error": "خطأ: ${response.statusCode} - ${response.body}"};
+        }
+      }
+    } catch (e) {
+      print(" Resend OTP Exception: $e");
+      return {"error": "تعذر الاتصال بالخادم: $e"};
+    }
+  }
+
   static Future<Map<String, dynamic>> verifyOTP(
       String mobile, String otp) async {
     try {
@@ -97,7 +130,6 @@ class AuthAPI {
     try {
       print(" Logging in with Mobile: $mobile");
 
-      // محاولة الـ login عبر Backend أولاً
       final response = await http.post(
         Uri.parse("$serverUrl/loginWithMobile"),
         headers: {
@@ -120,95 +152,15 @@ class AuthAPI {
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
-        // إذا فشل Backend، إنشاء user من Frontend
-        print(" Backend login failed, creating user from Flutter...");
-        return await _createOrLoginUserDirectly(mobile, otp);
+        print(" loginWithMobile failed, trying loginAfterOTP...");
+        return await loginAfterOTP(mobile);
       }
     } catch (e) {
       print(" Login Exception: $e");
-      // محاولة الإنشاء المباشر كخطة احتياطية
-      return await _createOrLoginUserDirectly(mobile, otp);
+      return await loginAfterOTP(mobile);
     }
   }
 
-  static Future<Map<String, dynamic>> _createOrLoginUserDirectly(
-      String mobile, String otp) async {
-    try {
-      final username = "mobile_$mobile";
-      final password = "otp_${DateTime.now().millisecondsSinceEpoch}";
-
-      // محاولة البحث عن user موجود
-      final queryUrl = Uri.parse("$serverUrl/../classes/User");
-      final queryResponse = await http.get(
-        queryUrl,
-        headers: {
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
-      );
-
-      // إنشاء user جديد
-      final createUrl = Uri.parse("$serverUrl/../users");
-      final createResponse = await http.post(
-        createUrl,
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
-        body: jsonEncode({
-          "username": username,
-          "password": password,
-          "mobileNumber": mobile,
-        }),
-      );
-
-      print(" Create User Status: ${createResponse.statusCode}");
-      print(" Create User Response: ${createResponse.body}");
-
-      if (createResponse.statusCode == 201 ||
-          createResponse.statusCode == 200) {
-        final userData = jsonDecode(createResponse.body);
-        
-        // محاولة الدخول للحصول على sessionToken
-        final loginUrl = Uri.parse("$serverUrl/../login");
-        final loginResp = await http.post(
-          loginUrl,
-          headers: {
-            "Content-Type": "application/json",
-            "X-Parse-Application-Id": appId,
-            "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-          },
-          body: jsonEncode({
-            "username": username,
-            "password": password,
-          }),
-        );
-
-        if (loginResp.statusCode == 200) {
-          final loginData = jsonDecode(loginResp.body);
-          return {
-            "sessionToken": loginData["sessionToken"] ?? userData["sessionToken"] ?? "",
-            "mobileNumber": mobile,
-            "username": username,
-            "userId": userData["objectId"] ?? "",
-          };
-        }
-
-        return {
-          "sessionToken": userData["sessionToken"] ?? userData["id"] ?? "",
-          "mobileNumber": mobile,
-          "username": username,
-          "userId": userData["objectId"] ?? "",
-        };
-      } else {
-        return {"error": "فشل إنشاء المستخدم"};
-      }
-    } catch (e) {
-      print(" Direct Create Exception: $e");
-      return {"error": "فشل إنشاء المستخدم: $e"};
-    }
-  }
 
 
   static Future<Map<String, dynamic>> loginAfterOTP(String mobile) async {

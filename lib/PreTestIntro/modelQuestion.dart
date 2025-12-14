@@ -1,9 +1,11 @@
 class Question {
-  final String questionImage; // صورة المجموعة الناقصة
-  final List<String> options; // صور الخيارات
-  final int correctAnswer; // رقم الخيار الصحيح 4,1,2,3)
+  final String? id;
+  final String questionImage;
+  final List<String> options;
+  final int correctAnswer;
 
   Question({
+    this.id,
     required this.questionImage,
     required this.options,
     required this.correctAnswer,

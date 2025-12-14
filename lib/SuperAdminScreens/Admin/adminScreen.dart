@@ -42,7 +42,7 @@ class _AdminScreenState extends State<Adminscreen> {
   Future<void> _loadAdmins() async {
     setState(() => _isLoading = true);
     try {
-      final sessionToken = await SharedPrefsHelper.getToken();
+      final sessionToken = SharedPrefsHelper.getToken();
       print(" DEBUG _loadAdmins: sessionToken = '$sessionToken'");
       print(" DEBUG _loadAdmins: sessionToken is null? ${sessionToken == null}");
       print(" DEBUG _loadAdmins: sessionToken isEmpty? ${sessionToken?.isEmpty ?? 'N/A'}");
@@ -145,7 +145,7 @@ class _AdminScreenState extends State<Adminscreen> {
     bool confirm = await _showConfirmDialog(adminName);
     if (confirm) {
       try {
-        final sessionToken = await SharedPrefsHelper.getToken();
+        final sessionToken = SharedPrefsHelper.getToken();
         final adminId = filteredAdmins[index]['objectId'] ?? filteredAdmins[index]['id'];
         
         if (sessionToken != null && sessionToken.isNotEmpty && adminId != null) {

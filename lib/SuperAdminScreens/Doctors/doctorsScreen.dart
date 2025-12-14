@@ -43,7 +43,7 @@ class _DoctorsPageState extends State<DoctorsPage> {
   Future<void> _loadDoctors() async {
     setState(() => _isLoading = true);
     try {
-      final sessionToken = await SharedPrefsHelper.getToken();
+      final sessionToken = SharedPrefsHelper.getToken();
       if (sessionToken != null && sessionToken.isNotEmpty) {
         final doctorsList = await UserAPI.getAllDoctors(sessionToken);
         setState(() {
@@ -115,7 +115,7 @@ class _DoctorsPageState extends State<DoctorsPage> {
     bool confirm = await _showConfirmDialog(doctorName);
     if (confirm) {
       try {
-        final sessionToken = await SharedPrefsHelper.getToken();
+        final sessionToken = SharedPrefsHelper.getToken();
         final doctorId = filteredDoctors[index]['objectId'] ?? filteredDoctors[index]['id'];
         
         print(" DEBUG: sessionToken = $sessionToken");

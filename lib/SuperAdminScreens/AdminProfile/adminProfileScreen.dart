@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pulse_of_sound/LoginScreens/loginscreen.dart';
-import 'package:pulse_of_sound/SuperAdminScreens/Admin/modelAdmin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../api/user_api.dart';
 import '../../utils/shared_pref_helper.dart';
@@ -43,17 +42,40 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
   }
 
   Future<void> _loadProfile() async {
+    try {
+      final sessionToken = SharedPrefsHelper.getToken();
+      if (sessionToken == null || sessionToken.isEmpty) {
+        _loadFromLocalStorage();
+        return;
+      }
+
+      final profile = await UserAPI.getMyProfile(sessionToken);
+      
+      if (profile.containsKey('error')) {
+        _loadFromLocalStorage();
+        return;
+      }
+
+      setState(() {
+        nameController.text = profile['fullName'] ?? profile['username'] ?? '';
+        emailController.text = profile['email'] ?? '';
+        phoneController.text = profile['mobileNumber'] ?? '';
+        specialtyController.text = profile['specialty'] ?? '';
+      });
+    } catch (e) {
+      _loadFromLocalStorage();
+    }
+  }
+
+  Future<void> _loadFromLocalStorage() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      nameController.text = prefs.getString('admin_name') ?? ' غير معروف';
-      specialtyController.text =
-          prefs.getString('admin_specialty') ?? 'غير معروف ';
-      phoneController.text = prefs.getString('admin_phone') ?? 'غير محدد';
-      emailController.text = prefs.getString('admin_email') ?? 'غير محدد';
+      nameController.text = prefs.getString('admin_name') ?? 'غير معروف';
+      specialtyController.text = prefs.getString('admin_specialty') ?? '';
+      phoneController.text = prefs.getString('admin_phone') ?? '';
+      emailController.text = prefs.getString('admin_email') ?? '';
       _imagePath = prefs.getString('admin_image');
     });
-
-    setState(() {});
   }
 
   Future<void> _saveProfile() async {
@@ -79,8 +101,6 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
       final result = await UserAPI.updateMyAccount(
         sessionToken,
         fullName: nameController.text.trim(),
-        mobile: phoneController.text.trim(),
-        email: emailController.text.trim(),
       );
 
       setState(() => _isLoading = false);

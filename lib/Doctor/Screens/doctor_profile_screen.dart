@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pulse_of_sound/LoginScreens/loginscreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../Colors/colors.dart';
+import '../../api/user_api.dart';
+import '../../utils/shared_pref_helper.dart';
 import '../utils/doctor_wallet_prefs.dart';
 
 class DoctorProfileScreen extends StatefulWidget {
@@ -31,6 +33,35 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
   }
 
   Future<void> _loadProfile() async {
+    try {
+      final sessionToken = SharedPrefsHelper.getToken();
+      if (sessionToken == null || sessionToken.isEmpty) {
+        _loadFromLocalStorage();
+        return;
+      }
+
+      final profile = await UserAPI.getMyProfile(sessionToken);
+      
+      if (profile.containsKey('error')) {
+        _loadFromLocalStorage();
+        return;
+      }
+
+      setState(() {
+        nameController.text = profile['fullName'] ?? profile['username'] ?? '';
+        emailController.text = profile['email'] ?? '';
+        phoneController.text = profile['mobileNumber'] ?? '';
+        specialtyController.text = profile['specialty'] ?? '';
+      });
+    } catch (e) {
+      _loadFromLocalStorage();
+    }
+
+    balance = await DoctorWalletPrefs.getBalance();
+    setState(() {});
+  }
+
+  Future<void> _loadFromLocalStorage() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       nameController.text = prefs.getString('doctor_name') ?? 'د. غير معروف';
@@ -40,8 +71,6 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
       emailController.text = prefs.getString('doctor_email') ?? 'غير محدد';
       _imagePath = prefs.getString('doctor_image');
     });
-    balance = await DoctorWalletPrefs.getBalance();
-    setState(() {});
   }
 
   Future<void> _saveProfile() async {

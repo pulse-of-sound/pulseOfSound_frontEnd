@@ -112,10 +112,6 @@ class MyReceiptsScreen extends StatelessWidget {
   Future<List<Receipt>> _loadMyReceipts() async {
     final data = await WalletPrefs.loadReceipts();
 
-    if (data is! List) {
-      return [];
-    }
-
     final List<dynamic> list = List<dynamic>.from(data);
 
     return list.map<Receipt>((dynamic m) {

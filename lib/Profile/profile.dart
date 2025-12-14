@@ -60,12 +60,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     setState(() {
-      _nameController.text = SharedPrefsHelper.getName() ?? "";
+      String name = SharedPrefsHelper.getName() ?? "";
+      
+      if (name.isEmpty || _isSessionToken(name)) {
+        name = "child";
+      }
+      
+      _nameController.text = name;
       _fatherNameController.text = SharedPrefsHelper.getFatherName() ?? "";
       _birthDateController.text = SharedPrefsHelper.getBirthDate() ?? "";
       _gender = SharedPrefsHelper.getGender();
       _healthController.text = SharedPrefsHelper.getHealthStatus() ?? "";
     });
+  }
+  
+  bool _isSessionToken(String text) {
+    return text.length > 20 || text.contains(RegExp(r'^[a-zA-Z0-9]{20,}$'));
   }
 
   Future<void> _saveProfile() async {

@@ -62,18 +62,8 @@ class _OtpScreenState extends State<OtpScreen> {
       return;
     }
 
-    // أولاً: تحقق من صحة الـ OTP
-    final verify = await AuthAPI.verifyOTP(widget.phone, code);
-
-    if (verify["verified"] != true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("الكود غير صحيح")),
-      );
-      return;
-    }
-
-    // ثانياً: تسجيل الدخول
-    final login = await AuthAPI.loginAfterOTP(widget.phone);
+    // تسجيل الدخول مباشرة - loginWithMobile يتحقق من OTP داخلياً
+    final login = await AuthAPI.loginWithMobile(widget.phone, code);
 
     if (login.containsKey("error")) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -89,8 +79,18 @@ class _OtpScreenState extends State<OtpScreen> {
     await SharedPrefsHelper.setSession(true);
     await SharedPrefsHelper.setUserType("child");
     await SharedPrefsHelper.setPhone(login["mobileNumber"] ?? widget.phone);
-    await SharedPrefsHelper.setName(login["username"] ?? "Child User");
-    
+
+    String childName =
+        _getValidName(login["fullName"] ?? login["username"] ?? "child");
+    await SharedPrefsHelper.setName(childName);
+
+    if (login["fatherName"] != null) {
+      await SharedPrefsHelper.setFatherName(login["fatherName"]);
+    }
+    if (login["birthDate"] != null) {
+      await SharedPrefsHelper.setBirthDate(login["birthDate"]);
+    }
+
     // الـ sessionToken قد يكون موجود أو نستخدم الـ ID
     final token = login["sessionToken"] ?? login["id"] ?? "";
     await SharedPrefsHelper.setToken(token);
@@ -100,6 +100,17 @@ class _OtpScreenState extends State<OtpScreen> {
       context,
       MaterialPageRoute(builder: (_) => const OnBoardingScreen()),
     );
+  }
+
+  String _getValidName(String name) {
+    if (name.isEmpty || _isSessionToken(name)) {
+      return "child";
+    }
+    return name;
+  }
+
+  bool _isSessionToken(String text) {
+    return text.length > 20 || text.contains(RegExp(r'^[a-zA-Z0-9]{20,}$'));
   }
 
   Widget _buildOtpBox(int index) {
