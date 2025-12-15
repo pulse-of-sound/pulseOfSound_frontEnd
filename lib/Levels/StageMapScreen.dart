@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'sharedPrefs.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'StageDetailScreen.dart';
-import 'group_test_screen.dart'; //  استدعاء شاشة الاختبار الجديدة
+import 'group_test_screen.dart';
 
 class StageMapScreen extends StatefulWidget {
   final int levelNumber;
   final int groupNumber;
+  final String groupId;
 
   const StageMapScreen({
     super.key,
     required this.levelNumber,
     required this.groupNumber,
+    required this.groupId,
   });
 
   @override
@@ -21,148 +24,168 @@ class StageMapScreen extends StatefulWidget {
 class _StageMapScreenState extends State<StageMapScreen> {
   int currentStage = 0;
   String? lastPlayDate;
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadProgress();
+    print(" StageMapScreen Initialized for Group: ${widget.groupId}, Order: ${widget.groupNumber}");
+    _loadLocalProgress();
   }
 
-  Future<void> _loadProgress() async {
-    currentStage = await SharedPrefsHelper.getInt(
-            "level_${widget.levelNumber}_group_${widget.groupNumber}_stage") ??
-        0;
-    lastPlayDate = await SharedPrefsHelper.getString(
-        "lastPlayDate_Level${widget.levelNumber}_Group${widget.groupNumber}");
-    setState(() {});
+  Future<void> _loadLocalProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stageKey = "level_${widget.levelNumber}_group_${widget.groupNumber}_stage";
+    final dateKey = "lastPlayDate_Level${widget.levelNumber}_Group${widget.groupNumber}";
+    
+    currentStage = prefs.getInt(stageKey) ?? 0;
+    lastPlayDate = prefs.getString(dateKey);
+    
+    print(" Local Progress Loaded: Stage $currentStage, LastDate: $lastPlayDate");
+    
+    if (mounted) {
+      setState(() => isLoading = false);
+    }
   }
 
   bool _canPlayToday() {
+    if (lastPlayDate == null) return true;
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
     return lastPlayDate != today;
   }
 
   void _openStage(int stageNumber) async {
-    if (stageNumber > currentStage + 1) return;
-
-    if (stageNumber == currentStage + 1 && !_canPlayToday()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("يمكنك لعب مرحلة واحدة فقط يومياً")),
+    print("📢 Tapped on Stage $stageNumber. Current: $currentStage");
+    
+    // التحقق 1: هل المرحلة مقفلة تماماً؟
+    if (stageNumber > currentStage + 1) {
+       ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("🔒 يجب إنهاء المرحلة السابقة أولاً"),
+          backgroundColor: Colors.orange,
+        ),
       );
       return;
     }
 
-    final passed = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => StageDetailScreen(
-          levelNumber: widget.levelNumber,
-          groupNumber: widget.groupNumber,
-          stageNumber: stageNumber,
-        ),
-      ),
-    );
-
-    if (passed == true) {
-      setState(() => currentStage = stageNumber);
-
-      //  إذا خلص آخر مرحلة بالمجموعة
-      if (stageNumber == 10) {
-        await Future.delayed(const Duration(milliseconds: 400));
-
-        //  فتح اختبار نهاية المجموعة
-        final testPassed = await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => GroupTestScreen(
-              levelNumber: widget.levelNumber,
-              groupNumber: widget.groupNumber,
-            ),
+    // التحقق 2: إذا كانت مرحلة جديدة (لم تُنجز بعد)، تحقق من التاريخ
+    if (stageNumber == currentStage + 1) {
+      if (!_canPlayToday()) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("⏰ مرحلة واحدة يومياً! عد غداً لمرحلة جديدة 🌟"),
+            backgroundColor: Colors.blue,
+            duration: Duration(seconds: 3),
           ),
         );
+        return;
+      }
+      print("✅ Opening new stage $stageNumber");
+    } else {
+      // إعادة لعب مرحلة مكتملة - مسموح دائماً
+      print("🔄 Replaying completed stage $stageNumber");
+    }
 
-        if (testPassed == true) {
-          //  نجح بالاختبار → نفتح المجموعة التالية
-          await SharedPrefsHelper.setInt(
-              "unlockedGroup_Level${widget.levelNumber}",
-              widget.groupNumber + 1);
+    try {
+      final passed = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => StageDetailScreen(
+            levelNumber: widget.levelNumber,
+            groupNumber: widget.groupNumber,
+            stageNumber: stageNumber,
+            groupId: widget.groupId,
+            isFinalStage: stageNumber == 10,
+          ),
+        ),
+      );
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("أحسنت! تم فتح المجموعة التالية ")),
-          );
-        } else {
-          //  فشل → عرض رسالة
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("حاول مجددًا لاجتياز الاختبار ")),
-          );
+      if (passed == true) {
+        _loadLocalProgress();
+        if (stageNumber == 10) {
+           await Future.delayed(const Duration(milliseconds: 500));
+           _openGroupTest();
         }
       }
+    } catch (e) {
+      print("❌ Error navigating to stage details: $e");
+    }
+  }
+
+  void _openGroupTest() async {
+    // ... (نفس المنطق السابق)
+    try {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => GroupTestScreen(
+            levelNumber: widget.levelNumber,
+            groupNumber: widget.groupNumber,
+          ),
+        ),
+      );
+    } catch (e) {
+       print(" Error opening group test: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // لون احتياطي
       extendBodyBehindAppBar: true,
       appBar: AppBar(
+        title: const Text("خريطة المراحل", style: TextStyle(color: Colors.pinkAccent, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.pinkAccent),
         centerTitle: true,
-        iconTheme: const IconThemeData(
-          color: Colors.pinkAccent,
-        ),
-        title: const Text(
-          "خريطة المراحل",
-          style:
-              TextStyle(fontWeight: FontWeight.bold, color: Colors.pinkAccent),
-        ),
       ),
       body: Container(
+        width: double.infinity,
+        height: double.infinity,
         decoration: const BoxDecoration(
+          color: Colors.white, // احتياطي
           image: DecorationImage(
             image: AssetImage("images/levelsBackground.jpg"),
             fit: BoxFit.cover,
           ),
         ),
-        child: Center(
-          child: Wrap(
-            spacing: 20,
-            runSpacing: 20,
-            children: List.generate(10, (i) {
-              final isUnlocked = i <= currentStage;
-              return GestureDetector(
-                onTap: () => _openStage(i + 1),
-                child: Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isUnlocked
-                        ? Colors.pinkAccent
-                        : Colors.grey.withOpacity(0.6),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 4,
-                        offset: Offset(2, 2),
+        child: isLoading 
+         ? const Center(child: CircularProgressIndicator())
+         : Center(
+            child: SingleChildScrollView( // إضافة سكرول تحسباً للشاشات الصغيرة
+              child: Wrap(
+                spacing: 20,
+                runSpacing: 20,
+                alignment: WrapAlignment.center,
+                children: List.generate(10, (i) {
+                  final stageNum = i + 1;
+                  final isUnlocked = stageNum <= currentStage + 1;
+                  final isCompleted = stageNum <= currentStage;
+                  
+                  Color color = isCompleted ? Colors.pinkAccent : (isUnlocked ? Colors.orangeAccent : Colors.grey.withOpacity(0.6));
+                  
+                  return GestureDetector(
+                    onTap: () => _openStage(stageNum),
+                    child: Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: color,
+                        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(2, 2))],
                       ),
-                    ],
-                  ),
-                  child: Center(
-                    child: isUnlocked
-                        ? Text(
-                            "${i + 1}",
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          )
-                        : const Icon(Icons.lock, color: Colors.white),
-                  ),
-                ),
-              );
-            }),
-          ),
+                      child: Center(
+                        child: isUnlocked
+                            ? Text("$stageNum", style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold))
+                            : const Icon(Icons.lock, color: Colors.white),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
         ),
       ),
     );

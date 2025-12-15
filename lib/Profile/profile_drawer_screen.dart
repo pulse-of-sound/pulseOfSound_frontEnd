@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/shared_pref_helper.dart';
+import '../api/child_api.dart';
 
 class ProfileDrawerScreen extends StatefulWidget {
   const ProfileDrawerScreen({super.key});
@@ -18,6 +20,7 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
   final _healthController = TextEditingController();
   String? _gender;
   File? _profileImage;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -26,6 +29,53 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
   }
 
   Future<void> _loadProfile() async {
+    // 1. محاولة الجلب من السيرفر أولاً
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final sessionToken = prefs.getString('session_token');
+      
+      if (sessionToken != null && sessionToken.isNotEmpty) {
+        print("🔄 Loading profile from server...");
+        
+        final profile = await ChildProfileAPI.getMyChildProfile(
+          sessionToken: sessionToken,
+        );
+        
+        if (!profile.containsKey('error') && mounted) {
+          print("✅ Profile loaded from server");
+          
+          setState(() {
+            _nameController.text = profile['name'] ?? "";
+            _fatherNameController.text = profile['fatherName'] ?? "";
+            _birthDateController.text = profile['birthdate'] ?? "";
+            _gender = profile['gender'];
+            _healthController.text = profile['medical_info'] ?? "";
+          });
+          
+          // حفظ محلياً للاستخدام السريع
+          await SharedPrefsHelper.setName(profile['name'] ?? "");
+          await SharedPrefsHelper.setFatherName(profile['fatherName'] ?? "");
+          await SharedPrefsHelper.setBirthDate(profile['birthdate'] ?? "");
+          await SharedPrefsHelper.setGender(profile['gender'] ?? "");
+          await SharedPrefsHelper.setHealthStatus(profile['medical_info'] ?? "");
+          
+          // تحميل الصورة المحلية
+          final imagePath = SharedPrefsHelper.getProfileImage();
+          if (imagePath != null && File(imagePath).existsSync()) {
+            setState(() => _profileImage = File(imagePath));
+          }
+          
+          return;
+        } else {
+          print("⚠️ Failed to load from server: ${profile['error']}");
+        }
+      }
+    } catch (e) {
+      print("❌ Exception loading profile: $e");
+    }
+    
+    // 2. إذا فشل، اجلب من المحلي (Fallback)
+    print("📂 Loading profile from local storage");
     final imagePath = SharedPrefsHelper.getProfileImage();
     if (imagePath != null && File(imagePath).existsSync()) {
       setState(() => _profileImage = File(imagePath));
@@ -42,6 +92,56 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
 
   Future<void> _saveProfile() async {
     if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
+      
+      // 1. حفظ في السيرفر أولاً
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final childId = prefs.getString('child_id');
+        
+        if (childId != null && childId.isNotEmpty) {
+          print("💾 Updating profile on server for child: $childId");
+          
+          final result = await ChildProfileAPI.createOrUpdateChildProfile(
+            childId: childId,
+            name: _nameController.text,
+            fatherName: _fatherNameController.text,
+            birthdate: _birthDateController.text,
+            gender: _gender,
+            medicalInfo: _healthController.text,
+          );
+          
+          if (result.containsKey('error')) {
+            print("❌ Error updating profile: ${result['error']}");
+            if (mounted) {
+              setState(() => _isLoading = false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('خطأ في الحفظ: ${result['error']}'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+              return;
+            }
+          } else {
+            print("✅ Profile updated successfully on server");
+          }
+        }
+      } catch (e) {
+        print("❌ Exception updating profile: $e");
+        if (mounted) {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('خطأ في الاتصال: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+      }
+      
+      // 2. حفظ محلياً
       await SharedPrefsHelper.setName(_nameController.text);
       await SharedPrefsHelper.setFatherName(_fatherNameController.text);
       await SharedPrefsHelper.setBirthDate(_birthDateController.text);
@@ -51,9 +151,15 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
         await SharedPrefsHelper.setProfileImage(_profileImage!.path);
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(" تم حفظ التعديلات بنجاح")),
-      );
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("✅ تم حفظ التعديلات بنجاح"),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     }
   }
 

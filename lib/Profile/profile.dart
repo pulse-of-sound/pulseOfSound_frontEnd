@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pulse_of_sound/PreTestIntro/preTestIntroScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/shared_pref_helper.dart';
+import '../api/child_api.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -80,16 +82,59 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _saveProfile() async {
     if (_formKey.currentState!.validate()) {
+      // 1. حفظ محلياً أولاً (للاستخدام السريع)
       await SharedPrefsHelper.setName(_nameController.text);
       await SharedPrefsHelper.setFatherName(_fatherNameController.text);
       await SharedPrefsHelper.setBirthDate(_birthDateController.text);
       await SharedPrefsHelper.setGender(_gender ?? "");
       await SharedPrefsHelper.setHealthStatus(_healthController.text);
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const PreTestIntroScreen()),
-      );
+      // 2. حفظ في السيرفر
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final childId = prefs.getString('child_id');
+        
+        if (childId != null && childId.isNotEmpty) {
+          print("💾 Saving profile to server for child: $childId");
+          
+          final result = await ChildProfileAPI.createOrUpdateChildProfile(
+            childId: childId,
+            name: _nameController.text,
+            fatherName: _fatherNameController.text,
+            birthdate: _birthDateController.text,
+            gender: _gender,
+            medicalInfo: _healthController.text,
+          );
+          
+          if (result.containsKey('error')) {
+            print("❌ Error saving profile: ${result['error']}");
+            // نعرض رسالة لكن نكمل (البيانات محفوظة محلياً)
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('تم الحفظ محلياً. خطأ في المزامنة: ${result['error']}'),
+                  backgroundColor: Colors.orange,
+                ),
+              );
+            }
+          } else {
+            print("✅ Profile saved successfully to server");
+          }
+        } else {
+          print("⚠️ No child_id found, saving locally only");
+        }
+      } catch (e) {
+        print("❌ Exception saving profile: $e");
+        // نكمل حتى لو فشل الحفظ في السيرفر
+      }
+
+      // 3. الانتقال للشاشة التالية
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const PreTestIntroScreen()),
+        );
+      }
     }
   }
 

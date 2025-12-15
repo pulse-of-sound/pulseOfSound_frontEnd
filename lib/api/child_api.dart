@@ -118,11 +118,10 @@ class ChildLevelAPI {
     try {
       print(" Fetching current stage for child: $childId");
       
-      final response = await http.get(
-        Uri.parse("${ApiConfig.baseUrl}/getCurrentStageForChild").replace(
-          queryParameters: {"child_id": childId},
-        ),
+      final response = await http.post(
+        Uri.parse("${ApiConfig.baseUrl}/getCurrentStageForChild"),
         headers: ApiConfig.getHeadersWithToken(sessionToken),
+        body: jsonEncode({"child_id": childId}),
       );
       
       print(" Current Stage Status: ${response.statusCode}");

@@ -45,9 +45,10 @@ class LevelAPI {
     try {
       print(" Fetching all levels");
       
-      final response = await http.get(
+      final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/getAllLevels"),
-        headers: ApiConfig.getBaseHeaders(),
+        headers: ApiConfig.getHeadersWithMasterKey(),
+        body: jsonEncode({}),
       );
       
       print(" Levels Status: ${response.statusCode}");
@@ -182,7 +183,7 @@ class LevelGameAPI {
       
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/getLevelGamesForLevel"),
-        headers: ApiConfig.getBaseHeaders(),
+        headers: ApiConfig.getHeadersWithMasterKey(),
         body: jsonEncode({"level_id": levelId}),
       );
       
@@ -247,9 +248,10 @@ class LevelGameAPI {
     required String sessionToken,
     required String childId,
     required String stageId,
+    bool passed = true,
   }) async {
     try {
-      print(" Advancing/repeating stage: $stageId for child: $childId");
+      print(" Advancing/repeating stage: $stageId for child: $childId, passed=$passed");
       
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/advanceOrRepeatStage"),
@@ -257,6 +259,7 @@ class LevelGameAPI {
         body: jsonEncode({
           "child_id": childId,
           "stage_id": stageId,
+          if (passed) "passed": passed,
         }),
       );
       

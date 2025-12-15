@@ -44,8 +44,8 @@ class _StageGameScreenState extends State<StageGameScreen> {
     if (!_canPlay) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("يمكنك لعب مرحلة واحدة فقط يومياً 🎯"),
-          backgroundColor: Colors.orange,
+          content: Text("يمكنك لعب مرحلة واحدة فقط يومياً"),
+          backgroundColor: Colors.pinkAccent,
         ),
       );
       return;
@@ -53,7 +53,7 @@ class _StageGameScreenState extends State<StageGameScreen> {
 
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-    // 🔹 حفظ بيانات التقدم العادية
+    //  حفظ بيانات التقدم العادية
     await SharedPrefsHelper.setString(
       "lastPlayDate_Level${widget.levelNumber}_Group${widget.groupNumber}",
       today,
