@@ -109,16 +109,21 @@ class LevelAPI {
     required String levelId,
   }) async {
     try {
-      print(" Deleting level: $levelId");
+      print("🗑️ Deleting level: $levelId");
+      print("🔑 SessionToken: $sessionToken");
+      print("🔑 Token length: ${sessionToken.length}");
+      
+      final headers = ApiConfig.getHeadersWithToken(sessionToken);
+      print("📤 Headers: $headers");
       
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/deleteLevel"),
-        headers: ApiConfig.getHeadersWithToken(sessionToken),
+        headers: headers,
         body: jsonEncode({"level_id": levelId}),
       );
       
-      print(" Delete Level Status: ${response.statusCode}");
-      print(" Delete Level Response: ${response.body}");
+      print("📥 Delete Level Status: ${response.statusCode}");
+      print("📥 Delete Level Response: ${response.body}");
       
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -130,7 +135,7 @@ class LevelAPI {
         }
       }
     } catch (e) {
-      print(" Delete Level Exception: $e");
+      print("❌ Delete Level Exception: $e");
       return {"error": "تعذر حذف المستوى: $e"};
     }
   }
@@ -139,16 +144,18 @@ class LevelAPI {
 class LevelGameAPI {
   // 1) إضافة مرحلة جديدة لمستوى
   static Future<Map<String, dynamic>> addLevelGameByAdmin({
+    required String sessionToken,
     required String levelId,
     required String name,
     required int order,
   }) async {
     try {
-      print(" Adding level game: $name to level: $levelId, order=$order");
+      print("➕ Adding level game: $name to level: $levelId, order=$order");
+      print("🔑 SessionToken: $sessionToken");
       
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/addLevelGameByAdmin"),
-        headers: ApiConfig.getHeadersWithMasterKey(),
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
         body: jsonEncode({
           "levelId": levelId,
           "name": name,
@@ -156,8 +163,8 @@ class LevelGameAPI {
         }),
       );
       
-      print(" Add Level Game Status: ${response.statusCode}");
-      print(" Add Level Game Response: ${response.body}");
+      print("📥 Add Level Game Status: ${response.statusCode}");
+      print("📥 Add Level Game Response: ${response.body}");
       
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -169,7 +176,7 @@ class LevelGameAPI {
         }
       }
     } catch (e) {
-      print(" Add Level Game Exception: $e");
+      print("❌ Add Level Game Exception: $e");
       return {"error": "تعذر إضافة المرحلة: $e"};
     }
   }

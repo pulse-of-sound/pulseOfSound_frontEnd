@@ -9,6 +9,7 @@ import '../SuperAdminScreens/Chats/AdminCommunityChatScreen.dart';
 import '../SuperAdminScreens/Childrens/chidScreen.dart';
 import '../SuperAdminScreens/Doctors/doctorsScreen.dart';
 import '../SuperAdminScreens/Wallet/ReceiptsAdminScreen.dart';
+import '../SuperAdminScreens/Levels/levelsManagementScreen.dart';
 import '../utils/shared_pref_helper.dart';
 
 class AdminHome extends StatelessWidget {
@@ -93,6 +94,15 @@ class AdminHome extends StatelessWidget {
                     if (isSuperAdmin) {
                       cards.add(_buildGlassCard(context, "الأدمن",
                           "icons/icons8-admin-50.png", const Adminscreen()));
+                    }
+
+                    // إدارة المستويات - متاح لـ Admin و SuperAdmin
+                    if (isAdmin) {
+                      cards.add(_buildGlassCard(
+                          context,
+                          "إدارة المستويات",
+                          "icons/icons8-dashboard-40.png",
+                          const LevelsManagementScreen()));
                     }
 
                     cards.addAll([
