@@ -10,9 +10,10 @@ class WalletAPI {
     try {
       print(" Fetching wallet balance");
       
-      final response = await http.get(
+      final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/getWalletBalance"),
         headers: ApiConfig.getHeadersWithToken(sessionToken),
+        body: jsonEncode({}),
       );
       
       print(" Wallet Balance Status: ${response.statusCode}");
@@ -87,17 +88,14 @@ class WalletTransactionAPI {
     try {
       print(" Fetching transactions for wallet: $walletId");
       
-      final queryParams = <String, String>{"wallet_id": walletId};
-      if (type != null) queryParams["type"] = type;
-      if (appointmentId != null) queryParams["appointment_id"] = appointmentId;
-      
-      final uri = Uri.parse("${ApiConfig.baseUrl}/getWalletTransactions").replace(
-        queryParameters: queryParams,
-      );
-      
-      final response = await http.get(
-        uri,
+      final response = await http.post(
+        Uri.parse("${ApiConfig.baseUrl}/getWalletTransactions"),
         headers: ApiConfig.getHeadersWithToken(sessionToken),
+        body: jsonEncode({
+          "wallet_id": walletId,
+          if (type != null) "type": type,
+          if (appointmentId != null) "appointment_id": appointmentId,
+        }),
       );
       
       print(" Transactions Status: ${response.statusCode}");
@@ -129,11 +127,10 @@ class WalletTransactionAPI {
     try {
       print(" Fetching transactions for appointment: $appointmentId");
       
-      final response = await http.get(
-        Uri.parse("${ApiConfig.baseUrl}/getTransactionsByAppointment").replace(
-          queryParameters: {"appointment_id": appointmentId},
-        ),
+      final response = await http.post(
+        Uri.parse("${ApiConfig.baseUrl}/getTransactionsByAppointment"),
         headers: ApiConfig.getHeadersWithToken(sessionToken),
+        body: jsonEncode({"appointment_id": appointmentId}),
       );
       
       print(" Appointment Transactions Status: ${response.statusCode}");
@@ -201,11 +198,10 @@ class WalletTransactionAPI {
     try {
       print(" Fetching transaction details: $transactionId");
       
-      final response = await http.get(
-        Uri.parse("${ApiConfig.baseUrl}/getTransactionById").replace(
-          queryParameters: {"transaction_id": transactionId},
-        ),
+      final response = await http.post(
+        Uri.parse("${ApiConfig.baseUrl}/getTransactionById"),
         headers: ApiConfig.getHeadersWithToken(sessionToken),
+        body: jsonEncode({"transaction_id": transactionId}),
       );
       
       print(" Transaction Details Status: ${response.statusCode}");

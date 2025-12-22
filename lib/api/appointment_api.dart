@@ -114,8 +114,11 @@ class AppointmentAPI {
     try {
       print(" Fetching pending appointments for provider");
       
+      final uri = Uri.parse("${ApiConfig.baseUrl}/getPendingAppointmentsForProvider");
+      print("Calling URI: $uri");
+
       final response = await http.post(
-        Uri.parse("${ApiConfig.baseUrl}/getPendingAppointmentsForProvider"),
+        uri,
         headers: ApiConfig.getHeadersWithToken(sessionToken),
         body: jsonEncode({}),
       );
@@ -203,6 +206,72 @@ class AppointmentAPI {
     } catch (e) {
       print(" Handle Decision Exception: $e");
       return {"error": "تعذر معالجة القرار: $e"};
+    }
+  }
+
+  // 7) جلب حجوزات الطبيب/الأخصائي
+  static Future<List<Map<String, dynamic>>> getProviderAppointments({
+    required String sessionToken,
+    String? providerId,
+  }) async {
+    try {
+      print(" Fetching appointments for provider: ${providerId ?? 'current'}");
+      
+      final body = providerId != null ? {"provider_id": providerId} : {};
+
+      final response = await http.post(
+        Uri.parse("${ApiConfig.baseUrl}/getPendingAppointmentsForProvider"),
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
+        body: jsonEncode(body),
+      );
+      
+      print(" Provider Appointments Status: ${response.statusCode}");
+      print(" Provider Appointments Response: ${response.body}");
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is List) {
+          return List<Map<String, dynamic>>.from(data);
+        }
+        return [];
+      } else {
+        return [];
+      }
+    } catch (e) {
+      print(" Get Provider Appointments Exception: $e");
+      return [];
+    }
+  }
+
+  // 8) إلغاء موعد (للآباء)
+  static Future<Map<String, dynamic>> cancelAppointment({
+    required String sessionToken,
+    required String appointmentId,
+  }) async {
+    try {
+      print(" Cancelling appointment: $appointmentId");
+      
+      final response = await http.post(
+        Uri.parse("${ApiConfig.baseUrl}/cancelAppointment"),
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
+        body: jsonEncode({"appointment_id": appointmentId}),
+      );
+      
+      print(" Cancel Appointment Status: ${response.statusCode}");
+      print(" Cancel Appointment Response: ${response.body}");
+      
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        try {
+          return jsonDecode(response.body);
+        } catch (e) {
+          return {"error": "فشل إلغاء الموعد"};
+        }
+      }
+    } catch (e) {
+      print(" Cancel Appointment Exception: $e");
+      return {"error": "تعذر إلغاء الموعد: $e"};
     }
   }
 }

@@ -1,9 +1,8 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import '../../Booking/utils/wallet_prefs.dart';
-import '../utils/doctor_booking_prefs.dart';
-import '../utils/doctor_chat_prefs.dart';
-import '../utils/doctor_wallet_prefs.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../api/appointment_api.dart';
+import '../../utils/api_helpers.dart';
+import '../../Colors/colors.dart';
 
 class DoctorBookingsScreen extends StatefulWidget {
   const DoctorBookingsScreen({super.key});
@@ -14,100 +13,116 @@ class DoctorBookingsScreen extends StatefulWidget {
 
 class _DoctorBookingsScreenState extends State<DoctorBookingsScreen> {
   List<Map<String, dynamic>> bookings = [];
+  bool isLoading = false;
+  String _providerId = '';
 
   @override
   void initState() {
     super.initState();
-    _loadBookings();
+    _loadProviderIdAndBookings();
+  }
+
+  Future<void> _loadProviderIdAndBookings() async {
+    final prefs = await SharedPreferences.getInstance();
+    final providerId = prefs.getString('userId') ?? '';
+    setState(() => _providerId = providerId);
+    
+    if (providerId.isNotEmpty) {
+      await _loadBookings();
+    }
   }
 
   Future<void> _loadBookings() async {
-    final data = await DoctorBookingPrefs.load();
-    setState(() => bookings = data);
-  }
+    setState(() => isLoading = true);
 
-  /// ✅ قبول الحجز وإنشاء محادثة خاصة + مؤقت انتهاء الجلسة
-  Future<void> _approveBooking(int index) async {
-    final booking = bookings[index];
-    final double price = booking["price"] ?? 0.0;
-    final String chatId = booking["id"].toString();
-
-    // 🔹 التحقق من وجود خطة زمنية (نصف ساعة / ساعة...)
-    int durationMinutes = 30; // افتراضي 30 دقيقة
-    if (booking["plan"] != null) {
-      final plan = booking["plan"].toString().toLowerCase();
-      if (plan.contains("ساعة")) durationMinutes = 60;
-      if (plan.contains("نصف")) durationMinutes = 30;
-    }
-
-    // 🔹 خصم المبلغ من محفظة وليّ الأمر
-    final success = await WalletPrefs.deduct(price);
-    if (!success) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("رصيد وليّ الأمر غير كافٍ")),
+    try {
+      final sessionToken = await APIHelpers.getSessionToken();
+      final result = await AppointmentAPI.getProviderAppointments(
+        sessionToken: sessionToken,
+        providerId: _providerId,
       );
-      return;
+
+      setState(() {
+        bookings = result;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() => isLoading = false);
+      if (mounted) {
+        APIHelpers.showErrorDialog(context, 'حدث خطأ: $e');
+      }
     }
-
-    // 🔹 إضافة المبلغ لمحفظة الطبيب
-    await DoctorWalletPrefs.addFunds(price);
-
-    // 🔹 تحديث حالة الحجز
-    booking["status"] = "accepted";
-    await DoctorBookingPrefs.update(booking);
-
-    // 🔹 إنشاء محادثة خاصة جديدة بين الطبيب ووليّ الأمر
-    await DoctorChatService.createPrivateChat(
-      chatId: chatId,
-      doctorId: booking["doctorId"] ?? "unknown",
-      parentId: booking["parentId"] ?? "",
-      parentName: booking["parentName"] ?? "وليّ الأمر",
-      durationMinutes: durationMinutes,
-    );
-
-    // 🔹 إرسال أول رسالة تلقائية
-    await DoctorChatService.addPrivateMessage(
-      chatId,
-      "system",
-      "✅ تمت الموافقة على الاستشارة.\n"
-          "⏱ المدة المتاحة: $durationMinutes دقيقة.\n"
-          "يمكنكم الآن بدء المحادثة.",
-    );
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-          content: Text("تمت الموافقة على الحجز وإنشاء المحادثة الخاصة")),
-    );
-
-    if (!mounted) return;
-    _loadBookings();
   }
 
-  /// ❌ رفض الحجز
-  Future<void> _rejectBooking(int index) async {
-    final booking = bookings[index];
-    booking["status"] = "rejected";
-    await DoctorBookingPrefs.update(booking);
+  Future<void> _handleAppointment(String appointmentId, String decision) async {
+    if (mounted) {
+      APIHelpers.showLoadingDialog(context, message: 'جاري المعالجة...');
+    }
 
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("تم رفض الحجز")),
-    );
+    try {
+      final sessionToken = await APIHelpers.getSessionToken();
+      final result = await AppointmentAPI.handleAppointmentDecision(
+        sessionToken: sessionToken,
+        appointmentId: appointmentId,
+        decision: decision,
+      );
 
-    if (!mounted) return;
-    _loadBookings();
+      if (mounted) {
+        APIHelpers.hideLoadingDialog(context);
+      }
+
+      if (!result.containsKey('error')) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(decision == 'approve' ? 'تمت الموافقة' : 'تم الرفض'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+        await _loadBookings();
+      } else {
+        if (mounted) {
+          APIHelpers.showErrorDialog(context, result['error']);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        APIHelpers.hideLoadingDialog(context);
+        APIHelpers.showErrorDialog(context, 'حدث خطأ: $e');
+      }
+    }
+  }
+
+  String _getStatusText(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'قيد المراجعة';
+      case 'approved':
+      case 'confirmed':
+        return 'مقبول';
+      case 'rejected':
+        return 'مرفوض';
+      case 'completed':
+        return 'مكتمل';
+      default:
+        return status;
+    }
   }
 
   Color _statusColor(String status) {
-    switch (status) {
-      case "accepted":
-        return Colors.green;
-      case "rejected":
-        return Colors.redAccent;
-      default:
+    switch (status.toLowerCase()) {
+      case 'pending':
         return Colors.orangeAccent;
+      case 'approved':
+      case 'confirmed':
+        return Colors.green;
+      case 'rejected':
+        return Colors.redAccent;
+      case 'completed':
+        return Colors.blue;
+      default:
+        return Colors.grey;
     }
   }
 
@@ -128,8 +143,7 @@ class _DoctorBookingsScreenState extends State<DoctorBookingsScreen> {
             Row(
               children: [
                 IconButton(
-                  icon:
-                      const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+                  icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
                   onPressed: () => Navigator.pop(context),
                 ),
                 const Expanded(
@@ -144,76 +158,141 @@ class _DoctorBookingsScreenState extends State<DoctorBookingsScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 40),
+                IconButton(
+                  icon: const Icon(Icons.refresh, color: Colors.white),
+                  onPressed: _loadBookings,
+                ),
               ],
             ),
             const SizedBox(height: 10),
             Expanded(
-              child: bookings.isEmpty
-                  ? const Center(
-                      child: Text(
-                        "لا توجد حجوزات حالياً",
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: bookings.length,
-                      itemBuilder: (context, index) {
-                        final b = bookings[index];
-                        final status = b["status"] ?? "pending";
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                  : bookings.isEmpty
+                      ? const Center(
+                          child: Text(
+                            "لا توجد حجوزات حالياً",
+                            style: TextStyle(color: Colors.white, fontSize: 18),
+                          ),
+                        )
+                      : RefreshIndicator(
+                          onRefresh: _loadBookings,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: bookings.length,
+                            itemBuilder: (context, index) {
+                              final b = bookings[index];
+                              final status = b["status"] ?? "pending";
+                              final child = b["child"] ?? {};
+                              final plan = b["appointment_plan"] ?? {};
 
-                        return Card(
-                          color: Colors.white.withOpacity(0.9),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
-                          elevation: 6,
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.all(12),
-                            title: Text(
-                              "${b["type"]} مع ${b["parentName"] ?? "وليّ الأمر"}",
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("السعر: ${b["price"]} ل.س"),
-                                Text(
-                                  "الخطة: ${b["plan"] ?? "غير محددة"}",
-                                  style: const TextStyle(fontSize: 14),
-                                ),
-                                Text(
-                                  "الحالة: ${status == "pending" ? "قيد المراجعة" : status == "accepted" ? "مقبولة" : "مرفوضة"}",
-                                  style: TextStyle(
-                                    color: _statusColor(status),
-                                    fontWeight: FontWeight.bold,
+                              return Card(
+                                color: Colors.white.withOpacity(0.9),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16)),
+                                elevation: 6,
+                                margin: const EdgeInsets.symmetric(vertical: 8),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Header
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              child["name"] ?? "طفل",
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 6,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: _statusColor(status),
+                                              borderRadius: BorderRadius.circular(20),
+                                            ),
+                                            child: Text(
+                                              _getStatusText(status),
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 12),
+
+                                      // Plan
+                                      Text(
+                                        "الخطة: ${plan["title"] ?? "غير محددة"}",
+                                        style: const TextStyle(fontSize: 16),
+                                      ),
+                                      const SizedBox(height: 4),
+
+                                      // Price
+                                      Text(
+                                        "السعر: ${plan["price"] ?? 0} ل.س",
+                                        style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                      ),
+
+                                      // Note
+                                      if (b["note"] != null && b["note"].toString().isNotEmpty) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          "ملاحظة: ${b["note"]}",
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
+                                      ],
+
+                                      // Actions
+                                      if (status.toLowerCase() == "pending") ...[
+                                        const SizedBox(height: 12),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            ElevatedButton.icon(
+                                              onPressed: () => _handleAppointment(b["id"], "approve"),
+                                              icon: const Icon(Icons.check_circle, size: 18),
+                                              label: const Text("قبول"),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.green,
+                                                foregroundColor: Colors.white,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            ElevatedButton.icon(
+                                              onPressed: () => _handleAppointment(b["id"], "reject"),
+                                              icon: const Icon(Icons.cancel, size: 18),
+                                              label: const Text("رفض"),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.redAccent,
+                                                foregroundColor: Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                 ),
-                              ],
-                            ),
-                            trailing: status == "pending"
-                                ? Column(
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.check_circle,
-                                            color: Colors.green),
-                                        onPressed: () => _approveBooking(index),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(Icons.cancel,
-                                            color: Colors.redAccent),
-                                        onPressed: () => _rejectBooking(index),
-                                      ),
-                                    ],
-                                  )
-                                : Icon(Icons.verified,
-                                    color: _statusColor(status)),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
+                        ),
             ),
           ]),
         ),

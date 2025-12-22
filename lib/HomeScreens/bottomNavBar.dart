@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:pulse_of_sound/Articles/articlesScreen.dart';
 import 'package:pulse_of_sound/HomeScreens/HomeScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Booking/screens/consultation_flow.dart';
 import '../Colors/colors.dart';
 import '../Levels/levelsScreen.dart';
@@ -17,25 +18,43 @@ class BottomNavScreen extends StatefulWidget {
 
 class _BottomNavScreenState extends State<BottomNavScreen> {
   late int _selectedIndex;
+  String _userId = '';
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
+    _loadUserId();
   }
 
-  final List<Widget> _pages = [
-    const LevelScreen(),
-    const ConsultationTypeScreen(),
-    const ParentHomeScreen(),
-    const ParentChatHome(),
-    const ArticlesScreen(),
-  ];
+  Future<void> _loadUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('userId') ?? '';
+    setState(() {
+      _userId = userId;
+      _isLoading = false;
+    });
+  }
+
+  List<Widget> get _pages => [
+        const LevelScreen(),
+        ConsultationFlowScreen(childId: _userId),
+        const ParentHomeScreen(),
+        const ParentChatHome(),
+        const ArticlesScreen(),
+      ];
 
   void _onItemTapped(int index) => setState(() => _selectedIndex = index);
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       extendBody: true,
       backgroundColor: Colors.transparent,

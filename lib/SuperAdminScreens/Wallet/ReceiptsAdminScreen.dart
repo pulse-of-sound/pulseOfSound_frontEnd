@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../../Booking/utils/wallet_prefs.dart';
-import 'ReceiptModel.dart';
+import '../../api/charge_request_api.dart';
+import '../../utils/api_helpers.dart';
+import '../../Colors/colors.dart';
 
 class ReceiptsAdminScreen extends StatefulWidget {
   const ReceiptsAdminScreen({super.key});
@@ -11,218 +12,434 @@ class ReceiptsAdminScreen extends StatefulWidget {
 }
 
 class _ReceiptsAdminScreenState extends State<ReceiptsAdminScreen> {
-  List<Receipt> receipts = [
-    Receipt(
-      id: "1",
-      parentPhone: "0999999999",
-      amount: 50.0,
-      imagePath: "images/electric-bill.jpg",
-    ),
-    Receipt(
-      id: "2",
-      parentPhone: "0988888888",
-      amount: 30.0,
-      imagePath: "images/electric-bill.jpg",
-    ),
-  ];
+  List<Map<String, dynamic>> _requests = [];
+  bool _isLoading = false;
+  String _selectedFilter = 'pending'; // pending, approved, rejected, all
 
-  void _approveReceipt(int index) async {
-    final receipt = receipts[index];
-    await WalletPrefs.addFunds(receipt.amount);
-    setState(() => receipt.status = "approved");
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("تمت الموافقة على الإيصال وإضافة الرصيد")),
-    );
+  @override
+  void initState() {
+    super.initState();
+    _loadRequests();
   }
 
-  void _rejectReceipt(int index) {
-    setState(() => receipts[index].status = "rejected");
+  Future<void> _loadRequests() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final sessionToken = await APIHelpers.getSessionToken();
+      
+      final requests = await ChargeRequestAPI.getChargeRequests(
+        sessionToken: sessionToken,
+        status: _selectedFilter == 'all' ? null : _selectedFilter,
+      );
+
+      setState(() {
+        _requests = requests;
+      });
+    } catch (e) {
+      if (mounted) {
+        APIHelpers.showErrorDialog(context, 'فشل تحميل الطلبات: $e');
+      }
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _approveRequest(String requestId, int index) async {
+    try {
+      final sessionToken = await APIHelpers.getSessionToken();
+      
+      final result = await ChargeRequestAPI.approveChargeRequest(
+        sessionToken: sessionToken,
+        chargeRequestId: requestId,
+      );
+
+      if (result.containsKey('error')) {
+        if (mounted) {
+          APIHelpers.showErrorDialog(context, result['error']);
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('تمت الموافقة على الطلب! الرصيد تم إضافته للمحفظة.'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+        _loadRequests(); // تحديث القائمة
+      }
+    } catch (e) {
+      if (mounted) {
+        APIHelpers.showErrorDialog(context, 'فشل الموافقة على الطلب: $e');
+      }
+    }
+  }
+
+  Future<void> _rejectRequest(String requestId, int index) async {
+    // عرض حوار لإدخال سبب الرفض
+    final reasonController = TextEditingController();
+    
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('رفض الطلب'),
+        content: TextField(
+          controller: reasonController,
+          decoration: const InputDecoration(
+            labelText: 'سبب الرفض',
+            hintText: 'أدخل سبب رفض الطلب',
+          ),
+          maxLines: 3,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('إلغاء'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('رفض'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && reasonController.text.isNotEmpty) {
+      try {
+        final sessionToken = await APIHelpers.getSessionToken();
+        
+        final result = await ChargeRequestAPI.rejectChargeRequest(
+          sessionToken: sessionToken,
+          chargeRequestId: requestId,
+          rejectionNote: reasonController.text,
+        );
+
+        if (result.containsKey('error')) {
+          if (mounted) {
+            APIHelpers.showErrorDialog(context, result['error']);
+          }
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('تم رفض الطلب.'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          _loadRequests(); // تحديث القائمة
+        }
+      } catch (e) {
+        if (mounted) {
+          APIHelpers.showErrorDialog(context, 'فشل رفض الطلب: $e');
+        }
+      }
+    }
   }
 
   Color _statusColor(String status) {
     switch (status) {
-      case "approved":
+      case 'approved':
         return Colors.green;
-      case "rejected":
+      case 'rejected':
         return Colors.redAccent;
       default:
         return Colors.orangeAccent;
     }
   }
 
-  /// 🔹 دالة آمنة لعرض الصورة سواء من asset أو ملف
-  Widget _buildReceiptImage(String path) {
-    try {
-      final file = File(path);
-      if (file.existsSync()) {
-        return Image.file(
-          file,
-          width: 60,
-          height: 60,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
-        );
-      } else {
-        return Image.asset(
-          path,
-          width: 60,
-          height: 60,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => const Icon(Icons.receipt_long,
-              color: Colors.blueAccent, size: 40),
-        );
-      }
-    } catch (_) {
-      return const Icon(Icons.receipt_long, color: Colors.blueAccent, size: 40);
+  String _statusText(String status) {
+    switch (status) {
+      case 'pending':
+        return 'قيد المراجعة';
+      case 'approved':
+        return 'مقبول';
+      case 'rejected':
+        return 'مرفوض';
+      default:
+        return status;
     }
   }
 
-  ///  فتح الصورة بالحجم الكامل داخل حوار منبثق
-  void _showFullImage(String path) {
-    showDialog(
-      context: context,
-      builder: (_) {
-        return Dialog(
-          backgroundColor: Colors.black87,
-          insetPadding: const EdgeInsets.all(16),
-          child: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: InteractiveViewer(
-              panEnabled: true,
-              minScale: 0.8,
-              maxScale: 3.0,
-              child: _buildLargeImage(path),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildLargeImage(String path) {
+  String _formatDate(dynamic dateValue) {
     try {
-      final file = File(path);
-      if (file.existsSync()) {
-        return Image.file(file, fit: BoxFit.contain);
-      } else {
-        return Image.asset(path, fit: BoxFit.contain);
+      if (dateValue == null) return '';
+      
+      // إذا كان Object من Parse
+      if (dateValue is Map && dateValue.containsKey('iso')) {
+        final isoString = dateValue['iso'] as String;
+        final date = DateTime.parse(isoString);
+        return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
       }
-    } catch (_) {
-      return const Center(
-        child: Icon(Icons.broken_image, color: Colors.white, size: 80),
-      );
+      
+      // إذا كان String
+      if (dateValue is String) {
+        final date = DateTime.parse(dateValue);
+        return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+      }
+      
+      return dateValue.toString();
+    } catch (e) {
+      return '';
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(children: [
-        Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage("images/Admin.jpg"),
-              fit: BoxFit.cover,
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("images/Admin.jpg"),
+                fit: BoxFit.cover,
+              ),
             ),
           ),
-        ),
-        SafeArea(
-          child: Column(
-            children: [
-              //  العنوان العلوي
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new,
-                        color: Colors.white),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  const Expanded(
-                    child: Text(
-                      "إدارة الإيصالات",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        shadows: [Shadow(color: Colors.black54, blurRadius: 6)],
+          SafeArea(
+            child: Column(
+              children: [
+                // العنوان العلوي
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new,
+                          color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const Expanded(
+                      child: Text(
+                        "إدارة طلبات الشحن",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(color: Colors.black54, blurRadius: 6)
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 48),
-                ],
-              ),
-              const SizedBox(height: 10),
+                    IconButton(
+                      icon: const Icon(Icons.refresh, color: Colors.white),
+                      onPressed: _loadRequests,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
 
-              //  قائمة الإيصالات
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: receipts.length,
-                  itemBuilder: (context, index) {
-                    final receipt = receipts[index];
-                    return Card(
-                        color: Colors.white.withOpacity(0.9),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16)),
-                        elevation: 6,
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.all(12),
-                          leading: GestureDetector(
-                            onTap: () => _showFullImage(receipt.imagePath),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: _buildReceiptImage(receipt.imagePath),
-                            ),
+                // فلتر الحالة
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildFilterChip('الكل', 'all'),
+                      _buildFilterChip('قيد المراجعة', 'pending'),
+                      _buildFilterChip('مقبول', 'approved'),
+                      _buildFilterChip('مرفوض', 'rejected'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // قائمة الطلبات
+                Expanded(
+                  child: _isLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
                           ),
-                          title: Text(
-                            "رقم الموبايل: ${receipt.parentPhone}",
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 15),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("المبلغ: ${receipt.amount} ل.س"),
-                              Text(
-                                "الحالة: ${receipt.status == "pending" ? "قيد المراجعة" : receipt.status == "approved" ? "مقبول" : "مرفوض"}",
-                                style: TextStyle(
-                                    color: _statusColor(receipt.status),
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                          trailing: receipt.status == "pending"
-                              ? SizedBox(
-                                  height: 80, // 🔹 نعطي مساحة كافية للأزرار
-                                  child: Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      GestureDetector(
-                                        onTap: () => _approveReceipt(index),
-                                        child: const Icon(Icons.check_circle,
-                                            color: Colors.green, size: 28),
-                                      ),
-                                      GestureDetector(
-                                        onTap: () => _rejectReceipt(index),
-                                        child: const Icon(Icons.cancel,
-                                            color: Colors.redAccent, size: 28),
-                                      ),
-                                    ],
+                        )
+                      : _requests.isEmpty
+                          ? Center(
+                              child: Container(
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.9),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: const Text(
+                                  'لا توجد طلبات',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.grey,
                                   ),
-                                )
-                              : Icon(Icons.verified,
-                                  color: _statusColor(receipt.status)),
-                        ));
-                  },
+                                ),
+                              ),
+                            )
+                          : ListView.builder(
+                              padding: const EdgeInsets.all(16),
+                              itemCount: _requests.length,
+                              itemBuilder: (context, index) {
+                                final request = _requests[index];
+                                return _buildRequestCard(request, index);
+                              },
+                            ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, String value) {
+    final isSelected = _selectedFilter == value;
+    return GestureDetector(
+      onTap: () {
+        setState(() => _selectedFilter = value);
+        _loadRequests();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.skyBlue : Colors.grey[300],
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black87,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRequestCard(Map<String, dynamic> request, int index) {
+    final requestId = request['charge_request_id'] ?? '';
+    final username = request['username'] ?? 'غير معروف';
+    final amount = request['amount'] ?? 0;
+    final status = request['status'] ?? 'pending';
+    final note = request['note'] ?? '';
+    final createdAt = request['createdAt'] ?? '';
+
+    return Card(
+      color: Colors.white.withOpacity(0.95),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 6,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'المستخدم: $username',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'المبلغ: ${APIHelpers.formatCurrency(amount.toDouble())}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.skyBlue,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: _statusColor(status).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: _statusColor(status)),
+                  ),
+                  child: Text(
+                    _statusText(status),
+                    style: TextStyle(
+                      color: _statusColor(status),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (note.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                'الملاحظة: $note',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
                 ),
               ),
             ],
-          ),
+            if (createdAt != null && createdAt.toString().isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                'التاريخ: ${_formatDate(createdAt)}',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+            if (status == 'pending') ...[
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => _approveRequest(requestId, index),
+                      icon: const Icon(Icons.check_circle),
+                      label: const Text('موافقة'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => _rejectRequest(requestId, index),
+                      icon: const Icon(Icons.cancel),
+                      label: const Text('رفض'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
         ),
-      ]),
+      ),
     );
   }
 }

@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../Booking/utils/wallet_prefs.dart';
 import '../../SuperAdminScreens/Wallet/ReceiptModel.dart';
+import '../../utils/api_helpers.dart';
+import '../../api/charge_request_api.dart';
 
 class MyReceiptsScreen extends StatelessWidget {
   const MyReceiptsScreen({super.key});
@@ -108,36 +110,61 @@ class MyReceiptsScreen extends StatelessWidget {
     );
   }
 
-  ///  تحميل الإيصالات مع معالجة آمنة
+  ///  تحميل الإيصالات من API
   Future<List<Receipt>> _loadMyReceipts() async {
-    final data = await WalletPrefs.loadReceipts();
-
-    final List<dynamic> list = List<dynamic>.from(data);
-
-    return list.map<Receipt>((dynamic m) {
-      try {
-        if (m is Receipt) return m;
-        if (m is Map<String, dynamic>) return Receipt.fromMap(m);
-        if (m is Map) return Receipt.fromMap(Map<String, dynamic>.from(m));
-      } catch (e) {
-        debugPrint(" خطأ في تحويل الإيصال: $e");
-      }
-
-      return Receipt(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        parentPhone: "unknown",
-        amount: 0.0,
-        imagePath: "",
-        status: "pending",
+    try {
+      final sessionToken = await APIHelpers.getSessionToken();
+      final data = await ChargeRequestAPI.getChargeRequests(
+        sessionToken: sessionToken,
+        status: 'all', // Fetch all for the user
       );
-    }).toList();
+
+      return data.map<Receipt>((m) {
+        // Backend returns "receipt_image" as object {__type: File, name: ..., url: ...}
+        String imagePath = "";
+        if (m['receipt_image'] != null && m['receipt_image']['url'] != null) {
+          imagePath = m['receipt_image']['url'];
+        }
+        
+        return Receipt(
+          id: m['charge_request_id'] ?? m['objectId'] ?? "",
+          parentPhone: m['username'] ?? "unknown",
+          amount: (m['amount'] ?? 0).toDouble(),
+          imagePath: imagePath,
+          status: m['status'] ?? "pending",
+        );
+      }).toList();
+    } catch (e) {
+      debugPrint("❌ Error loading receipts: $e");
+      return [];
+    }
   }
 
-  ///  عرض الصورة (ملف أو أصول)
+  ///  عرض الصورة (ملف، أصول، أو شبكة)
   Widget _buildReceiptImage(String path) {
     if (path.isEmpty) {
       return const Icon(Icons.receipt_long, color: Colors.blueAccent, size: 45);
     }
+    
+    // Check if it's a network URL
+    if (path.startsWith('http')) {
+      return Image.network(
+        path,
+        width: 55,
+        height: 55,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) =>
+            const Icon(Icons.broken_image, color: Colors.redAccent, size: 40),
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const SizedBox(
+             width: 55, height: 55,
+             child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          );
+        },
+      );
+    }
+
     if (path.startsWith('/')) {
       // صورة من الجهاز
       return Image.file(
@@ -155,6 +182,7 @@ class MyReceiptsScreen extends StatelessWidget {
         width: 55,
         height: 55,
         fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const Icon(Icons.error),
       );
     }
   }

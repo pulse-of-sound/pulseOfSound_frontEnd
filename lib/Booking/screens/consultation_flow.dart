@@ -1,16 +1,57 @@
 import 'package:flutter/material.dart';
-import '../model/consultation_models.dart';
-import 'provider_list_screen.dart';
+import '../../api/appointment_plan_api.dart';
+import '../../api/user_api.dart';
+import '../../utils/api_helpers.dart';
+import '../../Colors/colors.dart';
+import 'plan_selection_screen.dart';
 
-class ConsultationTypeScreen extends StatefulWidget {
-  const ConsultationTypeScreen({super.key});
+class ConsultationFlowScreen extends StatefulWidget {
+  final String childId;
+  
+  const ConsultationFlowScreen({
+    super.key,
+    required this.childId,
+  });
 
   @override
-  State<ConsultationTypeScreen> createState() => _ConsultationTypeScreenState();
+  State<ConsultationFlowScreen> createState() => _ConsultationFlowScreenState();
 }
 
-class _ConsultationTypeScreenState extends State<ConsultationTypeScreen> {
+class _ConsultationFlowScreenState extends State<ConsultationFlowScreen> {
   String? selectedType;
+  List<Map<String, dynamic>> providers = [];
+  bool isLoadingProviders = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  /// التحقق من تسجيل الدخول
+  Future<void> _checkLoginStatus() async {
+    final isLoggedIn = await APIHelpers.isUserLoggedIn();
+    if (!isLoggedIn && mounted) {
+      // المستخدم غير مسجل دخول
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          title: const Text('تسجيل الدخول مطلوب'),
+          content: const Text('يجب تسجيل الدخول أولاً للوصول إلى هذه الميزة'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // إغلاق الحوار
+                Navigator.of(context).pop(); // العودة للشاشة السابقة
+              },
+              child: const Text('حسناً'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +60,10 @@ class _ConsultationTypeScreenState extends State<ConsultationTypeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text("احجز استشارتك",
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          "احجز استشارتك",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
       ),
       body: Container(
@@ -50,45 +93,75 @@ class _ConsultationTypeScreenState extends State<ConsultationTypeScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text("اختر نوع الاستشارة:",
-                    style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const Text(
+                  "اختر نوع الاستشارة:",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 25),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildTypeButton("طبية"),
-                    _buildTypeButton("نفسية"),
+                    _buildTypeButton("Doctor", "طبية"),
+                    _buildTypeButton("Psychologist", "نفسية"),
                   ],
                 ),
                 const SizedBox(height: 25),
                 if (selectedType != null)
                   Expanded(
-                    child: ListView(
-                      children: [
-                        const Text("المتخصصون المتاحون:",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18)),
-                        const SizedBox(height: 15),
-                        ..._getProviders(selectedType!).map((p) => ListTile(
-                              leading: CircleAvatar(
-                                  backgroundImage: AssetImage(p.avatar)),
-                              title: Text(p.name),
-                              subtitle: Text(p.specialty),
-                              trailing: const Icon(Icons.arrow_forward_ios,
-                                  size: 18, color: Colors.pinkAccent),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => PlanStaticSelectionScreen(
-                                        type: selectedType!, provider: p),
+                    child: isLoadingProviders
+                        ? const Center(child: CircularProgressIndicator())
+                        : providers.isEmpty
+                            ? const Center(
+                                child: Text(
+                                  'لا يوجد متخصصون متاحون حالياً',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              )
+                            : ListView(
+                                children: [
+                                  const Text(
+                                    "المتخصصون المتاحون:",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
                                   ),
-                                );
-                              },
-                            )),
-                      ],
-                    ),
+                                  const SizedBox(height: 15),
+                                  ...providers.map((provider) => ListTile(
+                                        leading: CircleAvatar(
+                                          backgroundColor: AppColors.skyBlue,
+                                          child: Text(
+                                            provider['fullName']?[0] ?? 'د',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                        title: Text(provider['fullName'] ?? 'غير معروف'),
+                                        subtitle: Text(
+                                          provider['specialization'] ?? 'متخصص',
+                                        ),
+                                        trailing: const Icon(
+                                          Icons.arrow_forward_ios,
+                                          size: 18,
+                                          color: Colors.pinkAccent,
+                                        ),
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => PlanSelectionScreen(
+                                                childId: widget.childId,
+                                                providerId: provider['id'],
+                                                providerName: provider['fullName'] ?? 'متخصص',
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      )),
+                                ],
+                              ),
                   ),
               ],
             ),
@@ -98,7 +171,7 @@ class _ConsultationTypeScreenState extends State<ConsultationTypeScreen> {
     );
   }
 
-  Widget _buildTypeButton(String type) {
+  Widget _buildTypeButton(String type, String label) {
     final bool isSelected = selectedType == type;
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
@@ -110,40 +183,38 @@ class _ConsultationTypeScreenState extends State<ConsultationTypeScreen> {
       onPressed: () {
         setState(() {
           selectedType = type;
+          providers = [];
         });
+        _loadProviders(type);
       },
-      child: Text(type,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
     );
   }
 
-  List<ProviderModel> _getProviders(String type) {
-    if (type == "طبية") {
-      return [
-        ProviderModel(
-            id: "1",
-            name: "د. أحمد سليمان",
-            specialty: "أخصائي أنف وأذن وحنجرة",
-            avatar: "images/doctor1.jpeg"),
-        ProviderModel(
-            id: "2",
-            name: "د. سارة الخطيب",
-            specialty: "جراحة سمعية",
-            avatar: "images/doctor.jpg"),
-      ];
-    } else {
-      return [
-        ProviderModel(
-            id: "3",
-            name: "أ. منى العبدالله",
-            specialty: "أخصائية نطق ولغة",
-            avatar: "images/doctor.jpg"),
-        ProviderModel(
-            id: "4",
-            name: "أ. خليل الرفاعي",
-            specialty: "علاج سلوكي",
-            avatar: "images/doctor1.jpeg"),
-      ];
+  Future<void> _loadProviders(String providerType) async {
+    setState(() => isLoadingProviders = true);
+
+    try {
+      final sessionToken = await APIHelpers.getSessionToken();
+      
+      // استدعاء API الحقيقي
+      final result = await UserAPI.getProvidersByType(
+        sessionToken: sessionToken,
+        providerType: providerType,
+      );
+      
+      setState(() {
+        providers = result;
+      });
+    } catch (e) {
+      if (mounted) {
+        APIHelpers.showErrorDialog(context, 'فشل تحميل المتخصصين: $e');
+      }
+    } finally {
+      setState(() => isLoadingProviders = false);
     }
   }
 }

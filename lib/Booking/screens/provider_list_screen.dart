@@ -118,12 +118,10 @@ class PlanStaticSelectionScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => PlanSelectionScreen(
-                                    type: type,
-                                    provider: provider,
-                                    planTitle: plan["title"]!,
-                                    price:
-                                        double.parse(plan["price"].toString()),
+                                  builder: (_) => PlanSelectionScreen(childId: '', providerName: '', providerId: '',
+                                  
+                                 
+                                 
                                   ),
                                 ),
                               );

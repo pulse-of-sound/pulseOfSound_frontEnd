@@ -155,16 +155,12 @@ class ChargeRequestAPI {
     try {
       print(" Fetching charge requests");
 
-      final queryParams = <String, String>{};
-      if (status != null) queryParams["status"] = status;
-
-      final uri = Uri.parse("${ApiConfig.baseUrl}/getChargeRequests").replace(
-        queryParameters: queryParams.isEmpty ? null : queryParams,
-      );
-
-      final response = await http.get(
-        uri,
+      final response = await http.post(
+        Uri.parse("${ApiConfig.baseUrl}/getChargeRequests"),
         headers: ApiConfig.getHeadersWithToken(sessionToken),
+        body: jsonEncode({
+          if (status != null) "status": status,
+        }),
       );
 
       print(" Charge Requests Status: ${response.statusCode}");

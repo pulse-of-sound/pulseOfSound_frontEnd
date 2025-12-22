@@ -50,9 +50,10 @@ class AppointmentPlanAPI {
     try {
       print(" Fetching available appointment plans");
       
-      final response = await http.get(
+      final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/getAvailableAppointmentPlans"),
         headers: ApiConfig.getHeadersWithToken(sessionToken),
+        body: jsonEncode({}),
       );
       
       print(" Plans Status: ${response.statusCode}");

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../HomeScreens/AdminHomeScreen.dart';
 import '../HomeScreens/DoctorHomeScreen.dart';
 import '../api/user_api.dart';
@@ -54,6 +55,10 @@ class _LoginForAdminAndDrState extends State<LoginForAdminAndDr> {
     await SharedPrefsHelper.setUserType(role);
     await SharedPrefsHelper.setName(result["fullName"] ?? result["username"] ?? "User");
     await SharedPrefsHelper.setToken(result["sessionToken"]);
+    
+    // حفظ userId
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userId', result["id"] ?? '');
     
     final storedToken = SharedPrefsHelper.getToken();
     final storedRole = SharedPrefsHelper.getUserType();

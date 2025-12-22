@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:pulse_of_sound/LoginScreens/loginscreen.dart';
 import 'package:pulse_of_sound/OnBoarding/onBoarding.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../api/auth_api.dart';
 import '../utils/shared_pref_helper.dart';
 
@@ -94,6 +95,10 @@ class _OtpScreenState extends State<OtpScreen> {
     // الـ sessionToken قد يكون موجود أو نستخدم الـ ID
     final token = login["sessionToken"] ?? login["id"] ?? "";
     await SharedPrefsHelper.setToken(token);
+    
+    // حفظ userId
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userId', login["id"] ?? login["objectId"] ?? '');
 
     // الانتقال للصفحة التالية
     Navigator.pushReplacement(

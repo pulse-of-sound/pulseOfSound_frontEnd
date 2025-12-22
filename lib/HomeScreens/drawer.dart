@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Booking/screens/Wallet Screen.dart';
+import '../Booking/screens/WalletScreenUpdated.dart';
 import '../Booking/screens/bookings_list_screen.dart';
 import '../Booking/utils/bookings_prefs.dart';
 import '../Colors/colors.dart';
 import '../LoginScreens/loginscreen.dart';
 import '../Parent/screens/ParentReportsScreen.dart';
 import '../Profile/profile_drawer_screen.dart';
+
+import '../api/appointment_api.dart';
+import '../utils/api_helpers.dart';
 
 class DrawerScreen extends StatefulWidget {
   const DrawerScreen({super.key});
@@ -28,8 +31,24 @@ class _DrawerScreenState extends State<DrawerScreen> {
   }
 
   Future<void> _loadPendingCount() async {
-    final count = await BookingsPrefs.pendingCount();
-    setState(() => pendingCount = count);
+    try {
+      final sessionToken = await APIHelpers.getSessionToken();
+      final userId = await APIHelpers.getUserId();
+      if (sessionToken == null || userId == null) return;
+      
+      final appointments = await AppointmentAPI.getChildAppointments(
+          sessionToken: sessionToken, 
+          childId: userId 
+      );
+      
+      if (mounted) {
+        setState(() {
+          pendingCount = appointments.where((a) => a['status'] == 'pending').length;
+        });
+      }
+    } catch (e) {
+      print("Failed to load pending count: $e");
+    }
   }
 
   Future<void> _loadNewReportsCount() async {
@@ -86,7 +105,7 @@ class _DrawerScreenState extends State<DrawerScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const WalletScreen()),
+                MaterialPageRoute(builder: (_) => const WalletScreenUpdated()),
               );
             },
           ),

@@ -29,27 +29,35 @@ class PreTestIntroScreen extends StatelessWidget {
                   const Spacer(),
 
                   // النص
-                  const Text(
-                    "مرحباً بك!\n\n"
-                    "قبل أن تبدأ رحلتك التعليمية في تطبيق Pulse of Sound، "
-                    "ينبغي عليك إجراء اختبار تمهيدي يتألف من 15 سؤالاً.\n\n"
-                    "يجب أن تحصل على 8 إجابات صحيحة على الأقل لتتمكن من متابعة التعلم.\n\n"
-                    "إذا حصلت على أقل من ذلك، يمكنك إعادة الاختبار أو الدخول إلى وضع التدريب "
-                    "للتدرّب على هذه الأسئلة قبل المتابعة.",
-                    style: TextStyle(
-                      fontSize: 20, // 🔥 أكبر شوي
-                      height: 1.7,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black87, // 🔥 ظل أوضح
-                          blurRadius: 6,
-                          offset: Offset(2, 2),
+                  // النص داخل حاوية شفافة لزيادة الوضوح والتناسق
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
-                    textAlign: TextAlign.center,
+                    child: const Text(
+                      "مرحباً بك!\n\n"
+                      "قبل أن تبدأ رحلتك التعليمية في تطبيق Pulse of Sound، "
+                      "ينبغي عليك إجراء اختبار تمهيدي يتألف من 15 سؤالاً.\n\n"
+                      "يجب أن تحصل على 8 إجابات صحيحة على الأقل لتتمكن من متابعة التعلم.\n\n"
+                      "إذا حصلت على أقل من ذلك، يمكنك إعادة الاختبار أو الدخول إلى وضع التدريب "
+                      "للتدرّب على هذه الأسئلة قبل المتابعة.",
+                      style: TextStyle(
+                        fontSize: 19,
+                        height: 1.6,
+                        color: Color(0xFF1A237E), // 🔥 لون نيلي عميق متناسق مع الثيم
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
 
                   const SizedBox(height: 50),

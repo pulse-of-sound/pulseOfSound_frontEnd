@@ -204,6 +204,15 @@ class _QuizScreenState extends State<Pretestscreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.blueAccent),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(

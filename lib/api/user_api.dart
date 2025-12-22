@@ -1425,4 +1425,49 @@ class UserAPI {
       return {"error": "تعذر تسجيل الدخول: $e"};
     }
   }
+
+  /// جلب قائمة الأطباء أو الأخصائيين النفسيين حسب النوع
+  /// providerType: 'Doctor' أو 'Psychologist'
+  static Future<List<Map<String, dynamic>>> getProvidersByType({
+    required String sessionToken,
+    required String providerType,
+  }) async {
+    try {
+      print("🔍 Fetching providers of type: $providerType");
+      
+      final response = await http.post(
+        Uri.parse("$serverUrl/getProvidersByType"),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Session-Token": sessionToken,
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
+        body: jsonEncode({"provider_type": providerType}),
+      );
+      
+      print("📊 Providers Status: ${response.statusCode}");
+      print("📊 Providers Response: ${response.body}");
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is List) {
+          return List<Map<String, dynamic>>.from(data);
+        }
+        return [];
+      } else {
+        try {
+          final error = jsonDecode(response.body);
+          print("❌ Error: ${error['message'] ?? 'Unknown error'}");
+        } catch (e) {
+          print("❌ Failed to parse error response");
+        }
+        return [];
+      }
+    } catch (e) {
+      print("❌ Get Providers Exception: $e");
+      return [];
+    }
+  }
 }
