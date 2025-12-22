@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'api_config.dart';
 
 class AppointmentPlanAPI {
-  // 1) إنشاء خطة موعد جديدة
+  //  إنشاء خطة موعد جديدة
   static Future<Map<String, dynamic>> createAppointmentPlan({
     required String sessionToken,
     required String title,
@@ -43,7 +43,7 @@ class AppointmentPlanAPI {
     }
   }
   
-  // 2) جلب جميع خطط المواعيد المتاحة
+  //  جلب جميع خطط المواعيد المتاحة
   static Future<List<Map<String, dynamic>>> getAvailableAppointmentPlans({
     required String sessionToken,
   }) async {

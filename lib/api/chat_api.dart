@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'api_config.dart';
 
 class ChatGroupAPI {
-  // 1) إنشاء مجموعة محادثة لموعد
+  //  إنشاء مجموعة محادثة لموعد
   static Future<Map<String, dynamic>> createChatGroupForAppointment({
     required String sessionToken,
     required String appointmentId,
@@ -35,7 +35,7 @@ class ChatGroupAPI {
     }
   }
   
-  // 2) جلب مجموعات المحادثة الخاصة بي
+  //  جلب مجموعات المحادثة الخاصة بي
   static Future<List<Map<String, dynamic>>> getMyChatGroups({
     required String sessionToken,
   }) async {
@@ -68,7 +68,7 @@ class ChatGroupAPI {
     }
   }
   
-  // 3) جلب المشاركين في مجموعة محادثة
+  //  جلب المشاركين في مجموعة محادثة
   static Future<List<Map<String, dynamic>>> getChatParticipants({
     required String sessionToken,
     required String chatGroupId,
@@ -104,7 +104,7 @@ class ChatGroupAPI {
     }
   }
   
-  // 4) أرشفة مجموعة محادثة - Admin only
+  //  أرشفة مجموعة محادثة - Admin only
   static Future<Map<String, dynamic>> archiveChatGroup({
     required String sessionToken,
     required String chatGroupId,
@@ -138,7 +138,7 @@ class ChatGroupAPI {
 }
 
 class ChatGroupParticipantAPI {
-  // 1) إزالة مشارك من مجموعة - Admin only
+  //  إزالة مشارك من مجموعة - Admin only
   static Future<Map<String, dynamic>> removeParticipantFromGroup({
     required String sessionToken,
     required String chatGroupId,
@@ -174,7 +174,7 @@ class ChatGroupParticipantAPI {
     }
   }
   
-  // 2) كتم مشارك - Admin only
+  //  كتم مشارك - Admin only
   static Future<Map<String, dynamic>> muteParticipant({
     required String sessionToken,
     required String chatGroupId,
@@ -212,7 +212,7 @@ class ChatGroupParticipantAPI {
     }
   }
   
-  // 3) إلغاء الكتم عن مشارك - Admin only
+  //  إلغاء الكتم عن مشارك - Admin only
   static Future<Map<String, dynamic>> unmuteParticipant({
     required String sessionToken,
     required String chatGroupId,
@@ -248,7 +248,7 @@ class ChatGroupParticipantAPI {
     }
   }
   
-  // 4) جلب المشاركين في مجموعة
+  //  جلب المشاركين في مجموعة
   static Future<List<Map<String, dynamic>>> getParticipantsInGroup({
     required String sessionToken,
     required String chatGroupId,
@@ -286,7 +286,7 @@ class ChatGroupParticipantAPI {
 }
 
 class ChatMessageAPI {
-  // 1) إرسال رسالة
+  // إرسال رسالة
   static Future<Map<String, dynamic>> sendChatMessage({
     required String sessionToken,
     required String chatGroupId,
@@ -324,7 +324,7 @@ class ChatMessageAPI {
     }
   }
   
-  // 2) جلب رسائل مجموعة
+  //  جلب رسائل مجموعة
   static Future<List<Map<String, dynamic>>> getChatMessages({
     required String sessionToken,
     required String chatGroupId,
@@ -360,7 +360,7 @@ class ChatMessageAPI {
     }
   }
   
-  // 3) تعليم رسالة كمقروءة
+  //  تعليم رسالة كمقروءة
   static Future<Map<String, dynamic>> markMessageAsRead({
     required String sessionToken,
     required String chatMessageId,
@@ -392,7 +392,7 @@ class ChatMessageAPI {
     }
   }
   
-  // 4) جلب مجموعات المحادثة الخاصة بالمستخدم
+  //  جلب مجموعات المحادثة الخاصة بالمستخدم
   static Future<List<Map<String, dynamic>>> getUserChatGroups({
     required String sessionToken,
   }) async {
@@ -425,7 +425,7 @@ class ChatMessageAPI {
     }
   }
   
-  // 5) جلب سجل محادثة لمجموعة
+  //  جلب سجل محادثة لمجموعة
   static Future<List<Map<String, dynamic>>> getChatHistory({
     required String sessionToken,
     required String chatGroupId,

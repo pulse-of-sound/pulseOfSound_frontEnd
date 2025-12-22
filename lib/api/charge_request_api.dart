@@ -5,7 +5,7 @@ import 'package:http_parser/http_parser.dart';
 import 'api_config.dart';
 
 class ChargeRequestAPI {
-  // 1) إنشاء طلب شحن رصيد
+  //  إنشاء طلب شحن رصيد
   static Future<Map<String, dynamic>> createChargeRequest({
     required String sessionToken,
     required double amount,
@@ -79,7 +79,7 @@ class ChargeRequestAPI {
     }
   }
 
-  // 2) الموافقة على طلب شحن - Admin only
+  //  الموافقة على طلب شحن - Admin only
   static Future<Map<String, dynamic>> approveChargeRequest({
     required String sessionToken,
     required String chargeRequestId,
@@ -111,7 +111,7 @@ class ChargeRequestAPI {
     }
   }
 
-  // 3) رفض طلب شحن - Admin only
+  //  رفض طلب شحن - Admin only
   static Future<Map<String, dynamic>> rejectChargeRequest({
     required String sessionToken,
     required String chargeRequestId,
@@ -147,7 +147,7 @@ class ChargeRequestAPI {
     }
   }
 
-  // 4) جلب جميع طلبات الشحن - Admin only
+  //  جلب جميع طلبات الشحن - Admin only
   static Future<List<Map<String, dynamic>>> getChargeRequests({
     required String sessionToken,
     String? status, // "pending", "approved", "rejected"

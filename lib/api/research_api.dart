@@ -5,7 +5,7 @@ import 'package:http_parser/http_parser.dart';
 import 'api_config.dart';
 
 class ResearchCategoriesAPI {
-  // 1) إنشاء فئة بحث جديدة - Admin only
+  //  إنشاء فئة بحث جديدة - Admin only
   static Future<Map<String, dynamic>> createResearchCategory({
     required String sessionToken,
     required String name,
@@ -37,16 +37,17 @@ class ResearchCategoriesAPI {
     }
   }
   
-  // 2) جلب جميع فئات البحث
+  //  جلب جميع فئات البحث
   static Future<List<Map<String, dynamic>>> getAllResearchCategories({
     required String sessionToken,
   }) async {
     try {
       print(" Fetching all research categories");
       
-      final response = await http.get(
+      final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/getAllResearchCategories"),
         headers: ApiConfig.getHeadersWithToken(sessionToken),
+        body: jsonEncode({}),
       );
       
       print(" Categories Status: ${response.statusCode}");
@@ -69,7 +70,7 @@ class ResearchCategoriesAPI {
 }
 
 class ResearchPostsAPI {
-  // 1) إرسال مقال بحثي جديد - Doctor/Specialist only
+  //  إرسال مقال بحثي جديد - Doctor/Specialist only
   static Future<Map<String, dynamic>> submitResearchPost({
     required String sessionToken,
     required String title,
@@ -149,16 +150,17 @@ class ResearchPostsAPI {
     }
   }
   
-  // 2) جلب المقالات المعلّقة - Admin only
+  //  جلب المقالات المعلّقة - Admin only
   static Future<List<Map<String, dynamic>>> getPendingResearchPosts({
     required String sessionToken,
   }) async {
     try {
       print(" Fetching pending research posts");
       
-      final response = await http.get(
+      final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/getPendingResearchPosts"),
         headers: ApiConfig.getHeadersWithToken(sessionToken),
+        body: jsonEncode({}),
       );
       
       print(" Pending Posts Status: ${response.statusCode}");
@@ -179,7 +181,7 @@ class ResearchPostsAPI {
     }
   }
   
-  // 3) الموافقة أو رفض مقال - Admin only
+  //  الموافقة أو رفض مقال - Admin only
   static Future<Map<String, dynamic>> approveOrRejectPost({
     required String sessionToken,
     required String postId,
@@ -217,14 +219,15 @@ class ResearchPostsAPI {
     }
   }
   
-  // 4) جلب المقالات المنشورة
+  //  جلب المقالات المنشورة
   static Future<List<Map<String, dynamic>>> getPublishedResearchPosts() async {
     try {
       print(" Fetching published research posts");
       
-      final response = await http.get(
+      final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/getPublishedResearchPosts"),
         headers: ApiConfig.getBaseHeaders(),
+        body: jsonEncode({}),
       );
       
       print(" Published Posts Status: ${response.statusCode}");
@@ -245,18 +248,17 @@ class ResearchPostsAPI {
     }
   }
   
-  // 5) البحث في المقالات المنشورة
+  //  البحث في المقالات المنشورة
   static Future<List<Map<String, dynamic>>> searchResearchPosts({
     required String query,
   }) async {
     try {
       print(" Searching research posts: $query");
       
-      final response = await http.get(
-        Uri.parse("${ApiConfig.baseUrl}/searchResearchPosts").replace(
-          queryParameters: {"query": query},
-        ),
+      final response = await http.post(
+        Uri.parse("${ApiConfig.baseUrl}/searchResearchPosts"),
         headers: ApiConfig.getBaseHeaders(),
+        body: jsonEncode({"query": query}),
       );
       
       print(" Search Status: ${response.statusCode}");
@@ -273,6 +275,37 @@ class ResearchPostsAPI {
       }
     } catch (e) {
       print(" Search Posts Exception: $e");
+      return [];
+    }
+  }
+
+  // جلب مقالاتي (خاصة بالطبيب)
+  static Future<List<Map<String, dynamic>>> getMyResearchPosts({
+    required String sessionToken,
+  }) async {
+    try {
+      print(" Fetching my research posts");
+
+      final response = await http.post(
+        Uri.parse("${ApiConfig.baseUrl}/getMyResearchPosts"),
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
+        body: jsonEncode({}),
+      );
+
+      print(" My Posts Status: ${response.statusCode}");
+      print(" My Posts Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is List) {
+          return List<Map<String, dynamic>>.from(data);
+        }
+        return [];
+      } else {
+        return [];
+      }
+    } catch (e) {
+      print(" Get My Posts Exception: $e");
       return [];
     }
   }

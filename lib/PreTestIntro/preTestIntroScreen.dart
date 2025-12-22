@@ -13,7 +13,7 @@ class PreTestIntroScreen extends StatelessWidget {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("images/pretestIntro.jpg"), // 🔥 الخلفية
+                image: AssetImage("images/pretestIntro.jpg"), // الخلفية
                 fit: BoxFit.cover,
               ),
             ),
@@ -28,12 +28,9 @@ class PreTestIntroScreen extends StatelessWidget {
                 children: [
                   const Spacer(),
 
-                  // النص
-                  // النص داخل حاوية شفافة لزيادة الوضوح والتناسق
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.8),
                       borderRadius: BorderRadius.circular(25),
                       boxShadow: [
                         BoxShadow(
@@ -53,8 +50,9 @@ class PreTestIntroScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 19,
                         height: 1.6,
-                        color: Color(0xFF1A237E), // 🔥 لون نيلي عميق متناسق مع الثيم
-                        fontWeight: FontWeight.bold,
+                        color:
+                            Color(0xFF4A4A4A), //  لون نيلي عميق متناسق مع الثيم
+                        fontWeight: FontWeight.w600,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -65,7 +63,7 @@ class PreTestIntroScreen extends StatelessWidget {
                   // الزر
                   SizedBox(
                     width: MediaQuery.of(context).size.width *
-                        0.6, // 🔥 أصغر من العرض الكامل
+                        0.6, //  أصغر من العرض الكامل
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.pushReplacement(

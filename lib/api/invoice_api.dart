@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'api_config.dart';
 
 class InvoiceAPI {
-  // 1) إنشاء فاتورة لموعد
+  //  إنشاء فاتورة لموعد
   static Future<Map<String, dynamic>> createInvoiceForAppointment({
     required String sessionToken,
     required String appointmentId,
@@ -35,7 +35,7 @@ class InvoiceAPI {
     }
   }
   
-  // 2) تأكيد دفع فاتورة
+  //  تأكيد دفع فاتورة
   static Future<Map<String, dynamic>> confirmInvoicePayment({
     required String sessionToken,
     required String invoiceId,

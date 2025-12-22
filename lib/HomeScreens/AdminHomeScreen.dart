@@ -5,6 +5,7 @@ import 'package:pulse_of_sound/SuperAdminScreens/Specialists/specialistScreen.da
 import '../SuperAdminScreens/Admin/adminScreen.dart';
 import '../SuperAdminScreens/AdminProfile/adminProfileScreen.dart';
 import '../SuperAdminScreens/Articles/admin_articel_screen.dart';
+import '../SuperAdminScreens/Articles/admin_research_categories_screen.dart';
 import '../SuperAdminScreens/Chats/AdminCommunityChatScreen.dart';
 import '../SuperAdminScreens/Childrens/chidScreen.dart';
 import '../SuperAdminScreens/Doctors/doctorsScreen.dart';
@@ -121,6 +122,11 @@ class AdminHome extends StatelessWidget {
                           "المقالات",
                           "icons/icons8-article-48.png",
                           const AdminReviewArticlesScreen()),
+                      _buildGlassCard(
+                          context,
+                          "فئات البحث",
+                          "icons/icons8-dashboard-40.png",
+                          const AdminResearchCategoriesScreen()),
                     ]);
 
                     return GridView.count(

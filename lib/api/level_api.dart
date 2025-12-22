@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'api_config.dart';
 
 class LevelAPI {
-  // 1) إضافة مستوى جديد
+  //  إضافة مستوى جديد
   static Future<Map<String, dynamic>> addLevelByAdmin({
     required String name,
     String? description,
@@ -40,7 +40,7 @@ class LevelAPI {
     }
   }
   
-  // 2) جلب جميع المستويات
+  //  جلب جميع المستويات
   static Future<List<Map<String, dynamic>>> getAllLevels() async {
     try {
       print(" Fetching all levels");
@@ -72,7 +72,7 @@ class LevelAPI {
     }
   }
   
-  // 3) جلب مستوى حسب ID
+  //  جلب مستوى حسب ID
   static Future<Map<String, dynamic>> getLevelById({
     required String levelId,
   }) async {
@@ -103,18 +103,18 @@ class LevelAPI {
     }
   }
   
-  // 4) حذف مستوى - Admin only
+  //  حذف مستوى - Admin only
   static Future<Map<String, dynamic>> deleteLevel({
     required String sessionToken,
     required String levelId,
   }) async {
     try {
-      print("🗑️ Deleting level: $levelId");
-      print("🔑 SessionToken: $sessionToken");
-      print("🔑 Token length: ${sessionToken.length}");
+      print(" Deleting level: $levelId");
+      print(" SessionToken: $sessionToken");
+      print(" Token length: ${sessionToken.length}");
       
       final headers = ApiConfig.getHeadersWithToken(sessionToken);
-      print("📤 Headers: $headers");
+      print(" Headers: $headers");
       
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/deleteLevel"),
@@ -122,8 +122,8 @@ class LevelAPI {
         body: jsonEncode({"level_id": levelId}),
       );
       
-      print("📥 Delete Level Status: ${response.statusCode}");
-      print("📥 Delete Level Response: ${response.body}");
+      print(" Delete Level Status: ${response.statusCode}");
+      print(" Delete Level Response: ${response.body}");
       
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -135,14 +135,14 @@ class LevelAPI {
         }
       }
     } catch (e) {
-      print("❌ Delete Level Exception: $e");
+      print(" Delete Level Exception: $e");
       return {"error": "تعذر حذف المستوى: $e"};
     }
   }
 }
 
 class LevelGameAPI {
-  // 1) إضافة مرحلة جديدة لمستوى
+  //  إضافة مرحلة جديدة لمستوى
   static Future<Map<String, dynamic>> addLevelGameByAdmin({
     required String sessionToken,
     required String levelId,
@@ -150,8 +150,8 @@ class LevelGameAPI {
     required int order,
   }) async {
     try {
-      print("➕ Adding level game: $name to level: $levelId, order=$order");
-      print("🔑 SessionToken: $sessionToken");
+      print(" Adding level game: $name to level: $levelId, order=$order");
+      print(" SessionToken: $sessionToken");
       
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/addLevelGameByAdmin"),
@@ -163,8 +163,8 @@ class LevelGameAPI {
         }),
       );
       
-      print("📥 Add Level Game Status: ${response.statusCode}");
-      print("📥 Add Level Game Response: ${response.body}");
+      print(" Add Level Game Status: ${response.statusCode}");
+      print(" Add Level Game Response: ${response.body}");
       
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -176,7 +176,7 @@ class LevelGameAPI {
         }
       }
     } catch (e) {
-      print("❌ Add Level Game Exception: $e");
+      print(" Add Level Game Exception: $e");
       return {"error": "تعذر إضافة المرحلة: $e"};
     }
   }

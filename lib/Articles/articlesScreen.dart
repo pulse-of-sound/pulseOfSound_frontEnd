@@ -1,6 +1,6 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
-import '../../Doctor/utils/doctor_articles_prefs.dart';
+import '../api/research_api.dart';
 import 'articleDetailScreen.dart';
 
 class ArticlesScreen extends StatefulWidget {
@@ -12,6 +12,7 @@ class ArticlesScreen extends StatefulWidget {
 
 class _ArticlesScreenState extends State<ArticlesScreen> {
   List<Map<String, dynamic>> _articles = [];
+  bool isLoading = true;
   String _searchQuery = "";
 
   @override
@@ -21,42 +22,27 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
   }
 
   Future<void> _loadArticles() async {
-    // نحمل المقالات الموافق عليها فقط
-    final approved = await DoctorArticlesPrefs.loadApprovedArticles();
-
-    // لو لسه فاضية (للتجربة أول مرة) نحط المقالات القديمة تبعك
-    if (approved.isEmpty) {
-      _articles = [
-        {
-          "title": "العناية بجهاز القوقعة",
-          "description":
-              "تعرف على أهم الخطوات للحفاظ على جهاز القوقعة بحالة ممتازة.",
-          "image": "images/articles1.jpg",
-        },
-        {
-          "title": "تمارين السمع للأطفال",
-          "description":
-              "أنشطة وتمارين تساعد الطفل على تحسين مهارات السمع بعد الزراعة.",
-          "image": "images/articles2.jpg",
-        },
-        {
-          "title": "المتابعة الطبية الدورية",
-          "description": "أهمية المتابعة المنتظمة مع الطبيب بعد عملية الزراعة.",
-          "image": "images/articles3.jpg",
-        },
-      ];
-    } else {
-      // نحول المقالات من SharedPreferences إلى الشكل المطلوب
-      _articles = approved.map((a) {
-        return {
-          "title": a["title"],
-          "description": a["content"],
-          "image": "images/articles1.jpg", // ممكن لاحقاً الطبيب يرسل صورة
-        };
-      }).toList();
+    setState(() => isLoading = true);
+    try {
+      final posts = await ResearchPostsAPI.getPublishedResearchPosts();
+      setState(() {
+        _articles = posts.map((p) {
+          return {
+            "title": p["title"],
+            "description": p["body"],
+            "image": "images/articles1.jpg", // Default image if none provided
+            "author": p["author"]["name"],
+            "category": p["category"],
+            "date": p["created_at"],
+            "document_url": p["document_url"],
+          };
+        }).toList();
+      });
+    } catch (e) {
+      print("Error loading articles: $e");
+    } finally {
+      setState(() => isLoading = false);
     }
-
-    setState(() {});
   }
 
   @override
@@ -113,7 +99,11 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
 
                   // قائمة المقالات
                   Expanded(
-                    child: Center(
+                    child: isLoading 
+                        ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                        : filtered.isEmpty
+                        ? const Center(child: Text("لا توجد مقالات متاحة حالياً", style: TextStyle(color: Colors.white, fontSize: 16)))
+                        : Center(
                       child: Container(
                         width: MediaQuery.of(context).size.width * 0.9,
                         height: MediaQuery.of(context).size.height * 0.7,
@@ -161,7 +151,7 @@ class _ArticlesScreenState extends State<ArticlesScreen> {
                                     ),
                                   ),
                                   subtitle: Text(
-                                    art["description"]!,
+                                    "${art["author"]} | ${art["category"]}",
                                     textAlign: TextAlign.right,
                                     style: const TextStyle(fontSize: 12),
                                   ),

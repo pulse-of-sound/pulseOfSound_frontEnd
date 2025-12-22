@@ -11,7 +11,7 @@ class TrainingQuestionAPI {
       String url = fixed['question_image_url'] as String;
       if (url.contains('[object Object]')) {
         fixed['question_image_url'] = '';
-        print("⚠️ WARNING: Invalid question_image_url detected");
+        print(" WARNING: Invalid question_image_url detected");
       } else {
         fixed['question_image_url'] = ApiConfig.fixUrlHost(url);
       }
@@ -27,7 +27,7 @@ class TrainingQuestionAPI {
           String url = value;
           if (url.contains('[object Object]')) {
             options[key] = '';
-            print("⚠️ WARNING: Invalid option URL detected for option $key");
+            print(" WARNING: Invalid option URL detected for option $key");
           } else {
             options[key] = ApiConfig.fixUrlHost(url);
           }
@@ -41,7 +41,7 @@ class TrainingQuestionAPI {
     return fixed;
   }
 
-  // 1) جلب السؤال التدريبي التالي
+  // جلب السؤال التدريبي التالي
   static Future<Map<String, dynamic>> getNextTrainingQuestion({
     required String sessionToken,
     required String questionId,

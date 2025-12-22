@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'api_config.dart';
 
 class ChildProfileAPI {
-  // 1) جلب أو إنشاء ملف الطفل الخاص بي
+  //  جلب أو إنشاء ملف الطفل الخاص بي
   static Future<Map<String, dynamic>> getMyChildProfile({
     required String sessionToken,
   }) async {
@@ -33,7 +33,7 @@ class ChildProfileAPI {
     }
   }
   
-  // 2) إنشاء أو تحديث ملف طفل
+  //  إنشاء أو تحديث ملف طفل
   static Future<Map<String, dynamic>> createOrUpdateChildProfile({
     required String childId,
     String? name,
@@ -78,7 +78,7 @@ class ChildProfileAPI {
 }
 
 class ChildLevelAPI {
-  // 1) تعيين مستوى للطفل إذا نجح
+  //  تعيين مستوى للطفل إذا نجح
   static Future<Map<String, dynamic>> assignChildLevelIfPassed({
     required String sessionToken,
     required String childId,
@@ -110,7 +110,7 @@ class ChildLevelAPI {
     }
   }
   
-  // 2) جلب المرحلة الحالية للطفل
+  //  جلب المرحلة الحالية للطفل
   static Future<Map<String, dynamic>> getCurrentStageForChild({
     required String sessionToken,
     required String childId,
@@ -142,7 +142,7 @@ class ChildLevelAPI {
     }
   }
   
-  // 3) التقدم أو إعادة المرحلة
+  //  التقدم أو إعادة المرحلة
   static Future<Map<String, dynamic>> advanceOrRepeatStage({
     required String sessionToken,
     required String childId,
@@ -180,7 +180,7 @@ class ChildLevelAPI {
     }
   }
   
-  // 4) التحقق من إكمال المستوى
+  //  التحقق من إكمال المستوى
   static Future<Map<String, dynamic>> getLevelCompletionStatus({
     required String sessionToken,
     required String childId,
@@ -212,7 +212,7 @@ class ChildLevelAPI {
     }
   }
   
-  // 5) التحقق من إكمال مرحلة معينة
+  //  التحقق من إكمال مرحلة معينة
   static Future<Map<String, dynamic>> getStageCompletionStatus({
     required String sessionToken,
     required String childId,

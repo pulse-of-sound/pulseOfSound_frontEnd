@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'api_config.dart';
 
 class UserStageStatusAPI {
-  // 1) تعليم مرحلة كمكتملة
+ 
   static Future<Map<String, dynamic>> markStageCompleted({
     required String sessionToken,
     required String levelGameId,
@@ -39,7 +39,7 @@ class UserStageStatusAPI {
     }
   }
   
-  // 2) جلب حالة مراحل المستخدم
+  //  جلب حالة مراحل المستخدم
   static Future<List<Map<String, dynamic>>> getUserStageStatus({
     required String sessionToken,
   }) async {
@@ -73,7 +73,7 @@ class UserStageStatusAPI {
     }
   }
   
-  // 3) إعادة تعيين تقدم المرحلة
+  //  إعادة تعيين تقدم المرحلة
   static Future<Map<String, dynamic>> resetStageProgress({
     required String sessionToken,
     required String levelGameId,
@@ -105,7 +105,7 @@ class UserStageStatusAPI {
     }
   }
   
-  // 4) تعديل حالة مرحلة بواسطة الأدمن - Admin only
+  //  تعديل حالة مرحلة بواسطة الأدمن - Admin only
   static Future<Map<String, dynamic>> adminOverrideStageStatus({
     required String sessionToken,
     required String levelGameId,

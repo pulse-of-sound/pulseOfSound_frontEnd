@@ -6,7 +6,7 @@ class UserAPI {
   static final String serverUrl = ApiConfig.baseUrl;
   static const String appId = ApiConfig.appId;
 
-  // 1) LOGIN FUNCTIONS
+  //  LOGIN FUNCTIONS
 
   static Future<Map<String, dynamic>> loginUser(
       String username, String password) async {
@@ -46,7 +46,7 @@ class UserAPI {
         print(" DEBUG loginUser: userId = '$userId'");
         print(" DEBUG loginUser: username = '$usernameFromResponse'");
 
-        // إذا كان sessionToken فارغاً، حاول الحصول عليه من Parse's login endpoint
+        // إذا كان sessionToken فارغاً، حاول الحصول عليه من 
         if (sessionToken.isEmpty) {
           print(
               " DEBUG loginUser: sessionToken is empty, fetching from Parse login endpoint...");
@@ -59,7 +59,7 @@ class UserAPI {
           }
         }
 
-        // محاولة جلب الـ role
+        // محاولة جلب  role
         var roleData = await _fetchUserRole(userId, sessionToken);
         var role = roleData["role"] ?? "User";
 
@@ -129,7 +129,7 @@ class UserAPI {
     try {
       print(" Fetching sessionToken from Parse login endpoint...");
 
-      // استخدام Parse REST API login endpoint directly
+      
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/../login"),
         headers: {
@@ -166,7 +166,7 @@ class UserAPI {
   static Future<Map<String, dynamic>> _fetchUserRole(
       String userId, String sessionToken) async {
     try {
-      // محاولة 1: جلب الـ role من user object مع include
+  
       final url = Uri.parse("$serverUrl/../classes/_User/$userId?include=role");
       print(" Fetching role from: $url");
 
@@ -189,7 +189,7 @@ class UserAPI {
         final role = _extractRole(userData);
         print(" Extracted role: $role");
 
-        // إذا تم العثور على role، أرجعها
+      
         if (role != "User") {
           return {
             "role": role,
@@ -198,7 +198,7 @@ class UserAPI {
         }
       }
 
-      // محاولة 2: البحث عن الـ role من خلال Parse Roles API
+      
       try {
         final rolesUrl = Uri.parse("$serverUrl/../roles");
         print(" Fetching roles from: $rolesUrl");
@@ -219,7 +219,7 @@ class UserAPI {
               rolesData["results"] is List) {
             final roles = rolesData["results"] as List;
 
-            // البحث عن الـ role الذي يحتوي على هذا المستخدم
+            
             for (var roleObj in roles) {
               if (roleObj is Map && roleObj.containsKey("users")) {
                 final users = roleObj["users"];
@@ -246,7 +246,7 @@ class UserAPI {
         print(" Roles API Exception: $e");
       }
 
-      // محاولة 3: البحث في user object مباشرة عن حقل role
+      
       try {
         final userUrl = Uri.parse("$serverUrl/../classes/_User/$userId");
         final userResponse = await http.get(
@@ -263,7 +263,7 @@ class UserAPI {
         if (userResponse.statusCode == 200) {
           final userData = jsonDecode(userResponse.body);
 
-          // البحث عن role في user object
+          
           if (userData.containsKey("role")) {
             final role = _extractRole(userData);
             if (role != "User") {
@@ -275,7 +275,7 @@ class UserAPI {
             }
           }
 
-          // البحث عن role في username أو fullName
+          
           final username = userData["username"] ?? "";
           if (username.toLowerCase().contains("superadmin") ||
               username.toLowerCase().contains("super_admin")) {
@@ -303,7 +303,7 @@ class UserAPI {
       print(" Role data type: ${role.runtimeType}, value: $role");
 
       if (role is String) {
-        // تحويل إلى الصيغة الصحيحة
+        
         if (role.toUpperCase() == "SUPER_ADMIN" || role == "SuperAdmin") {
           return "SUPER_ADMIN";
         }
@@ -328,7 +328,7 @@ class UserAPI {
       }
     }
 
-    // البحث في الحقول الأخرى
+  
     if (data.containsKey("username")) {
       final username = data["username"]?.toString().toLowerCase() ?? "";
       if (username.contains("superadmin") || username.contains("super_admin")) {
@@ -339,7 +339,7 @@ class UserAPI {
     return "User";
   }
 
-  // 2) GET MY PROFILE
+  
 
   static Future<Map<String, dynamic>> getMyProfile(String sessionToken) async {
     try {
@@ -371,7 +371,7 @@ class UserAPI {
     }
   }
 
-  // 3) UPDATE MY ACCOUNT
+  
 
   static Future<Map<String, dynamic>> updateMyAccount(
     String sessionToken, {
@@ -419,7 +419,7 @@ class UserAPI {
     }
   }
 
-  // 3) LOGOUT
+  
 
   static Future<Map<String, dynamic>> logout(String sessionToken) async {
     try {
@@ -449,8 +449,6 @@ class UserAPI {
       return {"message": "تم تسجيل الخروج"};
     }
   }
-
-  // 5) ADD/EDIT DOCTOR
 
   static Future<Map<String, dynamic>> addEditDoctor(
     String sessionToken, {
@@ -494,8 +492,7 @@ class UserAPI {
       return {"error": "تعذر إضافة الطبيب: $e"};
     }
   }
-
-  // 6) ADD/EDIT SPECIALIST
+  
 
   static Future<Map<String, dynamic>> addEditSpecialist(
     String sessionToken, {
@@ -540,7 +537,7 @@ class UserAPI {
     }
   }
 
-  // 7) ADD/EDIT ADMIN
+  
 
   static Future<Map<String, dynamic>> addEditAdmin(
     String sessionToken, {
@@ -585,7 +582,7 @@ class UserAPI {
     }
   }
 
-  // 8) GET ALL DOCTORS
+  
 
   static Future<List<Map<String, dynamic>>> getAllDoctors(
       String sessionToken) async {
@@ -621,7 +618,7 @@ class UserAPI {
     }
   }
 
-  // 9) GET ALL SPECIALISTS
+  
 
   static Future<List<Map<String, dynamic>>> getAllSpecialists(
       String sessionToken) async {
@@ -657,7 +654,7 @@ class UserAPI {
     }
   }
 
-  // 10) GET ALL ADMINS
+  
 
   static Future<List<Map<String, dynamic>>> getAllAdmins(
       String sessionToken) async {
@@ -700,7 +697,7 @@ class UserAPI {
     }
   }
 
-  // 11) CREATE SYSTEM ROLES IF MISSING
+  
 
   static Future<Map<String, dynamic>> createSystemRolesIfMissing(
       String sessionToken) async {
@@ -733,7 +730,6 @@ class UserAPI {
     }
   }
 
-  // 12) DELETE DOCTOR
 
   static Future<Map<String, dynamic>> deleteDoctor(
       String sessionToken, String doctorId) async {
@@ -777,7 +773,7 @@ class UserAPI {
     }
   }
 
-  // 13) DELETE SPECIALIST
+  
 
   static Future<Map<String, dynamic>> deleteSpecialist(
       String sessionToken, String specialistId) async {
@@ -814,7 +810,7 @@ class UserAPI {
     }
   }
 
-  // 17) ADD/EDIT CHILD
+  //  ADD/EDIT CHILD
 
   static Future<Map<String, dynamic>> addEditChild(String sessionToken,
       {String? childId,
@@ -871,8 +867,8 @@ class UserAPI {
     }
   }
 
-  // // 18) GET ALL CHILDREN
-  //
+
+  
 
   static Future<List<Map<String, dynamic>>> getAllChildren(
       String sessionToken) async {
@@ -908,8 +904,8 @@ class UserAPI {
     }
   }
 
-  // // 19) DELETE CHILD
-  //
+
+  
 
   static Future<Map<String, dynamic>> deleteChild(
       String sessionToken, String childId) async {
@@ -946,7 +942,6 @@ class UserAPI {
     }
   }
 
-  // 20) LOGIN WITH MOBILE
 
   static Future<Map<String, dynamic>> loginWithMobile(
       String mobileNumber, String otp) async {
@@ -986,7 +981,7 @@ class UserAPI {
     }
   }
 
-  // 21) ADD SYSTEM USER
+  //  ADD SYSTEM USER
 
   static Future<Map<String, dynamic>> addSystemUser(
     String sessionToken, {
@@ -1039,7 +1034,7 @@ class UserAPI {
     }
   }
 
-  // 23) DELETE ADMIN
+  //  DELETE ADMIN
 
   static Future<Map<String, dynamic>> deleteAdmin(
       String sessionToken, String adminId) async {
@@ -1076,7 +1071,7 @@ class UserAPI {
     }
   }
 
-  // 24) CREATE ROLE
+  //  CREATE ROLE
 
   static Future<Map<String, dynamic>> createRole(
       String sessionToken, String roleName) async {
@@ -1115,7 +1110,7 @@ class UserAPI {
     }
   }
 
-  // 25) GET MY CHILD PROFILE
+  //  GET MY CHILD PROFILE
 
   static Future<Map<String, dynamic>> getMyChildProfile(
       String sessionToken) async {
@@ -1151,7 +1146,7 @@ class UserAPI {
     }
   }
 
-  // 26) CREATE OR UPDATE CHILD PROFILE
+  //  CREATE OR UPDATE CHILD PROFILE
 
   static Future<Map<String, dynamic>> createOrUpdateChildProfile(
     String childId, {
@@ -1204,7 +1199,7 @@ class UserAPI {
     }
   }
 
-  // 27) GENERATE OTP
+  //  GENERATE OTP
 
   static Future<Map<String, dynamic>> generateOTP(String mobileNumber) async {
     try {
@@ -1241,7 +1236,7 @@ class UserAPI {
     }
   }
 
-  // 28) RESEND OTP
+  //  RESEND OTP
 
   static Future<Map<String, dynamic>> resendOTP(String mobileNumber) async {
     try {
@@ -1278,7 +1273,7 @@ class UserAPI {
     }
   }
 
-  // 29) MUTE/UNMUTE CHILD
+  //  MUTE/UNMUTE CHILD
 
   static Future<Map<String, dynamic>> muteChild(
       String sessionToken, String childId) async {
@@ -1350,7 +1345,7 @@ class UserAPI {
     }
   }
 
-  // 30) VERIFY OTP
+  //  VERIFY OTP
 
   static Future<Map<String, dynamic>> verifyOTP(
       String mobileNumber, String otp) async {
@@ -1389,7 +1384,7 @@ class UserAPI {
     }
   }
 
-  // 30) LOGIN AFTER OTP (معلّق/غير مفعّل)
+
 
   static Future<Map<String, dynamic>> loginAfterOTP(String mobileNumber) async {
     try {
@@ -1426,14 +1421,12 @@ class UserAPI {
     }
   }
 
-  /// جلب قائمة الأطباء أو الأخصائيين النفسيين حسب النوع
-  /// providerType: 'Doctor' أو 'Psychologist'
   static Future<List<Map<String, dynamic>>> getProvidersByType({
     required String sessionToken,
     required String providerType,
   }) async {
     try {
-      print("🔍 Fetching providers of type: $providerType");
+      print(" Fetching providers of type: $providerType");
       
       final response = await http.post(
         Uri.parse("$serverUrl/getProvidersByType"),
@@ -1447,8 +1440,8 @@ class UserAPI {
         body: jsonEncode({"provider_type": providerType}),
       );
       
-      print("📊 Providers Status: ${response.statusCode}");
-      print("📊 Providers Response: ${response.body}");
+      print(" Providers Status: ${response.statusCode}");
+      print(" Providers Response: ${response.body}");
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -1459,14 +1452,14 @@ class UserAPI {
       } else {
         try {
           final error = jsonDecode(response.body);
-          print("❌ Error: ${error['message'] ?? 'Unknown error'}");
+          print(" Error: ${error['message'] ?? 'Unknown error'}");
         } catch (e) {
-          print("❌ Failed to parse error response");
+          print(" Failed to parse error response");
         }
         return [];
       }
     } catch (e) {
-      print("❌ Get Providers Exception: $e");
+      print(" Get Providers Exception: $e");
       return [];
     }
   }

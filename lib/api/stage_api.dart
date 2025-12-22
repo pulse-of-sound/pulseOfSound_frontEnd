@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'api_config.dart';
 
 class StageQuestionAPI {
-  // 1) إضافة أسئلة إلى مرحلة - Admin only
+  //  إضافة أسئلة إلى مرحلة - Admin only
   static Future<Map<String, dynamic>> addQuestionsToStage({
     required String sessionToken,
     required String levelGameId,
@@ -39,7 +39,7 @@ class StageQuestionAPI {
     }
   }
   
-  // 2) حذف أسئلة مرحلة حسب IDs - Admin only
+  //  حذف أسئلة مرحلة حسب IDs - Admin only
   static Future<Map<String, dynamic>> deleteStageQuestionsByIds({
     required String sessionToken,
     required List<String> questionIds,
@@ -71,7 +71,7 @@ class StageQuestionAPI {
     }
   }
   
-  // 3) جلب أسئلة مرحلة معينة
+  //  جلب أسئلة مرحلة معينة
   static Future<List<Map<String, dynamic>>> getStageQuestions({
     required String sessionToken,
     required String levelGameId,
@@ -108,7 +108,7 @@ class StageQuestionAPI {
 }
 
 class StageResultAPI {
-  // 1) إرسال إجابات مرحلة
+  //  إرسال إجابات مرحلة
   static Future<Map<String, dynamic>> submitStageAnswers({
     required String sessionToken,
     required String levelGameId,
@@ -144,7 +144,7 @@ class StageResultAPI {
     }
   }
   
-  // 2) جلب نتيجة مرحلة
+  //  جلب نتيجة مرحلة
   static Future<Map<String, dynamic>> getStageResult({
     required String sessionToken,
     required String levelGameId,
@@ -176,7 +176,7 @@ class StageResultAPI {
     }
   }
   
-  // 3) جلب سجل محاولات المرحلة
+  //  جلب سجل محاولات المرحلة
   static Future<List<Map<String, dynamic>>> getStageHistory({
     required String sessionToken,
     required String levelGameId,

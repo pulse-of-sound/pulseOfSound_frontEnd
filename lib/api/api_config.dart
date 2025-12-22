@@ -56,6 +56,7 @@ class ApiConfig {
     return {
       "Content-Type": "application/json",
       "X-Parse-Application-Id": appId,
+      "X-Parse-Master-Key": masterKey,
     };
   }
   

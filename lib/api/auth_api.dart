@@ -10,8 +10,8 @@ class AuthAPI {
     "X-Parse-Application-Id": appId,
   };
 
-// 1) إرسال OTP
-// endpoint = sendOtp
+// إرسال OTP
+
 
   static Future<Map<String, dynamic>> generateOTP(String mobile) async {
     try {
@@ -122,8 +122,8 @@ class AuthAPI {
   }
 
 
-// 2) تسجيل دخول المستخدم (الطفل) عبر رقم الهاتف + OTP
-// endpoint = loginWithMobile
+//  تسجيل دخول المستخدم (الطفل) عبر رقم الهاتف + OTP
+
 
   static Future<Map<String, dynamic>> loginWithMobile(
       String mobile, String otp) async {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../Colors/colors.dart';
-import '../utils/doctor_articles_prefs.dart';
+import '../../api/research_api.dart';
+import '../../utils/api_helpers.dart';
 
 class DoctorArticlesScreen extends StatefulWidget {
   const DoctorArticlesScreen({super.key});
@@ -13,38 +14,86 @@ class _DoctorArticlesScreenState extends State<DoctorArticlesScreen> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
   List<Map<String, dynamic>> myArticles = [];
+  List<Map<String, dynamic>> categories = [];
+  String? selectedCategory;
+  bool isLoading = true;
+  bool isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
-    _loadArticles();
+    _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
+    setState(() => isLoading = true);
+    await Future.wait([
+      _loadCategories(),
+      _loadArticles(),
+    ]);
+    setState(() => isLoading = false);
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final token = await APIHelpers.getSessionToken();
+      final cats = await ResearchCategoriesAPI.getAllResearchCategories(sessionToken: token);
+      setState(() {
+        categories = cats;
+        if (categories.isNotEmpty) {
+          selectedCategory = categories.first['name'];
+        }
+      });
+    } catch (e) {
+      print("Error loading categories: $e");
+    }
   }
 
   Future<void> _loadArticles() async {
-    final articles = await DoctorArticlesPrefs.loadDoctorArticles();
-    setState(() => myArticles = articles);
+    try {
+      final token = await APIHelpers.getSessionToken();
+      final articles = await ResearchPostsAPI.getMyResearchPosts(sessionToken: token);
+      setState(() => myArticles = articles);
+    } catch (e) {
+      print("Error loading articles: $e");
+    }
   }
 
   Future<void> _submitArticle() async {
     final title = titleController.text.trim();
     final content = contentController.text.trim();
-    if (title.isEmpty || content.isEmpty) return;
+    if (title.isEmpty || content.isEmpty || selectedCategory == null) {
+      APIHelpers.showErrorDialog(context, "الرجاء ملء جميع الحقول واختيار فئة");
+      return;
+    }
 
-    await DoctorArticlesPrefs.submitArticle({
-      "title": title,
-      "content": content,
-      "status": "pending",
-      "date": DateTime.now().toIso8601String(),
-    });
+    setState(() => isSubmitting = true);
+    try {
+      final token = await APIHelpers.getSessionToken();
+      final result = await ResearchPostsAPI.submitResearchPost(
+        sessionToken: token,
+        title: title,
+        body: content,
+        categoryName: selectedCategory!,
+      );
 
-    titleController.clear();
-    contentController.clear();
-    await _loadArticles();
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("تم إرسال المقال للمراجعة")),
-    );
+      if (result.containsKey('error')) {
+        if (mounted) APIHelpers.showErrorDialog(context, result['error']);
+      } else {
+        titleController.clear();
+        contentController.clear();
+        await _loadArticles();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("تم إرسال المقال للمراجعة")),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) APIHelpers.showErrorDialog(context, "حدث خطأ أثناء إرسال المقال: $e");
+    } finally {
+      setState(() => isSubmitting = false);
+    }
   }
 
   @override
@@ -81,7 +130,10 @@ class _DoctorArticlesScreenState extends State<DoctorArticlesScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 40),
+                  IconButton(
+                    icon: const Icon(Icons.refresh, color: Colors.white),
+                    onPressed: _loadInitialData,
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -96,6 +148,34 @@ class _DoctorArticlesScreenState extends State<DoctorArticlesScreen> {
                 ),
               ),
               const SizedBox(height: 10),
+              if (categories.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: selectedCategory,
+                      isExpanded: true,
+                      hint: const Text("اختر فئة البحث"),
+                      items: categories.map((cat) {
+                        return DropdownMenuItem<String>(
+                          value: cat['name'],
+                          child: Text(cat['name']),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        setState(() => selectedCategory = val);
+                      },
+                    ),
+                  ),
+                )
+              else if (!isLoading)
+                const Text("لا توجد فئات متاحة حالياً", style: TextStyle(color: Colors.white)),
+              const SizedBox(height: 10),
               TextField(
                 controller: contentController,
                 maxLines: 4,
@@ -109,17 +189,21 @@ class _DoctorArticlesScreenState extends State<DoctorArticlesScreen> {
               ),
               const SizedBox(height: 10),
               ElevatedButton(
-                onPressed: _submitArticle,
+                onPressed: isSubmitting ? null : _submitArticle,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.skyBlue,
                   foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 45),
                 ),
-                child: const Text("إرسال المقال"),
+                child: isSubmitting 
+                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : const Text("إرسال المقال"),
               ),
               const SizedBox(height: 15),
               Expanded(
-                child: myArticles.isEmpty
+                child: isLoading 
+                    ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                    : myArticles.isEmpty
                     ? const Center(
                         child: Text("لم ترسل أي مقالات بعد",
                             style:
@@ -128,6 +212,7 @@ class _DoctorArticlesScreenState extends State<DoctorArticlesScreen> {
                         itemCount: myArticles.length,
                         itemBuilder: (context, index) {
                           final a = myArticles[index];
+                          final status = a["status"];
                           return Card(
                             color: Colors.white.withOpacity(0.9),
                             margin: const EdgeInsets.symmetric(vertical: 8),
@@ -135,19 +220,26 @@ class _DoctorArticlesScreenState extends State<DoctorArticlesScreen> {
                                 borderRadius: BorderRadius.circular(14)),
                             child: ListTile(
                               title: Text(a["title"]),
-                              subtitle: Text(
-                                a["status"] == "pending"
-                                    ? "قيد المراجعة"
-                                    : a["status"] == "approved"
-                                        ? "تمت الموافقة"
-                                        : "مرفوض",
-                                style: TextStyle(
-                                  color: a["status"] == "approved"
-                                      ? Colors.green
-                                      : a["status"] == "rejected"
-                                          ? Colors.red
-                                          : Colors.orangeAccent,
-                                ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("الفئة: ${a["category"]}"),
+                                  Text(
+                                    status == "pending"
+                                        ? "قيد المراجعة"
+                                        : status == "published"
+                                            ? "تمت الموافقة والنشر"
+                                            : "مرفوض: ${a["rejection_reason"] ?? 'بدون سبب'}",
+                                    style: TextStyle(
+                                      color: status == "published"
+                                          ? Colors.green
+                                          : status == "rejected"
+                                              ? Colors.red
+                                              : Colors.orangeAccent,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           );

@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'api_config.dart';
 
 class WalletAPI {
-  // 1) جلب رصيد المحفظة
+  //  جلب رصيد المحفظة
   static Future<Map<String, dynamic>> getWalletBalance({
     required String sessionToken,
   }) async {
@@ -36,7 +36,7 @@ class WalletAPI {
 }
 
 class WalletTransactionAPI {
-  // 1) إنشاء معاملة محفظة
+  //  إنشاء معاملة محفظة
   static Future<Map<String, dynamic>> createWalletTransaction({
     required String sessionToken,
     required String fromWalletId,
@@ -78,7 +78,7 @@ class WalletTransactionAPI {
     }
   }
   
-  // 2) جلب معاملات محفظة معينة
+  //  جلب معاملات محفظة معينة
   static Future<List<Map<String, dynamic>>> getWalletTransactions({
     required String sessionToken,
     required String walletId,
@@ -119,7 +119,7 @@ class WalletTransactionAPI {
     }
   }
   
-  // 3) جلب معاملات مرتبطة بموعد
+  //  جلب معاملات مرتبطة بموعد
   static Future<List<Map<String, dynamic>>> getTransactionsByAppointment({
     required String sessionToken,
     required String appointmentId,
@@ -154,7 +154,7 @@ class WalletTransactionAPI {
     }
   }
   
-  // 4) عكس معاملة (Reversal) - Admin only
+  //  عكس معاملة (Reversal) - Admin only
   static Future<Map<String, dynamic>> reverseTransaction({
     required String sessionToken,
     required String transactionId,
@@ -190,7 +190,7 @@ class WalletTransactionAPI {
     }
   }
   
-  // 5) جلب تفاصيل معاملة محددة
+  //  جلب تفاصيل معاملة محددة
   static Future<Map<String, dynamic>> getTransactionById({
     required String sessionToken,
     required String transactionId,

@@ -78,7 +78,7 @@ class PlacementTestAPI {
     }
   }
 
-  // 2) جلب سؤال حسب الفهرس - Child only
+  //  جلب سؤال حسب الفهرس - Child only
   static Future<Map<String, dynamic>> getPlacementTestQuestionByIndex({
     required String sessionToken,
     required int index,
@@ -117,7 +117,7 @@ class PlacementTestAPI {
     }
   }
 
-  // 3) إرسال إجابات اختبار المستوى
+  //  إرسال إجابات اختبار المستوى
   static Future<Map<String, dynamic>> submitPlacementTestAnswers({
     required String sessionToken,
     required List<Map<String, String>>

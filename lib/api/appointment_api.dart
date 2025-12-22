@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'api_config.dart';
 
 class AppointmentAPI {
-  // 1) طلب موعد مع أخصائي نفسي
+  //  طلب موعد مع أخصائي نفسي
   static Future<Map<String, dynamic>> requestPsychologistAppointment({
     required String sessionToken,
     required String childId,
@@ -43,7 +43,7 @@ class AppointmentAPI {
     }
   }
   
-  // 2) جلب مواعيد طفل معين
+  //  جلب مواعيد طفل معين
   static Future<List<Map<String, dynamic>>> getChildAppointments({
     required String sessionToken,
     required String childId,
@@ -75,7 +75,7 @@ class AppointmentAPI {
     }
   }
   
-  // 3) جلب تفاصيل موعد محدد
+  //  جلب تفاصيل موعد محدد
   static Future<Map<String, dynamic>> getAppointmentDetails({
     required String sessionToken,
     required String appointmentId,
@@ -107,7 +107,7 @@ class AppointmentAPI {
     }
   }
   
-  // 4) جلب المواعيد المعلّقة للمزوّد
+  //  جلب المواعيد المعلّقة للمزوّد
   static Future<List<Map<String, dynamic>>> getPendingAppointmentsForProvider({
     required String sessionToken,
   }) async {
@@ -141,7 +141,7 @@ class AppointmentAPI {
     }
   }
   
-  // 5) التحقق من إمكانية الوصول لتقييم طفل
+  //  التحقق من إمكانية الوصول لتقييم طفل
   static Future<Map<String, dynamic>> canAccessChildEvaluation({
     required String sessionToken,
     required String childId,
@@ -173,11 +173,11 @@ class AppointmentAPI {
     }
   }
   
-  // 6) اتخاذ قرار بخصوص موعد (موافقة/رفض)
+  //  اتخاذ قرار بخصوص موعد (موافقة/رفض)
   static Future<Map<String, dynamic>> handleAppointmentDecision({
     required String sessionToken,
     required String appointmentId,
-    required String decision, // "approve" أو "reject"
+    required String decision, 
   }) async {
     try {
       print(" Handling appointment decision: $appointmentId, decision=$decision");
@@ -209,7 +209,7 @@ class AppointmentAPI {
     }
   }
 
-  // 7) جلب حجوزات الطبيب/الأخصائي
+  //  جلب حجوزات الطبيب/الأخصائي
   static Future<List<Map<String, dynamic>>> getProviderAppointments({
     required String sessionToken,
     String? providerId,
@@ -243,7 +243,7 @@ class AppointmentAPI {
     }
   }
 
-  // 8) إلغاء موعد (للآباء)
+  //  إلغاء موعد (للآباء)
   static Future<Map<String, dynamic>> cancelAppointment({
     required String sessionToken,
     required String appointmentId,
