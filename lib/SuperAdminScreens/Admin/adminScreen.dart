@@ -23,7 +23,7 @@ class _AdminScreenState extends State<Adminscreen> {
   @override
   void initState() {
     super.initState();
-    // التحقق من الصلاحيات - فقط SuperAdmin يمكنه الوصول
+    
     if (!SharedPrefsHelper.isSuperAdmin()) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pop(context);
@@ -56,7 +56,7 @@ class _AdminScreenState extends State<Adminscreen> {
           _isLoading = false;
         });
         
-        // إذا كانت القائمة فارغة بعد التحميل، قد تكون هناك مشكلة
+        
         if (adminsList.isEmpty && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -107,7 +107,7 @@ class _AdminScreenState extends State<Adminscreen> {
   }
 
   void _addAdmin(Admin admin) {
-    // إعادة تحميل القائمة بعد إضافة أدمن
+  
     _loadAdmins();
   }
 
@@ -117,7 +117,7 @@ class _AdminScreenState extends State<Adminscreen> {
       name: adminData['fullName'] ?? adminData['username'] ?? '',
       phone: adminData['mobile'] ?? '',
       email: adminData['email'],
-      password: '', // لن نعرض كلمة المرور
+      password: '', 
       birthDate: '',
     );
     
@@ -130,7 +130,7 @@ class _AdminScreenState extends State<Adminscreen> {
         builder: (_) => EditAdminPage(
           admin: admin,
           adminId: adminId,
-          originalUsername: username, // تمرير username الأصلي
+          originalUsername: username, 
         ),
       ),
     );
@@ -257,7 +257,7 @@ class _AdminScreenState extends State<Adminscreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Material(
-                      // 👈 هنا حل الخطأ
+                
                       color: Colors.transparent,
                       child: TextField(
                         controller: searchController,
@@ -375,7 +375,7 @@ class _AdminScreenState extends State<Adminscreen> {
         ],
       ),
 
-      // 🔹 زر الإضافة - فقط لـ SuperAdmin
+      
       floatingActionButton: SharedPrefsHelper.isSuperAdmin()
           ? FloatingActionButton(
               backgroundColor: AppColors.skyBlue,
@@ -384,7 +384,7 @@ class _AdminScreenState extends State<Adminscreen> {
                   context,
                   MaterialPageRoute(builder: (_) => const AddAdminPage()),
                 );
-                // إذا تمت الإضافة بنجاح، أعد تحميل القائمة
+                
                 if (result == true) {
                   _loadAdmins();
                 }

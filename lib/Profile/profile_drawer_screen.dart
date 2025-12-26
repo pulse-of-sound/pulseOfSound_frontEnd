@@ -29,20 +29,20 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
   }
 
   Future<void> _loadProfile() async {
-    // 1. محاولة الجلب من السيرفر أولاً
+    //  محاولة الجلب من السيرفر أولاً
     try {
       final prefs = await SharedPreferences.getInstance();
       final sessionToken = prefs.getString('session_token');
       
       if (sessionToken != null && sessionToken.isNotEmpty) {
-        print("🔄 Loading profile from server...");
+        print(" Loading profile from server...");
         
         final profile = await ChildProfileAPI.getMyChildProfile(
           sessionToken: sessionToken,
         );
         
         if (!profile.containsKey('error') && mounted) {
-          print("✅ Profile loaded from server");
+          print(" Profile loaded from server");
           
           setState(() {
             _nameController.text = profile['name'] ?? "";
@@ -67,15 +67,15 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
           
           return;
         } else {
-          print("⚠️ Failed to load from server: ${profile['error']}");
+          print(" Failed to load from server: ${profile['error']}");
         }
       }
     } catch (e) {
-      print("❌ Exception loading profile: $e");
+      print(" Exception loading profile: $e");
     }
     
-    // 2. إذا فشل، اجلب من المحلي (Fallback)
-    print("📂 Loading profile from local storage");
+    //  إذا فشل، اجلب من المحلي (Fallback)
+    print(" Loading profile from local storage");
     final imagePath = SharedPrefsHelper.getProfileImage();
     if (imagePath != null && File(imagePath).existsSync()) {
       setState(() => _profileImage = File(imagePath));
@@ -94,13 +94,13 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       
-      // 1. حفظ في السيرفر أولاً
+      //  حفظ في السيرفر أولاً
       try {
         final prefs = await SharedPreferences.getInstance();
         final childId = prefs.getString('child_id');
         
         if (childId != null && childId.isNotEmpty) {
-          print("💾 Updating profile on server for child: $childId");
+          print(" Updating profile on server for child: $childId");
           
           final result = await ChildProfileAPI.createOrUpdateChildProfile(
             childId: childId,
@@ -112,7 +112,7 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
           );
           
           if (result.containsKey('error')) {
-            print("❌ Error updating profile: ${result['error']}");
+            print(" Error updating profile: ${result['error']}");
             if (mounted) {
               setState(() => _isLoading = false);
               ScaffoldMessenger.of(context).showSnackBar(
@@ -124,11 +124,11 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
               return;
             }
           } else {
-            print("✅ Profile updated successfully on server");
+            print(" Profile updated successfully on server");
           }
         }
       } catch (e) {
-        print("❌ Exception updating profile: $e");
+        print(" Exception updating profile: $e");
         if (mounted) {
           setState(() => _isLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -141,7 +141,7 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
         }
       }
       
-      // 2. حفظ محلياً
+      // حفظ محلياً
       await SharedPrefsHelper.setName(_nameController.text);
       await SharedPrefsHelper.setFatherName(_fatherNameController.text);
       await SharedPrefsHelper.setBirthDate(_birthDateController.text);
@@ -155,7 +155,7 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("✅ تم حفظ التعديلات بنجاح"),
+            content: Text(" تم حفظ التعديلات بنجاح"),
             backgroundColor: Colors.green,
           ),
         );

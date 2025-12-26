@@ -1,0 +1,794 @@
+﻿Analyzing pulse_of_sound...                                     
+
+   info - The file name 'articleDetailScreen.dart' isn't a lower_case_with_underscores identifier - lib\Articles\articleDetailScreen.dart:1:1 - file_names
+   info - The file name 'articlesScreen.dart' isn't a lower_case_with_underscores identifier - lib\Articles\articlesScreen.dart:1:1 - file_names
+   info - Don't invoke 'print' in production code - lib\Articles\articlesScreen.dart:42:7 - avoid_print
+   info - The file name 'BookingFlowExample.dart' isn't a lower_case_with_underscores identifier - lib\Booking\screens\BookingFlowExample.dart:1:1 - file_names
+warning - The value of the field '_walletId' isn't used - lib\Booking\screens\BookingFlowExample.dart:31:10 - unused_field
+   info - The file name 'Bookings Screen.dart' isn't a lower_case_with_underscores identifier - lib\Booking\screens\Bookings Screen.dart:1:1 - file_names
+   info - The file name 'ChildTransactionsScreen.dart' isn't a lower_case_with_underscores identifier - lib\Booking\screens\ChildTransactionsScreen.dart:1:1 - file_names
+warning - Unused import: '../../Colors/colors.dart' - lib\Booking\screens\ChildTransactionsScreen.dart:4:8 - unused_import
+   info - The file name 'ConfirmBookingScreen.dart' isn't a lower_case_with_underscores identifier - lib\Booking\screens\ConfirmBookingScreen.dart:1:1 - file_names
+   info - Use 'const' with the constructor to improve performance - lib\Booking\screens\ConfirmBookingScreen.dart:143:22 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\Booking\screens\ConfirmBookingScreen.dart:144:27 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\Booking\screens\ConfirmBookingScreen.dart:145:19 - prefer_const_constructors
+   info - The file name 'MyReceiptsScreen.dart' isn't a lower_case_with_underscores identifier - lib\Booking\screens\MyReceiptsScreen.dart:1:1 - file_names
+warning - Unused import: '../../Booking/utils/wallet_prefs.dart' - lib\Booking\screens\MyReceiptsScreen.dart:3:8 - unused_import
+   info - The file name 'Wallet Screen.dart' isn't a lower_case_with_underscores identifier - lib\Booking\screens\Wallet Screen.dart:1:1 - file_names
+   info - The file name 'WalletScreenUpdated.dart' isn't a lower_case_with_underscores identifier - lib\Booking\screens\WalletScreenUpdated.dart:1:1 - file_names
+warning - The value of the field '_walletId' isn't used - lib\Booking\screens\WalletScreenUpdated.dart:22:10 - unused_field
+   info - The file name 'WalletTransactionsScreen.dart' isn't a lower_case_with_underscores identifier - lib\Booking\screens\WalletTransactionsScreen.dart:1:1 - file_names
+warning - Unused import: '../../api/appointment_plan_api.dart' - lib\Booking\screens\consultation_flow.dart:2:8 - unused_import
+   info - Use 'const' with the constructor to improve performance - lib\Booking\screens\provider_list_screen.dart:121:51 - prefer_const_constructors
+   info - Don't invoke 'print' in production code - lib\Doctor\Screens\doctor_articles_screen.dart:53:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Doctor\Screens\doctor_articles_screen.dart:63:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Doctor\Screens\doctor_articles_screen.dart:81:7 - avoid_print
+   info - Use 'const' with the constructor to improve performance - lib\Doctor\Screens\doctor_articles_screen.dart:315:37 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\Doctor\Screens\doctor_articles_screen.dart:317:46 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\Doctor\Screens\doctor_articles_screen.dart:318:51 - prefer_const_literals_to_create_immutables
+warning - Unused import: 'dart:io' - lib\Doctor\Screens\doctor_chat_room.dart:2:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\Doctor\Screens\doctor_chat_room.dart:65:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Doctor\Screens\doctor_chat_room.dart:116:7 - avoid_print
+  error - Expected an identifier - lib\Doctor\Screens\doctor_chat_screen.dart:73:135 - missing_identifier
+  error - Invalid constant value - lib\Doctor\Screens\doctor_chat_screen.dart:73:135 - invalid_constant
+warning - Unused import: 'dart:io' - lib\Doctor\Screens\doctor_community_chat_screen.dart:1:8 - unused_import
+warning - Unused import: 'package:flutter/foundation.dart' - lib\Doctor\Screens\doctor_community_chat_screen.dart:2:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\Doctor\Screens\doctor_community_chat_screen.dart:57:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Doctor\Screens\doctor_community_chat_screen.dart:79:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Doctor\Screens\doctor_community_chat_screen.dart:99:7 - avoid_print
+warning - The value of the local variable 'isIncoming' isn't used - lib\Doctor\Screens\doctor_wallet_screen.dart:159:41 - unused_local_variable
+   info - Use 'const' with the constructor to improve performance - lib\Doctor\Screens\doctor_wallet_screen.dart:171:52 - prefer_const_constructors
+   info - The file name 'AdminHomeScreen.dart' isn't a lower_case_with_underscores identifier - lib\HomeScreens\AdminHomeScreen.dart:1:1 - file_names
+   info - The file name 'DoctorHomeScreen.dart' isn't a lower_case_with_underscores identifier - lib\HomeScreens\DoctorHomeScreen.dart:1:1 - file_names
+   info - The file name 'HomeScreen.dart' isn't a lower_case_with_underscores identifier - lib\HomeScreens\HomeScreen.dart:1:1 - file_names
+   info - The file name 'bottomNavBar.dart' isn't a lower_case_with_underscores identifier - lib\HomeScreens\bottomNavBar.dart:1:1 - file_names
+warning - Unused import: '../Booking/utils/bookings_prefs.dart' - lib\HomeScreens\drawer.dart:5:8 - unused_import
+warning - The operand can't be null, so the condition is always 'false' - lib\HomeScreens\drawer.dart:37:24 - unnecessary_null_comparison
+   info - Don't invoke 'print' in production code - lib\HomeScreens\drawer.dart:50:7 - avoid_print
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\HomeScreens\drawer.dart:71:7 - use_build_context_synchronously
+  error - The method 'ParentReportsScreen' isn't defined for the type '_DrawerScreenState' - lib\HomeScreens\drawer.dart:159:35 - undefined_method
+   info - The file name 'GroupScreen.dart' isn't a lower_case_with_underscores identifier - lib\Levels\GroupScreen.dart:1:1 - file_names
+   info - Don't invoke 'print' in production code - lib\Levels\GroupScreen.dart:24:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\GroupScreen.dart:34:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\GroupScreen.dart:43:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\GroupScreen.dart:47:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\GroupScreen.dart:56:14 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\GroupScreen.dart:67:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\GroupScreen.dart:71:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\GroupScreen.dart:78:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\GroupScreen.dart:99:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\GroupScreen.dart:112:7 - avoid_print
+   info - The file name 'LevelStageScreen.dart' isn't a lower_case_with_underscores identifier - lib\Levels\LevelStageScreen.dart:1:1 - file_names
+warning - The value of the field '_completed' isn't used - lib\Levels\LevelStageScreen.dart:23:8 - unused_field
+warning - The value of the field '_lastPlayDate' isn't used - lib\Levels\LevelStageScreen.dart:25:11 - unused_field
+   info - Don't use 'BuildContext's across async gaps - lib\Levels\LevelStageScreen.dart:78:26 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\Levels\LevelStageScreen.dart:85:19 - use_build_context_synchronously
+   info - The file name 'StageDetailScreen.dart' isn't a lower_case_with_underscores identifier - lib\Levels\StageDetailScreen.dart:1:1 - file_names
+   info - The private field _matchPairs could be 'final' - lib\Levels\StageDetailScreen.dart:38:17 - prefer_final_fields
+   info - The private field _boyImages could be 'final' - lib\Levels\StageDetailScreen.dart:42:13 - prefer_final_fields
+   info - The private field _girlImages could be 'final' - lib\Levels\StageDetailScreen.dart:43:13 - prefer_final_fields
+   info - Don't invoke 'print' in production code - lib\Levels\StageDetailScreen.dart:49:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\StageDetailScreen.dart:54:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\StageDetailScreen.dart:59:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\StageDetailScreen.dart:60:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\StageDetailScreen.dart:67:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\StageDetailScreen.dart:77:7 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\Levels\StageDetailScreen.dart:206:37 - use_build_context_synchronously
+   info - Use 'const' with the constructor to improve performance - lib\Levels\StageDetailScreen.dart:367:13 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\Levels\StageDetailScreen.dart:369:25 - prefer_const_literals_to_create_immutables
+   info - The declaration '_buildDraggableImage' isn't referenced - lib\Levels\StageDetailScreen.dart:550:10 - unused_element
+   info - The file name 'StageMapScreen.dart' isn't a lower_case_with_underscores identifier - lib\Levels\StageMapScreen.dart:1:1 - file_names
+   info - Don't invoke 'print' in production code - lib\Levels\StageMapScreen.dart:32:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\StageMapScreen.dart:44:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\StageMapScreen.dart:58:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\StageMapScreen.dart:83:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\StageMapScreen.dart:86:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\StageMapScreen.dart:111:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Levels\StageMapScreen.dart:128:8 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\Levels\group_test_screen.dart:81:7 - use_build_context_synchronously
+   info - 'WillPopScope' is deprecated and shouldn't be used. Use PopScope instead. This feature was deprecated after v3.12.0-1.0.pre - lib\Levels\group_test_screen.dart:84:16 - deprecated_member_use
+   info - 'WillPopScope.new' is deprecated and shouldn't be used. Use PopScope instead. This feature was deprecated after v3.12.0-1.0.pre - lib\Levels\group_test_screen.dart:84:16 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps - lib\Levels\group_test_screen.dart:121:19 - use_build_context_synchronously
+   info - The file name 'levelsScreen.dart' isn't a lower_case_with_underscores identifier - lib\Levels\levelsScreen.dart:1:1 - file_names
+   info - The file name 'sharedPrefs.dart' isn't a lower_case_with_underscores identifier - lib\Levels\sharedPrefs.dart:1:1 - file_names
+   info - The file name 'OTPScreen.dart' isn't a lower_case_with_underscores identifier - lib\LoginScreens\OTPScreen.dart:1:1 - file_names
+   info - Don't use 'BuildContext's across async gaps - lib\LoginScreens\OTPScreen.dart:70:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\LoginScreens\OTPScreen.dart:105:7 - use_build_context_synchronously
+   info - The file name 'loginForAdmin&Dr.dart' isn't a lower_case_with_underscores identifier - lib\LoginScreens\loginForAdmin&Dr.dart:1:1 - file_names
+   info - Don't use 'BuildContext's across async gaps - lib\LoginScreens\loginForAdmin&Dr.dart:34:28 - use_build_context_synchronously
+   info - Don't invoke 'print' in production code - lib\LoginScreens\loginForAdmin&Dr.dart:42:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\LoginScreens\loginForAdmin&Dr.dart:43:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\LoginScreens\loginForAdmin&Dr.dart:44:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\LoginScreens\loginForAdmin&Dr.dart:45:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\LoginScreens\loginForAdmin&Dr.dart:65:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\LoginScreens\loginForAdmin&Dr.dart:66:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\LoginScreens\loginForAdmin&Dr.dart:67:5 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\LoginScreens\loginForAdmin&Dr.dart:72:9 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\LoginScreens\loginForAdmin&Dr.dart:77:9 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\LoginScreens\loginForAdmin&Dr.dart:82:9 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\LoginScreens\loginForAdmin&Dr.dart:86:28 - use_build_context_synchronously
+   info - Don't invoke 'print' in production code - lib\LoginScreens\loginscreen.dart:38:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\LoginScreens\loginscreen.dart:42:5 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\LoginScreens\loginscreen.dart:45:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\LoginScreens\loginscreen.dart:53:7 - use_build_context_synchronously
+   info - The file name 'onBoarding.dart' isn't a lower_case_with_underscores identifier - lib\OnBoarding\onBoarding.dart:1:1 - file_names
+   info - The file name 'ParentChatHome.dart' isn't a lower_case_with_underscores identifier - lib\Parent\screens\ParentChatHome.dart:1:1 - file_names
+   info - The file name 'ParentCommunityChat.dart' isn't a lower_case_with_underscores identifier - lib\Parent\screens\ParentCommunityChat.dart:1:1 - file_names
+warning - Unused import: 'dart:io' - lib\Parent\screens\ParentCommunityChat.dart:1:8 - unused_import
+warning - Unused import: 'package:flutter/foundation.dart' - lib\Parent\screens\ParentCommunityChat.dart:2:8 - unused_import
+warning - Unused import: 'package:image_picker/image_picker.dart' - lib\Parent\screens\ParentCommunityChat.dart:4:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\Parent\screens\ParentCommunityChat.dart:52:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Parent\screens\ParentCommunityChat.dart:75:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Parent\screens\ParentCommunityChat.dart:93:7 - avoid_print
+   info - The file name 'ParentPrivateChatRoom.dart' isn't a lower_case_with_underscores identifier - lib\Parent\screens\ParentPrivateChatRoom.dart:1:1 - file_names
+   info - Don't invoke 'print' in production code - lib\Parent\screens\ParentPrivateChatRoom.dart:58:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Parent\screens\ParentPrivateChatRoom.dart:108:7 - avoid_print
+   info - The file name 'ParentPrivateChatsListScreen.dart' isn't a lower_case_with_underscores identifier - lib\Parent\screens\ParentPrivateChatsListScreen.dart:1:1 - file_names
+   info - Don't invoke 'print' in production code - lib\Parent\screens\ParentPrivateChatsListScreen.dart:41:9 - avoid_print
+  error - The named parameter 'onPressed' isn't defined - lib\Parent\screens\ParentPrivateChatsListScreen.dart:95:21 - undefined_named_parameter
+   info - The file name 'modelTrainingQuestion.dart' isn't a lower_case_with_underscores identifier - lib\PreTestIntro\TrainingTest\modelTrainingQuestion.dart:1:1 - file_names
+   info - The file name 'trainingScreen.dart' isn't a lower_case_with_underscores identifier - lib\PreTestIntro\TrainingTest\trainingScreen.dart:1:1 - file_names
+warning - Unused import: 'modelTrainingQuestion.dart' - lib\PreTestIntro\TrainingTest\trainingScreen.dart:3:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\TrainingTest\trainingScreen.dart:65:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\TrainingTest\trainingScreen.dart:68:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\TrainingTest\trainingScreen.dart:136:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\TrainingTest\trainingScreen.dart:139:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\TrainingTest\trainingScreen.dart:212:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\TrainingTest\trainingScreen.dart:213:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\TrainingTest\trainingScreen.dart:214:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\TrainingTest\trainingScreen.dart:215:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\TrainingTest\trainingScreen.dart:219:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\TrainingTest\trainingScreen.dart:324:25 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\TrainingTest\trainingScreen.dart:365:41 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\TrainingTest\trainingScreen.dart:366:41 - avoid_print
+   info - The file name 'modelQuestion.dart' isn't a lower_case_with_underscores identifier - lib\PreTestIntro\modelQuestion.dart:1:1 - file_names
+   info - The file name 'preTestIntroScreen.dart' isn't a lower_case_with_underscores identifier - lib\PreTestIntro\preTestIntroScreen.dart:1:1 - file_names
+   info - The file name 'preTestScreen.dart' isn't a lower_case_with_underscores identifier - lib\PreTestIntro\preTestScreen.dart:1:1 - file_names
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\preTestScreen.dart:53:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\preTestScreen.dart:54:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\preTestScreen.dart:55:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\preTestScreen.dart:111:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\preTestScreen.dart:113:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\preTestScreen.dart:121:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\preTestScreen.dart:126:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\preTestScreen.dart:136:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\preTestScreen.dart:270:39 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\preTestScreen.dart:271:39 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\preTestScreen.dart:362:47 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\preTestScreen.dart:364:47 - avoid_print
+   info - Don't invoke 'print' in production code - lib\PreTestIntro\preTestScreen.dart:365:47 - avoid_print
+   info - The file name 'resultScreen.dart' isn't a lower_case_with_underscores identifier - lib\PreTestIntro\resultScreen.dart:1:1 - file_names
+   info - Don't invoke 'print' in production code - lib\Profile\profile.dart:98:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Profile\profile.dart:110:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Profile\profile.dart:121:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Profile\profile.dart:124:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Profile\profile.dart:127:9 - avoid_print
+warning - The value of the field '_isLoading' isn't used - lib\Profile\profile_drawer_screen.dart:23:8 - unused_field
+   info - Don't invoke 'print' in production code - lib\Profile\profile_drawer_screen.dart:38:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Profile\profile_drawer_screen.dart:45:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Profile\profile_drawer_screen.dart:70:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Profile\profile_drawer_screen.dart:74:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Profile\profile_drawer_screen.dart:78:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Profile\profile_drawer_screen.dart:103:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Profile\profile_drawer_screen.dart:115:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Profile\profile_drawer_screen.dart:127:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\Profile\profile_drawer_screen.dart:131:9 - avoid_print
+   info - The file name 'SplashScreen.dart' isn't a lower_case_with_underscores identifier - lib\SplashScreen\SplashScreen.dart:1:1 - file_names
+   info - The file name 'adminProfileScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\AdminProfile\adminProfileScreen.dart:1:1 - file_names
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\AdminProfile\adminProfileScreen.dart:109:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\AdminProfile\adminProfileScreen.dart:119:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\AdminProfile\adminProfileScreen.dart:125:28 - use_build_context_synchronously
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\AdminProfile\adminProfileScreen.dart:161:7 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\AdminProfile\adminProfileScreen.dart:167:9 - use_build_context_synchronously
+   info - The file name 'addAdminScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Admin\addAdminScreen.dart:1:1 - file_names
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Admin\addAdminScreen.dart:72:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Admin\addAdminScreen.dart:76:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Admin\addAdminScreen.dart:80:23 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Admin\addAdminScreen.dart:84:28 - use_build_context_synchronously
+   info - The file name 'adminScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Admin\adminScreen.dart:1:1 - file_names
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Admin\adminScreen.dart:46:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Admin\adminScreen.dart:47:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Admin\adminScreen.dart:48:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Admin\adminScreen.dart:49:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Admin\adminScreen.dart:81:7 - avoid_print
+   info - The declaration '_addAdmin' isn't referenced - lib\SuperAdminScreens\Admin\adminScreen.dart:109:8 - unused_element
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Admin\adminScreen.dart:154:34 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Admin\adminScreen.dart:159:34 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Admin\adminScreen.dart:165:30 - use_build_context_synchronously
+   info - The file name 'editAdminScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Admin\editAdminScreen.dart:1:1 - file_names
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Admin\editAdminScreen.dart:76:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Admin\editAdminScreen.dart:80:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Admin\editAdminScreen.dart:83:23 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Admin\editAdminScreen.dart:87:28 - use_build_context_synchronously
+   info - The file name 'modelAdmin.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Admin\modelAdmin.dart:1:1 - file_names
+   info - The file name 'AdminCommunityChatScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Chats\AdminCommunityChatScreen.dart:1:1 - file_names
+warning - Unused import: 'dart:io' - lib\SuperAdminScreens\Chats\AdminCommunityChatScreen.dart:1:8 - unused_import
+warning - Unused import: 'package:flutter/foundation.dart' - lib\SuperAdminScreens\Chats\AdminCommunityChatScreen.dart:2:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Chats\AdminCommunityChatScreen.dart:54:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Chats\AdminCommunityChatScreen.dart:77:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Chats\AdminCommunityChatScreen.dart:96:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Chats\AdminCommunityChatScreen.dart:112:7 - avoid_print
+   info - The declaration '_banUser' isn't referenced - lib\SuperAdminScreens\Chats\AdminCommunityChatScreen.dart:116:16 - unused_element
+   info - The file name 'addChildScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Childrens\addChildScreen.dart:1:1 - file_names
+   info - The file name 'chidScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Childrens\chidScreen.dart:1:1 - file_names
+warning - Unused import: 'addChildScreen.dart' - lib\SuperAdminScreens\Childrens\chidScreen.dart:5:8 - unused_import
+warning - Unused import: 'editChildScreen.dart' - lib\SuperAdminScreens\Childrens\chidScreen.dart:6:8 - unused_import
+warning - Unused import: 'modelChild.dart' - lib\SuperAdminScreens\Childrens\chidScreen.dart:7:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Childrens\chidScreen.dart:66:7 - avoid_print
+   info - The declaration '_editChild' isn't referenced - lib\SuperAdminScreens\Childrens\chidScreen.dart:83:8 - unused_element
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Childrens\chidScreen.dart:103:34 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Childrens\chidScreen.dart:108:34 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Childrens\chidScreen.dart:113:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Childrens\chidScreen.dart:167:34 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Childrens\chidScreen.dart:174:34 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Childrens\chidScreen.dart:179:30 - use_build_context_synchronously
+   info - The file name 'editChildScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Childrens\editChildScreen.dart:1:1 - file_names
+warning - Unused import: '../../api/user_api.dart' - lib\SuperAdminScreens\Childrens\editChildScreen.dart:3:8 - unused_import
+warning - The value of the local variable 'birthdate' isn't used - lib\SuperAdminScreens\Childrens\editChildScreen.dart:54:15 - unused_local_variable
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Childrens\editChildScreen.dart:62:11 - avoid_print
+   info - The file name 'modelChild.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Childrens\modelChild.dart:1:1 - file_names
+   info - The file name 'dashBoard.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\DashBoard\dashBoard.dart:1:1 - file_names
+   info - The file name 'addDoctorScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Doctors\addDoctorScreen.dart:1:1 - file_names
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Doctors\addDoctorScreen.dart:78:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Doctors\addDoctorScreen.dart:82:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Doctors\addDoctorScreen.dart:85:23 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Doctors\addDoctorScreen.dart:89:28 - use_build_context_synchronously
+   info - The file name 'doctorsScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Doctors\doctorsScreen.dart:1:1 - file_names
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Doctors\doctorsScreen.dart:57:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Doctors\doctorsScreen.dart:121:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Doctors\doctorsScreen.dart:122:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Doctors\doctorsScreen.dart:123:9 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Doctors\doctorsScreen.dart:128:34 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Doctors\doctorsScreen.dart:133:34 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Doctors\doctorsScreen.dart:139:30 - use_build_context_synchronously
+   info - The file name 'editDoctorScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Doctors\editDoctorScreen.dart:1:1 - file_names
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Doctors\editDoctorScreen.dart:87:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Doctors\editDoctorScreen.dart:91:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Doctors\editDoctorScreen.dart:94:23 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Doctors\editDoctorScreen.dart:98:28 - use_build_context_synchronously
+   info - The file name 'modelDoctor.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Doctors\modelDoctor.dart:1:1 - file_names
+   info - The file name 'addLevelGameScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Levels\addLevelGameScreen.dart:1:1 - file_names
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\addLevelGameScreen.dart:57:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\addLevelGameScreen.dart:61:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\addLevelGameScreen.dart:64:23 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\addLevelGameScreen.dart:68:28 - use_build_context_synchronously
+   info - The file name 'addLevelScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Levels\addLevelScreen.dart:1:1 - file_names
+warning - Unused import: '../../utils/shared_pref_helper.dart' - lib\SuperAdminScreens\Levels\addLevelScreen.dart:3:8 - unused_import
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\addLevelScreen.dart:42:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\addLevelScreen.dart:46:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\addLevelScreen.dart:49:23 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\addLevelScreen.dart:53:28 - use_build_context_synchronously
+   info - The file name 'addStageQuestionScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Levels\addStageQuestionScreen.dart:1:1 - file_names
+warning - Unused import: 'dart:io' - lib\SuperAdminScreens\Levels\addStageQuestionScreen.dart:2:8 - unused_import
+warning - Unused import: 'package:flutter/foundation.dart' - lib\SuperAdminScreens\Levels\addStageQuestionScreen.dart:4:8 - unused_import
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\addStageQuestionScreen.dart:69:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\addStageQuestionScreen.dart:95:28 - use_build_context_synchronously
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Levels\addStageQuestionScreen.dart:121:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Levels\addStageQuestionScreen.dart:122:7 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\addStageQuestionScreen.dart:133:30 - use_build_context_synchronously
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Levels\addStageQuestionScreen.dart:141:7 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\addStageQuestionScreen.dart:142:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\addStageQuestionScreen.dart:261:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\addStageQuestionScreen.dart:265:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\addStageQuestionScreen.dart:268:23 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\addStageQuestionScreen.dart:272:28 - use_build_context_synchronously
+   info - Unnecessary use of 'toList' in a spread - lib\SuperAdminScreens\Levels\addStageQuestionScreen.dart:603:12 - unnecessary_to_list_in_spreads
+   info - The file name 'levelGamesManagementScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Levels\levelGamesManagementScreen.dart:1:1 - file_names
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Levels\levelGamesManagementScreen.dart:58:7 - avoid_print
+   info - The file name 'levelsManagementScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Levels\levelsManagementScreen.dart:1:1 - file_names
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Levels\levelsManagementScreen.dart:64:7 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\levelsManagementScreen.dart:103:34 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\levelsManagementScreen.dart:108:34 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\levelsManagementScreen.dart:114:30 - use_build_context_synchronously
+   info - The file name 'stageQuestionsManagementScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Levels\stageQuestionsManagementScreen.dart:1:1 - file_names
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Levels\stageQuestionsManagementScreen.dart:59:7 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\stageQuestionsManagementScreen.dart:86:32 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\stageQuestionsManagementScreen.dart:91:32 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Levels\stageQuestionsManagementScreen.dart:96:30 - use_build_context_synchronously
+   info - The file name 'addSpecialistScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Specialists\addSpecialistScreen.dart:1:1 - file_names
+warning - Unused import: 'package:pulse_of_sound/SuperAdminScreens/Specialists/modelSpecialists.dart' - lib\SuperAdminScreens\Specialists\addSpecialistScreen.dart:2:8 - unused_import
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Specialists\addSpecialistScreen.dart:79:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Specialists\addSpecialistScreen.dart:83:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Specialists\addSpecialistScreen.dart:86:23 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Specialists\addSpecialistScreen.dart:90:28 - use_build_context_synchronously
+   info - The file name 'editSpecialistScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Specialists\editSpecialistScreen.dart:1:1 - file_names
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Specialists\editSpecialistScreen.dart:89:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Specialists\editSpecialistScreen.dart:93:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Specialists\editSpecialistScreen.dart:96:23 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Specialists\editSpecialistScreen.dart:100:28 - use_build_context_synchronously
+   info - The file name 'modelSpecialists.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Specialists\modelSpecialists.dart:1:1 - file_names
+   info - The file name 'specialistScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Specialists\specialistScreen.dart:1:1 - file_names
+   info - Don't invoke 'print' in production code - lib\SuperAdminScreens\Specialists\specialistScreen.dart:56:7 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Specialists\specialistScreen.dart:123:34 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Specialists\specialistScreen.dart:128:34 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\SuperAdminScreens\Specialists\specialistScreen.dart:134:30 - use_build_context_synchronously
+   info - The file name 'ReceiptModel.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Wallet\ReceiptModel.dart:1:1 - file_names
+   info - The file name 'ReceiptsAdminScreen.dart' isn't a lower_case_with_underscores identifier - lib\SuperAdminScreens\Wallet\ReceiptsAdminScreen.dart:1:1 - file_names
+warning - Unused import: 'dart:io' - lib\SuperAdminScreens\Wallet\ReceiptsAdminScreen.dart:1:8 - unused_import
+   info - The file name 'APITestScreen.dart' isn't a lower_case_with_underscores identifier - lib\TEST\APITestScreen.dart:1:1 - file_names
+   info - The file name 'SuperAdminPermissionsTest.dart' isn't a lower_case_with_underscores identifier - lib\TEST\SuperAdminPermissionsTest.dart:1:1 - file_names
+   info - Don't invoke 'print' in production code - lib\TEST\SuperAdminPermissionsTest.dart:23:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\api_config.dart:40:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\api_config.dart:47:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:15:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:28:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:29:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:41:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:52:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:60:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:61:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:73:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:84:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:92:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:93:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:105:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:115:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:118:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:126:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:127:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:139:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:150:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:158:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:159:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:171:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:183:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:194:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:195:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:207:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:218:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:228:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:229:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:241:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:252:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:260:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:261:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_api.dart:273:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_plan_api.dart:15:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_plan_api.dart:28:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_plan_api.dart:29:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_plan_api.dart:41:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_plan_api.dart:51:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_plan_api.dart:59:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_plan_api.dart:60:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\appointment_plan_api.dart:72:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:20:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:21:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:34:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:35:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:47:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:54:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:67:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:68:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:80:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:88:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:106:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:107:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:119:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:131:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:149:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:150:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:155:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:159:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:168:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:185:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:186:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\auth_api.dart:200:7 - avoid_print
+   info - The imported package 'http_parser' isn't a dependency of the importing package - lib\api\charge_request_api.dart:4:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - lib\api\charge_request_api.dart:16:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\charge_request_api.dart:40:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\charge_request_api.dart:41:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\charge_request_api.dart:63:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\charge_request_api.dart:64:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\charge_request_api.dart:77:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\charge_request_api.dart:88:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\charge_request_api.dart:96:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\charge_request_api.dart:97:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\charge_request_api.dart:109:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\charge_request_api.dart:121:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\charge_request_api.dart:132:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\charge_request_api.dart:133:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\charge_request_api.dart:145:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\charge_request_api.dart:156:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\charge_request_api.dart:166:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\charge_request_api.dart:167:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\charge_request_api.dart:182:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:11:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:18:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:19:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:31:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:46:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:61:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:62:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:74:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:87:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:95:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:96:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:108:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:119:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:127:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:128:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:140:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:153:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:165:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:166:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:178:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:189:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:197:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:198:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:210:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:222:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:233:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:234:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\child_api.dart:246:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\invoice_api.dart:12:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\invoice_api.dart:20:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\invoice_api.dart:21:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\invoice_api.dart:33:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\invoice_api.dart:44:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\invoice_api.dart:52:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\invoice_api.dart:53:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\invoice_api.dart:65:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:13:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:25:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:26:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:38:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:46:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:54:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:55:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:70:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:80:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:88:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:89:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:101:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:112:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:113:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:114:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:117:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:125:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:126:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:138:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:153:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:154:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:166:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:167:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:179:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:189:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:197:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:198:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:213:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:224:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:235:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:236:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:248:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:261:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:273:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:274:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\level_api.dart:286:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\placement_test_api.dart:16:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\placement_test_api.dart:32:15 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\placement_test_api.dart:52:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\placement_test_api.dart:59:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\placement_test_api.dart:60:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\placement_test_api.dart:67:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\placement_test_api.dart:72:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\placement_test_api.dart:76:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\placement_test_api.dart:87:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\placement_test_api.dart:95:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\placement_test_api.dart:96:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\placement_test_api.dart:115:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\placement_test_api.dart:127:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\placement_test_api.dart:135:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\placement_test_api.dart:136:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\placement_test_api.dart:148:7 - avoid_print
+   info - The imported package 'http_parser' isn't a dependency of the importing package - lib\api\research_api.dart:4:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:14:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:22:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:23:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:35:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:45:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:53:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:54:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:66:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:83:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:109:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:110:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:134:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:135:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:148:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:158:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:166:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:167:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:179:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:192:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:204:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:205:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:217:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:225:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:233:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:234:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:246:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:256:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:264:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:265:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:277:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:287:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:295:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:296:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\research_api.dart:308:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:13:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:24:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:25:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:37:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:48:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:56:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:57:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:69:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:80:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:88:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:89:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:104:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:118:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:129:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:130:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:142:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:153:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:161:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:162:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:174:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:185:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:193:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:194:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\stage_api.dart:209:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\training_question_api.dart:14:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\training_question_api.dart:30:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\training_question_api.dart:51:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\training_question_api.dart:62:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\training_question_api.dart:63:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\training_question_api.dart:69:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\training_question_api.dart:81:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:14:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:33:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:34:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:42:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:43:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:45:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:46:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:47:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:51:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:57:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:66:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:79:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:84:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:88:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:91:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:102:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:103:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:104:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:122:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:130:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:145:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:146:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:151:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:158:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:161:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:171:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:184:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:185:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:190:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:204:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:233:23 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:246:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:270:15 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:282:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:290:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:295:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:303:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:346:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:360:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:361:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:369:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:386:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:408:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:409:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:417:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:426:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:439:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:440:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:448:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:462:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:482:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:483:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:491:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:506:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:526:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:527:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:535:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:551:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:571:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:572:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:580:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:590:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:603:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:604:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:616:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:626:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:639:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:640:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:652:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:662:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:663:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:664:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:675:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:682:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:683:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:695:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:705:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:719:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:720:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:728:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:737:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:738:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:739:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:750:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:758:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:759:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:771:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:781:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:795:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:796:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:808:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:825:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:852:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:853:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:865:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:876:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:889:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:890:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:902:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:913:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:927:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:928:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:940:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:949:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:966:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:967:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:979:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:996:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1019:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1020:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1032:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1042:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1056:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1057:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1069:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1079:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1095:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1096:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1108:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1118:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1131:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1132:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1144:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1160:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1184:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1185:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1197:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1206:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1221:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1222:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1234:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1243:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1258:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1259:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1271:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1281:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1295:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1296:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1308:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1316:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1330:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1331:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1343:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1353:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1369:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1370:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1382:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1391:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1406:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1407:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1419:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1429:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1443:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1444:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1455:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1457:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_api.dart:1462:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_stage_status_api.dart:13:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_stage_status_api.dart:24:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_stage_status_api.dart:25:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_stage_status_api.dart:37:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_stage_status_api.dart:47:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_stage_status_api.dart:55:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_stage_status_api.dart:56:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_stage_status_api.dart:71:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_stage_status_api.dart:82:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_stage_status_api.dart:90:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_stage_status_api.dart:91:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_stage_status_api.dart:103:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_stage_status_api.dart:117:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_stage_status_api.dart:130:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_stage_status_api.dart:131:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\user_stage_status_api.dart:143:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:11:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:19:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:20:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:32:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:49:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:63:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:64:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:76:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:89:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:101:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:102:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:117:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:128:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:136:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:137:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:152:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:164:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:175:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:176:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:188:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:199:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:207:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:208:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\api\wallet_api.dart:220:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\utils\api_helpers.dart:15:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\utils\api_helpers.dart:22:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\utils\api_helpers.dart:26:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\utils\api_helpers.dart:29:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\utils\api_helpers.dart:54:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\utils\api_helpers.dart:75:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\utils\api_helpers.dart:93:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\utils\api_helpers.dart:211:7 - avoid_print
+   info - The file name 'sharedPreferance.dart' isn't a lower_case_with_underscores identifier - lib\utils\sharedPreferance.dart:1:1 - file_names
+   info - Don't invoke 'print' in production code - lib\utils\shared_pref_helper.dart:31:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\utils\shared_pref_helper.dart:32:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\utils\shared_pref_helper.dart:35:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\utils\shared_pref_helper.dart:40:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\utils\shared_pref_helper.dart:41:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:9:3 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:17:3 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:22:3 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:23:3 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:34:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:35:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:39:7 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:41:7 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:44:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:47:3 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:52:3 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:53:3 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:70:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:71:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:74:7 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:76:7 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:79:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:82:3 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:87:3 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:88:3 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:103:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:104:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:108:7 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:110:7 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:113:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:116:3 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:121:3 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:122:3 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:136:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:137:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:141:7 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:143:7 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:146:5 - avoid_print
+   info - Don't invoke 'print' in production code - test_child_level_api.dart:149:3 - avoid_print
+

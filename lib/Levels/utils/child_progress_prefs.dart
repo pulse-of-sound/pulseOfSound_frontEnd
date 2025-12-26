@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ChildProgressPrefs {
   static const _key = "child_daily_evaluations";
 
-  //  إضافة تقييم جديد (نستدعيه عند انتهاء المرحلة)
+  
   static Future<void> addDailyEvaluation(
       Map<String, dynamic> evaluation) async {
     final prefs = await SharedPreferences.getInstance();

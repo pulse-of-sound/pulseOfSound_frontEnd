@@ -27,7 +27,7 @@ class _DoctorWalletScreenState extends State<DoctorWalletScreen> {
     try {
       final sessionToken = await APIHelpers.getSessionToken();
       
-      // 1. Get Wallet Balance
+      //  Get Wallet Balance
       final balanceResult = await WalletAPI.getWalletBalance(sessionToken: sessionToken);
       
       if (balanceResult.containsKey('error')) {
@@ -39,7 +39,7 @@ class _DoctorWalletScreenState extends State<DoctorWalletScreen> {
       final fetchedBalance = (balanceResult['balance'] ?? 0).toDouble();
       final fetchedWalletId = balanceResult['wallet_id'];
 
-      // 2. Get Transactions if walletId available
+      //  Get Transactions if walletId available
       List<Map<String, dynamic>> fetchedTransactions = [];
       if (fetchedWalletId != null) {
         fetchedTransactions = await WalletTransactionAPI.getWalletTransactions(
@@ -143,22 +143,10 @@ class _DoctorWalletScreenState extends State<DoctorWalletScreen> {
                                 itemBuilder: (context, index) {
                                   final t = transactions[index];
                                   final amount = (t["amount"] ?? 0).toDouble();
-                                  // Determine if it is incoming or outgoing based on 'type' or comparison
-                                  // Usually adding funds is 'credit', spending is 'debit'
-                                  // Or compare to_wallet_id with current wallet_id
-                                  
-                                  // Since we don't have full transaction logic details here, let's assume:
-                                  // If type is 'deposit' or 'payment_received' -> Add (Green)
-                                  // If type is 'withdrawal' or 'payment_sent' -> Remove (Red)
-                                  
-                                  // For simplicity, let's rely on backend logic if possible, or simple heuristic
-                                  // Let's assume positive amount in list means related to this wallet context?
-                                  // Actually, createWalletTransaction takes 'from' and 'to'.
-                                  // getWalletTransactions returns transactions where this wallet is 'from' OR 'to'.
+                                 
                                   
                                   final isIncoming = t['to_wallet_id'] == walletId || (t['to_wallet_id']?['objectId'] == walletId);
-                                  // If walletId comparison is tricky due to object/pointer structure, let's check basic logic.
-                                  // However, for Doctor receiving payment, it is incoming.
+                               
                                   
                                   final type = t['type'] ?? 'transaction';
                                   

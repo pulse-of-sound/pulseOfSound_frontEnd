@@ -41,7 +41,7 @@ class _WalletScreenUpdatedState extends State<WalletScreenUpdated> {
     super.dispose();
   }
 
-  /// تحميل رصيد المحفظة من الـ Backend
+  
   Future<void> _loadBalance() async {
     setState(() => _isLoading = true);
 
@@ -70,7 +70,7 @@ class _WalletScreenUpdatedState extends State<WalletScreenUpdated> {
     }
   }
 
-  /// اختيار صورة الإيصال (يدعم Web و Mobile)
+  
   Future<void> _pickImage() async {
     try {
       final ImagePicker picker = ImagePicker();
@@ -102,7 +102,7 @@ class _WalletScreenUpdatedState extends State<WalletScreenUpdated> {
     }
   }
 
-  /// إرسال طلب شحن الرصيد إلى الـ Backend
+  
   Future<void> _sendReceipt() async {
     if (amountController.text.isEmpty) {
       APIHelpers.showErrorDialog(context, 'الرجاء إدخال المبلغ');
@@ -115,11 +115,7 @@ class _WalletScreenUpdatedState extends State<WalletScreenUpdated> {
       return;
     }
 
-    // الصورة اختيارية الآن
-    // if (!kIsWeb && _receiptImage == null) {
-    //   APIHelpers.showErrorDialog(context, 'يرجى اختيار صورة الإيصال');
-    //   return;
-    // }
+   
 
     if (mounted) {
       APIHelpers.showLoadingDialog(context, message: 'جاري إرسال الطلب...');
@@ -191,7 +187,7 @@ class _WalletScreenUpdatedState extends State<WalletScreenUpdated> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  //  زر الرجوع + العنوان
+                  //  زر الرجوع العنوان
                   Row(
                     children: [
                       IconButton(

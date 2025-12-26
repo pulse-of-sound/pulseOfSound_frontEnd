@@ -2,8 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:pulse_of_sound/LoginScreens/loginscreen.dart';
 import 'package:pulse_of_sound/OnBoarding/onBoarding.dart';
+import 'package:pulse_of_sound/HomeScreens/bottomNavBar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../api/auth_api.dart';
+import '../api/api_helpers.dart';
 import '../utils/shared_pref_helper.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -63,8 +65,14 @@ class _OtpScreenState extends State<OtpScreen> {
       return;
     }
 
-    // تسجيل الدخول مباشرة - loginWithMobile يتحقق من OTP داخلياً
+    
     final login = await AuthAPI.loginWithMobile(widget.phone, code);
+
+    print(' Login Response: $login');
+    print(' sessionToken: ${login["sessionToken"]}');
+    print(' id: ${login["id"]}');
+    print(' objectId: ${login["objectId"]}');
+    print(' placement_test_score: ${login["placement_test_score"]}');
 
     if (login.containsKey("error")) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -92,19 +100,43 @@ class _OtpScreenState extends State<OtpScreen> {
       await SharedPrefsHelper.setBirthDate(login["birthDate"]);
     }
 
-    // الـ sessionToken قد يكون موجود أو نستخدم الـ ID
+    
     final token = login["sessionToken"] ?? login["id"] ?? "";
     await SharedPrefsHelper.setToken(token);
     
-    // حفظ userId
+    
+    if (token.isNotEmpty) {
+      await APIHelpers.setSessionToken(token);
+      print(' Session Token cached in APIHelpers: ${token.substring(0, 10)}...');
+    }
+    
+    
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('userId', login["id"] ?? login["objectId"] ?? '');
+    final userId = login["id"] ?? login["objectId"] ?? '';
+    await prefs.setString('userId', userId);
+    await prefs.setString('child_id', userId); 
+    print(' child_id saved: $userId');
+    
+    
+    final placementScore = login["placement_test_score"];
+    print(' Placement Test Score: $placementScore');
+    
+    if (!mounted) return;
+    
+    if (placementScore != null && placementScore is num && placementScore > 0) {
+      print(' Placement test completed - going to Home');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const BottomNavScreen()),
+      );
+    } else {
 
-    // الانتقال للصفحة التالية
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const OnBoardingScreen()),
-    );
+      print(' Placement test not completed - going to OnBoarding');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const OnBoardingScreen()),
+      );
+    }
   }
 
   String _getValidName(String name) {
@@ -160,7 +192,7 @@ class _OtpScreenState extends State<OtpScreen> {
           Image.asset("assets/images/login.jpg", fit: BoxFit.cover),
           Container(color: Colors.white.withOpacity(0.25)),
 
-          // زر الرجوع
+      
           Positioned(
             top: 40,
             left: 20,

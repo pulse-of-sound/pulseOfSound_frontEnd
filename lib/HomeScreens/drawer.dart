@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../api/api_helpers.dart';
 import '../Booking/screens/WalletScreenUpdated.dart';
 import '../Booking/screens/bookings_list_screen.dart';
 import '../Booking/utils/bookings_prefs.dart';
 import '../Colors/colors.dart';
 import '../LoginScreens/loginscreen.dart';
-import '../Parent/screens/ParentReportsScreen.dart';
-import '../Profile/profile_drawer_screen.dart';
 
+import '../Profile/profile_drawer_screen.dart';
+import '../Parent/screens/ParentReportsScreen.dart';
 import '../api/appointment_api.dart';
-import '../utils/api_helpers.dart';
+import '../utils/api_helpers.dart' as utils_api;
 
 class DrawerScreen extends StatefulWidget {
   const DrawerScreen({super.key});
@@ -21,7 +22,7 @@ class DrawerScreen extends StatefulWidget {
 class _DrawerScreenState extends State<DrawerScreen> {
   int pendingCount = 0;
   int newReportsCount = 0;
-  final String parentId = "parent_001"; //  لاحقاً من بيانات المستخدم الحقيقي
+  final String parentId = "parent_001"; 
 
   @override
   void initState() {
@@ -33,7 +34,7 @@ class _DrawerScreenState extends State<DrawerScreen> {
   Future<void> _loadPendingCount() async {
     try {
       final sessionToken = await APIHelpers.getSessionToken();
-      final userId = await APIHelpers.getUserId();
+      final userId = await utils_api.APIHelpers.getUserId();
       if (sessionToken == null || userId == null) return;
       
       final appointments = await AppointmentAPI.getChildAppointments(
@@ -65,7 +66,25 @@ class _DrawerScreenState extends State<DrawerScreen> {
 
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    
+    
+    await prefs.remove('session_token');
+    await prefs.remove('userId');
+    await prefs.remove('child_id');
+    await prefs.remove('user_type');
+    await prefs.remove('phone');
+    await prefs.remove('name');
+    await prefs.remove('father_name');
+    await prefs.remove('birth_date');
+    await prefs.remove('gender');
+    await prefs.remove('health_status');
+    await prefs.remove('profile_image');
+    
+    
+    await APIHelpers.clearSessionToken();
+    
+    print(' Logged out - session cleared, game progress preserved');
+    
     if (!mounted) return;
     Navigator.pushAndRemoveUntil(
       context,
@@ -134,7 +153,7 @@ class _DrawerScreenState extends State<DrawerScreen> {
             },
           ),
 
-          // ✅ قسم التقارير الطبية
+          //  قسم التقارير الطبية
           ListTile(
             leading: const Icon(Icons.receipt_long),
             title: Row(

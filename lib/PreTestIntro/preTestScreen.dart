@@ -108,7 +108,7 @@ class _QuizScreenState extends State<Pretestscreen> {
         }
       }
 
-      print("📤 Submitting ${answers.length} answers to backend");
+      print(" Submitting ${answers.length} answers to backend");
       for (var ans in answers) {
         print("  - Question ${ans['questionId']}: ${ans['selectedOption']}");
       }
@@ -118,12 +118,12 @@ class _QuizScreenState extends State<Pretestscreen> {
         answers: answers,
       );
 
-      print("✅ Backend response: $result");
+      print(" Backend response: $result");
 
       if (!mounted) return;
 
       final correctCount = (result['correctCount'] as num?)?.toInt() ?? 0;
-      print("📊 Correct answers: $correctCount / ${questions.length}");
+      print("Correct answers: $correctCount / ${questions.length}");
 
       Navigator.pushReplacement(
         context,
@@ -208,7 +208,7 @@ class _QuizScreenState extends State<Pretestscreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.blueAccent),
+                        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () => Navigator.pop(context),
                       ),
                     ],

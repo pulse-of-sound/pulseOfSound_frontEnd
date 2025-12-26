@@ -5,7 +5,7 @@ import 'package:http_parser/http_parser.dart';
 import 'api_config.dart';
 
 class ResearchCategoriesAPI {
-  //  إنشاء فئة بحث جديدة - Admin only
+  //  إنشاء فئة بحث جديدة  Admin only
   static Future<Map<String, dynamic>> createResearchCategory({
     required String sessionToken,
     required String name,
@@ -70,7 +70,7 @@ class ResearchCategoriesAPI {
 }
 
 class ResearchPostsAPI {
-  //  إرسال مقال بحثي جديد - Doctor/Specialist only
+  // إرسال مقال بحثي جديد  Doctor/Specialist only
   static Future<Map<String, dynamic>> submitResearchPost({
     required String sessionToken,
     required String title,
@@ -78,70 +78,66 @@ class ResearchPostsAPI {
     required String categoryName,
     String? keywords,
     File? document,
+    List<int>? fileBytes,
+    String? fileName,
   }) async {
     try {
       print(" Submitting research post: $title");
       
-      if (document != null) {
-        // رفع مع ملف
-        final request = http.MultipartRequest(
-          'POST',
-          Uri.parse("${ApiConfig.baseUrl}/submitResearchPost"),
+      Map<String, dynamic>? documentObject;
+
+      if (document != null || (fileBytes != null && fileName != null)) {
+        //  Upload file to Parse files first
+        final String uploadFileName = fileName ?? (document != null ? document.path.split('/').last : "doc.pdf");
+        final Uri uploadUri = Uri.parse(ApiConfig.baseUrl.replaceAll('/functions', '/files') + "/$uploadFileName");
+        
+        final uploadResponse = await http.post(
+          uploadUri,
+          headers: {
+             "X-Parse-Application-Id": ApiConfig.appId,
+             "X-Parse-Master-Key": ApiConfig.masterKey,
+             "Content-Type": "application/pdf", // Adjust if needed
+          },
+          body: fileBytes ?? await document!.readAsBytes(),
         );
-        
-        request.headers.addAll(ApiConfig.getUploadHeaders(sessionToken));
-        request.fields['title'] = title;
-        request.fields['body'] = body;
-        request.fields['category_name'] = categoryName;
-        if (keywords != null) request.fields['keywords'] = keywords;
-        
-        request.files.add(
-          await http.MultipartFile.fromPath(
-            'document',
-            document.path,
-            contentType: MediaType('application', 'pdf'),
-          ),
-        );
-        
-        final streamedResponse = await request.send();
-        final response = await http.Response.fromStream(streamedResponse);
-        
-        print(" Post Status: ${response.statusCode}");
-        print(" Post Response: ${response.body}");
-        
-        if (response.statusCode == 200) {
-          return jsonDecode(response.body);
+
+        print(" File Upload Status: ${uploadResponse.statusCode}");
+        if (uploadResponse.statusCode == 201 || uploadResponse.statusCode == 200) {
+          final uploadData = jsonDecode(uploadResponse.body);
+          documentObject = {
+            "__type": "File",
+            "name": uploadData['name'],
+            "url": uploadData['url'],
+          };
+          print(" File Uploaded: ${uploadData['url']}");
         } else {
-          try {
-            return jsonDecode(response.body);
-          } catch (e) {
-            return {"error": "فشل إرسال المقال"};
-          }
+           return {"error": "فشل رفع الملف: ${uploadResponse.body}"};
         }
+      }
+
+      //  Submit post with file object
+      final response = await http.post(
+        Uri.parse("${ApiConfig.baseUrl}/submitResearchPost"),
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
+        body: jsonEncode({
+          "title": title,
+          "body": body,
+          "category_name": categoryName,
+          if (keywords != null) "keywords": keywords,
+          if (documentObject != null) "document": documentObject,
+        }),
+      );
+      
+      print(" Post Status: ${response.statusCode}");
+      print(" Post Response: ${response.body}");
+      
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
       } else {
-        // رفع بدون ملف
-        final response = await http.post(
-          Uri.parse("${ApiConfig.baseUrl}/submitResearchPost"),
-          headers: ApiConfig.getHeadersWithToken(sessionToken),
-          body: jsonEncode({
-            "title": title,
-            "body": body,
-            "category_name": categoryName,
-            if (keywords != null) "keywords": keywords,
-          }),
-        );
-        
-        print(" Post Status: ${response.statusCode}");
-        print(" Post Response: ${response.body}");
-        
-        if (response.statusCode == 200) {
+        try {
           return jsonDecode(response.body);
-        } else {
-          try {
-            return jsonDecode(response.body);
-          } catch (e) {
-            return {"error": "فشل إرسال المقال"};
-          }
+        } catch (e) {
+          return {"error": "فشل إرسال المقال: ${response.statusCode}"};
         }
       }
     } catch (e) {
@@ -150,7 +146,7 @@ class ResearchPostsAPI {
     }
   }
   
-  //  جلب المقالات المعلّقة - Admin only
+  //  جلب المقالات المعلّقة  Admin only
   static Future<List<Map<String, dynamic>>> getPendingResearchPosts({
     required String sessionToken,
   }) async {
@@ -181,7 +177,7 @@ class ResearchPostsAPI {
     }
   }
   
-  //  الموافقة أو رفض مقال - Admin only
+  //  الموافقة أو رفض مقال  Admin only
   static Future<Map<String, dynamic>> approveOrRejectPost({
     required String sessionToken,
     required String postId,

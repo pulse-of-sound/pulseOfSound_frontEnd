@@ -23,7 +23,7 @@ class _SpecialistscreenState extends State<Specialistscreen> {
   @override
   void initState() {
     super.initState();
-    // التحقق من الصلاحيات - SuperAdmin و Admin يمكنهم الوصول
+    
     if (!SharedPrefsHelper.hasAdminPermissions()) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pop(context);
@@ -83,7 +83,7 @@ class _SpecialistscreenState extends State<Specialistscreen> {
       name: specialistData['fullName'] ?? specialistData['username'] ?? '',
       phone: specialistData['mobile'] ?? '',
       email: specialistData['email'],
-      password: '', // لن نعرض كلمة المرور
+      password: '', 
       birthDate: '',
       certificates: '',
       experience: '',
@@ -99,7 +99,7 @@ class _SpecialistscreenState extends State<Specialistscreen> {
         builder: (_) => EditSpecialistPage(
           specialist: specialist,
           specialistId: specialistId,
-          originalUsername: username, // تمرير username الأصلي
+          originalUsername: username, 
         ),
       ),
     );
@@ -344,7 +344,7 @@ class _SpecialistscreenState extends State<Specialistscreen> {
         ],
       ),
 
-      //  زر الإضافة - متاح لـ SuperAdmin و Admin
+      
       floatingActionButton: SharedPrefsHelper.hasAdminPermissions()
           ? FloatingActionButton(
               backgroundColor: AppColors.skyBlue,

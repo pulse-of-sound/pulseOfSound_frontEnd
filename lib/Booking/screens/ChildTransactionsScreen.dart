@@ -24,7 +24,7 @@ class _ChildTransactionsScreenState extends State<ChildTransactionsScreen> {
     setState(() => _isLoading = true);
     try {
       final sessionToken = await APIHelpers.getSessionToken();
-      // 1. Get Wallet ID first
+      //  Get Wallet ID first
       final balanceResult = await WalletAPI.getWalletBalance(sessionToken: sessionToken);
       if (balanceResult.containsKey('error')) {
          if(mounted) APIHelpers.showErrorDialog(context, balanceResult['error']);
@@ -33,7 +33,7 @@ class _ChildTransactionsScreenState extends State<ChildTransactionsScreen> {
       final walletId = balanceResult['wallet_id'];
 
       if (walletId != null) {
-        // 2. Get Transactions
+        // Get Transactions
         final txs = await WalletTransactionAPI.getWalletTransactions(
           sessionToken: sessionToken,
           walletId: walletId,
@@ -64,7 +64,7 @@ class _ChildTransactionsScreenState extends State<ChildTransactionsScreen> {
               ),
             ),
           ),
-          Container(color: Colors.white.withOpacity(0.1)), // قللنا العتامة لتظهر الخلفية
+          Container(color: Colors.white.withOpacity(0.1)), 
           SafeArea(
             child: Column(
               children: [

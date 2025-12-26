@@ -6,7 +6,7 @@ import '../../Levels/utils/child_progress_prefs.dart';
 import '../../Colors/colors.dart';
 
 class ParentProfileDetailsScreen extends StatefulWidget {
-  final String parentId; // رقم أو هوية ولي الأمر (من المحادثة)
+  final String parentId; 
   const ParentProfileDetailsScreen({super.key, required this.parentId});
 
   @override
@@ -63,7 +63,7 @@ class _ParentProfileDetailsScreenState
           SafeArea(
             child: Column(
               children: [
-                // AppBar شفاف
+                
                 Row(
                   children: [
                     IconButton(
@@ -86,7 +86,7 @@ class _ParentProfileDetailsScreenState
                 ),
                 const SizedBox(height: 15),
 
-                // صورة الطفل
+                
                 CircleAvatar(
                   radius: 55,
                   backgroundColor: Colors.white.withOpacity(0.8),
@@ -98,7 +98,7 @@ class _ParentProfileDetailsScreenState
                 ),
                 const SizedBox(height: 10),
 
-                // المعلومات الأساسية
+                
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Card(
@@ -131,7 +131,7 @@ class _ParentProfileDetailsScreenState
 
                 const SizedBox(height: 10),
 
-                // تقييمات الطفل
+                
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),

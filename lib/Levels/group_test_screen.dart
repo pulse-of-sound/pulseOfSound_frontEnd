@@ -20,7 +20,7 @@ class _GroupTestScreenState extends State<GroupTestScreen> {
   int _currentQuestion = 0;
   bool _submitting = false;
 
-  // مثال أسئلة — استبدلي/وسعي حسب الحاجة
+  
   final List<Map<String, dynamic>> _questions = [
     {
       "question": "ما لون التفاحة؟",
@@ -76,7 +76,7 @@ class _GroupTestScreenState extends State<GroupTestScreen> {
 
     final passed = _score / _questions.length >= 0.6;
 
-    // عرض نتيجة
+    
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -105,7 +105,7 @@ class _GroupTestScreenState extends State<GroupTestScreen> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.pop(context); // تغلق الـ dialog
+                  Navigator.pop(context); 
                 },
                 child: const Text("حسناً"),
               ),
@@ -117,7 +117,7 @@ class _GroupTestScreenState extends State<GroupTestScreen> {
 
     setState(() => _submitting = false);
 
-    // نرجع إلى الشاشة السابقة مع نتيجة النجاح/الفشل
+    
     Navigator.pop(context, passed);
   }
 

@@ -42,8 +42,8 @@ class _ConsultationFlowScreenState extends State<ConsultationFlowScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // إغلاق الحوار
-                Navigator.of(context).pop(); // العودة للشاشة السابقة
+                Navigator.of(context).pop(); 
+                Navigator.of(context).pop(); 
               },
               child: const Text('حسناً'),
             ),

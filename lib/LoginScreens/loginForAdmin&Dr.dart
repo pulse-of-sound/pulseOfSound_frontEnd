@@ -44,7 +44,7 @@ class _LoginForAdminAndDrState extends State<LoginForAdminAndDr> {
     print(" DEBUG loginForAdmin&Dr: sessionToken value = '${result['sessionToken']}'");
     print(" DEBUG loginForAdmin&Dr: full result keys = ${result.keys.toList()}");
     
-    // تطبيع الـ role
+
     if (role.toUpperCase() == "SUPER_ADMIN" || role == "SuperAdmin") {
       role = "SUPER_ADMIN";
     } else if (role == "Admin") {
@@ -56,7 +56,7 @@ class _LoginForAdminAndDrState extends State<LoginForAdminAndDr> {
     await SharedPrefsHelper.setName(result["fullName"] ?? result["username"] ?? "User");
     await SharedPrefsHelper.setToken(result["sessionToken"]);
     
-    // حفظ userId
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('userId', result["id"] ?? '');
     
@@ -66,7 +66,6 @@ class _LoginForAdminAndDrState extends State<LoginForAdminAndDr> {
     print(" DEBUG loginForAdmin&Dr: stored token length = ${storedToken?.length}");
     print(" DEBUG loginForAdmin&Dr: stored role = '$storedRole'");
 
-    // دعم SuperAdmin و Admin
     if (role == "Admin" || role == "SuperAdmin" || role == "SUPER_ADMIN") {
       Navigator.pushReplacement(
         context,

@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'api_config.dart';
 
 class StageQuestionAPI {
-  //  إضافة أسئلة إلى مرحلة - Admin only
+  //  إضافة أسئلة إلى مرحلة  Admin only
   static Future<Map<String, dynamic>> addQuestionsToStage({
     required String sessionToken,
     required String levelGameId,
@@ -110,17 +110,22 @@ class StageQuestionAPI {
 class StageResultAPI {
   //  إرسال إجابات مرحلة
   static Future<Map<String, dynamic>> submitStageAnswers({
-    required String sessionToken,
+    required String childId,
     required String levelGameId,
     required List<Map<String, dynamic>> answers,
   }) async {
     try {
       print(" Submitting stage answers: $levelGameId, ${answers.length} answers");
+      print(" Child ID: $childId");
+      
+      final headers = ApiConfig.getHeadersWithMasterKey();
+      print(" Headers: $headers");
       
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/submitStageAnswers"),
-        headers: ApiConfig.getHeadersWithToken(sessionToken),
+        headers: headers,
         body: jsonEncode({
+          "child_id": childId,
           "level_game_id": levelGameId,
           "answers": answers,
         }),

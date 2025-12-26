@@ -23,7 +23,7 @@ class _ChildrenPageState extends State<ChildrenPage> {
   @override
   void initState() {
     super.initState();
-    // التحقق من الصلاحيات - SuperAdmin و Admin يمكنهم الوصول
+    
     if (!SharedPrefsHelper.hasAdminPermissions()) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pop(context);

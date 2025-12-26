@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../Colors/colors.dart';
+
 import 'doctor_private_chats_list_screen.dart';
 import 'doctor_community_chat_screen.dart';
 
@@ -51,7 +52,6 @@ class DoctorChatMainScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 40),
 
-                  // داخل DoctorChatMainScreen.dart
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

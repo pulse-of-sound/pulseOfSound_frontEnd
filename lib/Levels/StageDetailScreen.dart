@@ -10,6 +10,7 @@ class StageDetailScreen extends StatefulWidget {
   final int stageNumber;
   final String groupId;
   final bool isFinalStage;
+  final String? sessionToken; 
 
   const StageDetailScreen({
     super.key,
@@ -18,6 +19,7 @@ class StageDetailScreen extends StatefulWidget {
     required this.stageNumber,
     required this.groupId,
     this.isFinalStage = false,
+    this.sessionToken, 
   });
 
   @override
@@ -33,12 +35,11 @@ class _StageDetailScreenState extends State<StageDetailScreen> {
   
   bool _answeredCorrectly = false;
   String? _waitMessage;
-
-  // للأسئلة من نوع match
+  String? _sessionToken; 
+  
   Map<int, int> _matchPairs = {};
   int? _selectedLeft;
-
-  // للأسئلة من نوع classify
+  
   List<int> _boyImages = [];
   List<int> _girlImages = [];
   List<int> _unclassifiedImages = [];
@@ -46,25 +47,44 @@ class _StageDetailScreenState extends State<StageDetailScreen> {
   @override
   void initState() {
     super.initState();
-    print("📢 StageDetailScreen Initialized (Stage: ${widget.stageNumber})");
+    print(" StageDetailScreen Initialized (Stage: ${widget.stageNumber})");
+    _loadSessionToken();
     _fetchQuestions();
+  }
+  
+  Future<void> _loadSessionToken() async {
+    // استخدام Session Token من widget إذا كان 
+    if (widget.sessionToken != null && widget.sessionToken!.isNotEmpty) {
+      setState(() {
+        _sessionToken = widget.sessionToken;
+        print(' Session Token from widget: Found (${_sessionToken!.substring(0, 10)}...)');
+      });
+      return;
+    }
+    
+    
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _sessionToken = prefs.getString('session_token');
+      print(' Session Token from SharedPreferences: ${_sessionToken != null ? "Found" : "Missing"}');
+    });
   }
 
   Future<void> _fetchQuestions() async {
-    print("🔄 _fetchQuestions started...");
+    print(" _fetchQuestions started...");
     try {
       final prefs = await SharedPreferences.getInstance();
       final sessionToken = prefs.getString('session_token');
       
-      print("🔑 Session Token: ${sessionToken != null ? 'Found' : 'Missing'}");
-      print("🌍 Calling StageQuestionAPI.getStageQuestions for Group: ${widget.groupId}");
+      print(" Session Token: ${sessionToken != null ? 'Found' : 'Missing'}");
+      print("Calling StageQuestionAPI.getStageQuestions for Group: ${widget.groupId}");
       
       final questions = await StageQuestionAPI.getStageQuestions(
         sessionToken: sessionToken ?? "", 
         levelGameId: widget.groupId,
       );
       
-      print("📦 Questions Received: ${questions.length}");
+      print(" Questions Received: ${questions.length}");
       
       if (mounted) {
         setState(() {
@@ -74,7 +94,7 @@ class _StageDetailScreenState extends State<StageDetailScreen> {
         });
       }
     } catch (e) {
-      print("❌ Error fetching questions: $e");
+      print(" Error fetching questions: $e");
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -84,7 +104,7 @@ class _StageDetailScreenState extends State<StageDetailScreen> {
     final index = (widget.stageNumber - 1) % _questions.length;
     _currentQuestion = _questions[index];
     
-    // تهيئة قائمة الصور غير المصنفة للـ classify
+    
     final type = _currentQuestion!['question_type'];
     if (type == 'classify') {
       final images = _currentQuestion!['images'] as List?;
@@ -112,12 +132,12 @@ class _StageDetailScreenState extends State<StageDetailScreen> {
     
     if (isCorrect) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ إجابة صحيحة! أحسنت يا بطل!"), backgroundColor: Colors.green),
+        const SnackBar(content: Text(" إجابة صحيحة! أحسنت يا بطل!"), backgroundColor: Colors.green),
       );
       setState(() => _answeredCorrectly = true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ حاول مرة أخرى!"), backgroundColor: Colors.orange),
+        const SnackBar(content: Text("حاول مرة أخرى!"), backgroundColor: Colors.orange),
       );
     }
   }
@@ -142,12 +162,12 @@ class _StageDetailScreenState extends State<StageDetailScreen> {
     
     if (isCorrect && _matchPairs.length == correctPairs.length) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ ممتاز! جميع الوصلات صحيحة!"), backgroundColor: Colors.green),
+        const SnackBar(content: Text(" ممتاز! جميع الوصلات صحيحة!"), backgroundColor: Colors.green),
       );
       setState(() => _answeredCorrectly = true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ بعض الوصلات خاطئة، حاول مرة أخرى!"), backgroundColor: Colors.orange),
+        const SnackBar(content: Text(" بعض الوصلات خاطئة، حاول مرة أخرى!"), backgroundColor: Colors.orange),
       );
     }
   }
@@ -168,33 +188,108 @@ class _StageDetailScreenState extends State<StageDetailScreen> {
     
     if (isCorrect) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ تصنيف ممتاز!"), backgroundColor: Colors.green),
+        const SnackBar(content: Text(" تصنيف ممتاز!"), backgroundColor: Colors.green),
       );
       setState(() => _answeredCorrectly = true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ التصنيف غير صحيح، حاول مرة أخرى!"), backgroundColor: Colors.orange),
+        const SnackBar(content: Text(" التصنيف غير صحيح، حاول مرة أخرى!"), backgroundColor: Colors.orange),
       );
     }
   }
 
   Future<void> _finishStage() async {
+    print(' _finishStage called!');
     setState(() => _isWorking = true);
 
     try {
+      print(' Starting to finish stage...');
       final prefs = await SharedPreferences.getInstance();
       final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      
+      print('Session Token from state: ${_sessionToken != null && _sessionToken!.isNotEmpty ? "Found (${_sessionToken!.substring(0, 10)}...)" : "Missing"}');
 
+      // حفظ النتيجة في قاعدة البيانات
+      if (_sessionToken != null && _sessionToken!.isNotEmpty) {
+        print(' Saving stage result to database...');
+        
+        // إنشاء قائمة الإجابات
+        final answers = <Map<String, dynamic>>[];
+        
+        if (_currentQuestion != null) {
+          final questionType = _currentQuestion!['question_type'];
+          final questionId = _currentQuestion!['objectId'];
+          
+          // إضافة الإجابة حسب نوع السؤال
+          if (questionType == 'choose') {
+            answers.add({
+              'question_id': questionId,
+              'answer_type': 'choose',
+              'is_correct': _answeredCorrectly,
+            });
+          } else if (questionType == 'match') {
+            answers.add({
+              'question_id': questionId,
+              'answer_type': 'match',
+              'is_correct': _answeredCorrectly,
+              'match_pairs': _matchPairs,
+            });
+          } else if (questionType == 'classify') {
+            answers.add({
+              'question_id': questionId,
+              'answer_type': 'classify',
+              'is_correct': _answeredCorrectly,
+              'boy_images': _boyImages,
+              'girl_images': _girlImages,
+            });
+          } else if (questionType == 'view_only') {
+            answers.add({
+              'question_id': questionId,
+              'answer_type': 'view_only',
+              'is_correct': true,
+            });
+          }
+        }
+        
+        
+        try {
+          
+          final prefs = await SharedPreferences.getInstance();
+          final childId = prefs.getString('child_id');
+          
+          if (childId == null) {
+            print(' child_id not found in SharedPreferences');
+            throw 'child_id not found';
+          }
+          
+          print(' Using child_id: $childId');
+          
+          final result = await StageResultAPI.submitStageAnswers(
+            childId: childId,
+            levelGameId: widget.groupId,
+            answers: answers,
+          );
+          
+          if (result['success'] == true) {
+            print(' Stage result saved successfully');
+          } else {
+            print(' Failed to save stage result: ${result['error']}');
+          }
+        } catch (e) {
+          print(' Error saving stage result: $e');
+        }
+      }
+
+      // حفظ التقدم المحلي
       await prefs.setInt("level_${widget.levelNumber}_group_${widget.groupNumber}_stage", widget.stageNumber);
       await prefs.setString("lastPlayDate_Level${widget.levelNumber}_Group${widget.groupNumber}", today);
 
       if (widget.isFinalStage) {
-         final sessionToken = prefs.getString('session_token');
          final childId = prefs.getString('child_id');
          
-         if (sessionToken != null && childId != null) {
+         if (_sessionToken != null && childId != null) {
             final result = await LevelGameAPI.advanceOrRepeatStage(
-              sessionToken: sessionToken,
+              sessionToken: _sessionToken!,
               childId: childId,
               stageId: widget.groupId,
               passed: true,
@@ -289,7 +384,7 @@ class _StageDetailScreenState extends State<StageDetailScreen> {
           ),
           onPressed: _answeredCorrectly ? null : () {
             setState(() => _answeredCorrectly = true);
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("✅ أحسنت يا بطل!")));
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(" أحسنت يا بطل!")));
           },
         )
       ],
@@ -301,7 +396,7 @@ class _StageDetailScreenState extends State<StageDetailScreen> {
     
     return Column(
       children: [
-        const Text("👆 اضغط على الصورة الصحيحة", style: TextStyle(fontSize: 18, color: Colors.grey, fontWeight: FontWeight.bold)),
+        const Text(" اضغط على الصورة الصحيحة", style: TextStyle(fontSize: 18, color: Colors.grey, fontWeight: FontWeight.bold)),
         const SizedBox(height: 20),
         if (images != null && images.isNotEmpty)
           Wrap(
@@ -331,7 +426,7 @@ class _StageDetailScreenState extends State<StageDetailScreen> {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(15)),
-          child: const Text("👆 اضغط على صورة من اليسار ثم اضغط على ما يناسبها من اليمين", 
+          child: const Text(" اضغط على صورة من اليسار ثم اضغط على ما يناسبها من اليمين", 
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue), textAlign: TextAlign.center),
         ),
         const SizedBox(height: 20),
@@ -363,7 +458,7 @@ class _StageDetailScreenState extends State<StageDetailScreen> {
               }).toList(),
             ),
             
-            // خط فاصل مع سهم
+            
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -374,7 +469,7 @@ class _StageDetailScreenState extends State<StageDetailScreen> {
               ],
             ),
             
-            // العمود الأيمن
+            
             Column(
               children: rightImages.asMap().entries.map((entry) {
                 final rightIndex = entry.key + 2;
@@ -407,7 +502,7 @@ class _StageDetailScreenState extends State<StageDetailScreen> {
         const SizedBox(height: 10),
         ElevatedButton.icon(
           icon: const Icon(Icons.done_all, size: 24),
-          label: const Text("هل أنهيت الوصل؟ 🎯", style: TextStyle(fontSize: 18)),
+          label: const Text("هل أنهيت الوصل؟ ", style: TextStyle(fontSize: 18)),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green,
             foregroundColor: Colors.white,
@@ -430,17 +525,17 @@ class _StageDetailScreenState extends State<StageDetailScreen> {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(color: Colors.purple.withOpacity(0.1), borderRadius: BorderRadius.circular(15)),
-          child: const Text("👆 اضغط على الصورة ثم اضغط على المنطقة المناسبة", 
+          child: const Text(" اضغط على الصورة ثم اضغط على المنطقة المناسبة", 
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.purple), textAlign: TextAlign.center),
         ),
         const SizedBox(height: 20),
         
         // منطقة الأولاد
-        _buildClickableDropZone("أولاد 👦", Colors.blue, _boyImages, images),
+        _buildClickableDropZone("أولاد ", Colors.blue, _boyImages, images),
         const SizedBox(height: 15),
         
         // منطقة البنات
-        _buildClickableDropZone("بنات 👧", Colors.pink, _girlImages, images),
+        _buildClickableDropZone("بنات ", Colors.pink, _girlImages, images),
         const SizedBox(height: 15),
         
         // الصور غير المصنفة
@@ -456,7 +551,7 @@ class _StageDetailScreenState extends State<StageDetailScreen> {
         const SizedBox(height: 20),
         ElevatedButton.icon(
           icon: const Icon(Icons.star, size: 24),
-          label: const Text("انتهيت من التصنيف! ✨", style: TextStyle(fontSize: 18)),
+          label: const Text("انتهيت من التصنيف!", style: TextStyle(fontSize: 18)),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green,
             foregroundColor: Colors.white,
@@ -470,7 +565,7 @@ class _StageDetailScreenState extends State<StageDetailScreen> {
     );
   }
 
-  // منطقة قابلة للنقر بدلاً من السحب والإفلات
+  
   int? _selectedImageForClassify;
 
   Widget _buildClickableDropZone(String label, Color color, List<int> targetList, List images) {
@@ -637,7 +732,7 @@ class _StageDetailScreenState extends State<StageDetailScreen> {
                               elevation: 10,
                             ),
                             child: Text(
-                              widget.isFinalStage ? "إنهاء المجموعة 🏆" : "المرحلة التالية ➡️",
+                              widget.isFinalStage ? "إنهاء المجموعة " : "المرحلة التالية ",
                               style: const TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.bold),
                             ),
                           ),

@@ -46,7 +46,7 @@ class _BookingFlowExampleState extends State<BookingFlowExample> {
     super.dispose();
   }
 
-  /// الخطوة 1: تحميل الخطط المتاحة
+  // تحميل الخطط المتاحة
   Future<void> _loadPlans() async {
     setState(() => _isLoading = true);
 
@@ -69,7 +69,7 @@ class _BookingFlowExampleState extends State<BookingFlowExample> {
     }
   }
 
-  /// الخطوة 2: تحميل رصيد المحفظة
+  //   تحميل رصيد المحفظة
   Future<void> _loadWalletBalance() async {
     setState(() => _isLoading = true);
 
@@ -99,7 +99,7 @@ class _BookingFlowExampleState extends State<BookingFlowExample> {
     }
   }
 
-  /// الخطوة 3: إنشاء الموعد
+  //إنشاء الموعد
   Future<void> _createAppointment() async {
     if (_selectedPlan == null) {
       APIHelpers.showErrorDialog(context, 'يرجى اختيار خطة');
@@ -140,7 +140,7 @@ class _BookingFlowExampleState extends State<BookingFlowExample> {
     }
   }
 
-  /// الخطوة 4: إنشاء الفاتورة
+  // إنشاء الفاتورة
   Future<void> _createInvoice() async {
     if (_appointmentId == null) return;
 
@@ -173,7 +173,7 @@ class _BookingFlowExampleState extends State<BookingFlowExample> {
     }
   }
 
-  /// الخطوة 5: تأكيد الدفع
+  ///   تأكيد الدفع
   Future<void> _confirmPayment() async {
     if (_invoiceId == null) return;
 
@@ -205,7 +205,7 @@ class _BookingFlowExampleState extends State<BookingFlowExample> {
               onPressed: () {
                 Navigator.pop(context);
                 // الانتقال لشاشة شحن الرصيد
-                // Navigator.push(context, MaterialPageRoute(...));
+                
               },
               child: const Text('شحن الرصيد'),
             ),

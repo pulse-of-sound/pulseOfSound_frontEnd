@@ -6,6 +6,7 @@ import '../Doctor/Screens/doctor_bookings_screen.dart';
 import '../Doctor/Screens/doctor_chat_screen.dart';
 
 import '../Doctor/Screens/doctor_reports_compose_screen.dart';
+import '../Doctor/Screens/doctor_reports_list_screen.dart';
 import '../Doctor/Screens/doctor_wallet_screen.dart';
 
 class DoctorDashboard extends StatelessWidget {
@@ -42,9 +43,8 @@ class DoctorDashboard extends StatelessWidget {
       {
         "title": "التقارير الطبية",
         "icon": Icons.file_copy,
-        "screen": const DoctorReportsComposeScreen(
-          parentId: '',
-          parentName: '',
+        "screen": const DoctorReportsListScreen(
+
         )
       },
     ];

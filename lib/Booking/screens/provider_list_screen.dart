@@ -77,7 +77,7 @@ class PlanStaticSelectionScreen extends StatelessWidget {
                         TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                 const SizedBox(height: 10),
 
-                ///  فقط هذا الجزء قابل للسكرول:
+                
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(

@@ -213,10 +213,10 @@ class _BookingsListScreenState extends State<BookingsListScreen> {
   }
 
   Widget _buildAppointmentCard(Map<String, dynamic> appointment) {
-    final providerName = appointment['provider']['name'] ?? appointment['provider_name'] ?? 'متخصص'; // Fixed structure access based on getChildAppointments format
+    final providerName = appointment['provider']['name'] ?? appointment['provider_name'] ?? 'متخصص'; 
     final planTitle = appointment['appointment_plan']['title'] ?? appointment['plan_title'] ?? 'استشارة';
     final status = appointment['status'] ?? 'pending';
-    final date = appointment['created_at'] ?? appointment['appointment_date'] ?? ''; // Backend returns created_at usually as date
+    final date = appointment['created_at'] ?? appointment['appointment_date'] ?? ''; 
     final note = appointment['note'] ?? '';
     final id = appointment['id'];
 
@@ -334,7 +334,7 @@ class _BookingsListScreenState extends State<BookingsListScreen> {
                 ),
               ],
               
-              // Cancel Button - ONLY if status is pending
+              // Cancel Button  ONLY if status is pending
               if (status == 'pending' || status == 'pending_provider_approval') ...[
                 const SizedBox(height: 16),
                 SizedBox(

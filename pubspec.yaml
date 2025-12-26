@@ -48,6 +48,9 @@ dependencies:
   http: ^0.13.5
   parse_server_sdk: ^6.4.0
   parse_server_sdk_flutter: ^8.0.0
+  file_picker: ^8.0.7
+  fl_chart: ^0.66.2
+  
  
 dev_dependencies:
   flutter_test:

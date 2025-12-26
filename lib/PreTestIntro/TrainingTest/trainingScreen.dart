@@ -76,7 +76,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
   }
 
   void _selectAnswer(int index) {
-    // OLD: if (answered) return; -> Removed to allow changing answer
+    
     setState(() {
       selectedAnswer = index;
       answered = true;

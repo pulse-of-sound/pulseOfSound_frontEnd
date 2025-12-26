@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../api/api_helpers.dart';
+import '../api/user_stage_status_api.dart';
 import 'StageDetailScreen.dart';
 import 'group_test_screen.dart';
 
@@ -21,6 +23,7 @@ class StageMapScreen extends StatefulWidget {
   State<StageMapScreen> createState() => _StageMapScreenState();
 }
 
+
 class _StageMapScreenState extends State<StageMapScreen> {
   int currentStage = 0;
   String? lastPlayDate;
@@ -30,63 +33,92 @@ class _StageMapScreenState extends State<StageMapScreen> {
   void initState() {
     super.initState();
     print(" StageMapScreen Initialized for Group: ${widget.groupId}, Order: ${widget.groupNumber}");
-    _loadLocalProgress();
+    _loadProgressFromBackend(); // ← تغيير من _loadLocalProgress
   }
 
-  Future<void> _loadLocalProgress() async {
+  Future<void> _loadProgressFromBackend() async {
     final prefs = await SharedPreferences.getInstance();
-    final stageKey = "level_${widget.levelNumber}_group_${widget.groupNumber}_stage";
-    final dateKey = "lastPlayDate_Level${widget.levelNumber}_Group${widget.groupNumber}";
+    final childId = prefs.getString('child_id');
     
-    currentStage = prefs.getInt(stageKey) ?? 0;
-    lastPlayDate = prefs.getString(dateKey);
+    if (childId == null) {
+      print(' No child_id found - using default progress');
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+      return;
+    }
     
-    print(" Local Progress Loaded: Stage $currentStage, LastDate: $lastPlayDate");
-    
-    if (mounted) {
-      setState(() => isLoading = false);
+    try {
+      print(' Loading progress from Backend for group: ${widget.groupId}');
+      
+      final result = await UserStageStatusAPI.getStageProgressForGroup(
+        childId: childId,
+        levelGameId: widget.groupId,
+      );
+      
+      setState(() {
+        currentStage = result['current_stage'] ?? 0;
+        lastPlayDate = result['last_play_date'];
+        isLoading = false;
+      });
+      
+      print(' Backend Progress Loaded: Stage $currentStage, LastDate: $lastPlayDate');
+    } catch (e) {
+      print(' Error loading progress from Backend: $e');
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     }
   }
 
   bool _canPlayToday() {
     if (lastPlayDate == null) return true;
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    print(' Checking if can play today:');
+    print('   Last Play Date: $lastPlayDate');
+    print('   Today: $today');
+    print('   Can Play: ${lastPlayDate != today}');
     return lastPlayDate != today;
   }
 
   void _openStage(int stageNumber) async {
-    print("📢 Tapped on Stage $stageNumber. Current: $currentStage");
+    print(" Tapped on Stage $stageNumber. Current: $currentStage");
+    print(" Last Play Date: $lastPlayDate");
     
-    // التحقق 1: هل المرحلة مقفلة تماماً؟
+    
     if (stageNumber > currentStage + 1) {
        ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("🔒 يجب إنهاء المرحلة السابقة أولاً"),
+          content: Text(" يجب إنهاء المرحلة السابقة أولاً"),
           backgroundColor: Colors.orange,
         ),
       );
       return;
     }
 
-    // التحقق 2: إذا كانت مرحلة جديدة (لم تُنجز بعد)، تحقق من التاريخ
+  
     if (stageNumber == currentStage + 1) {
       if (!_canPlayToday()) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("⏰ مرحلة واحدة يومياً! عد غداً لمرحلة جديدة 🌟"),
+            content: Text(" مرحلة واحدة يومياً! عد غداً لمرحلة جديدة "),
             backgroundColor: Colors.blue,
             duration: Duration(seconds: 3),
           ),
         );
         return;
       }
-      print("✅ Opening new stage $stageNumber");
+      print("Opening new stage $stageNumber");
     } else {
       // إعادة لعب مرحلة مكتملة - مسموح دائماً
-      print("🔄 Replaying completed stage $stageNumber");
+      print(" Replaying completed stage $stageNumber");
     }
 
     try {
+      // الحصول على Session Token من APIHelpers
+      final sessionToken = await APIHelpers.getSessionToken();
+      print(' Passing Session Token to StageDetailScreen: ${sessionToken != null ? "Found (${sessionToken.substring(0, 10)}...)" : "Missing"}');
+      
       final passed = await Navigator.push(
         context,
         MaterialPageRoute(
@@ -96,24 +128,25 @@ class _StageMapScreenState extends State<StageMapScreen> {
             stageNumber: stageNumber,
             groupId: widget.groupId,
             isFinalStage: stageNumber == 10,
+            sessionToken: sessionToken, 
           ),
         ),
       );
 
       if (passed == true) {
-        _loadLocalProgress();
+        _loadProgressFromBackend();
         if (stageNumber == 10) {
            await Future.delayed(const Duration(milliseconds: 500));
            _openGroupTest();
         }
       }
     } catch (e) {
-      print("❌ Error navigating to stage details: $e");
+      print(" Error navigating to stage details: $e");
     }
   }
 
   void _openGroupTest() async {
-    // ... (نفس المنطق السابق)
+    
     try {
       await Navigator.push(
         context,
@@ -154,7 +187,7 @@ class _StageMapScreenState extends State<StageMapScreen> {
         child: isLoading 
          ? const Center(child: CircularProgressIndicator())
          : Center(
-            child: SingleChildScrollView( // إضافة سكرول تحسباً للشاشات الصغيرة
+            child: SingleChildScrollView( 
               child: Wrap(
                 spacing: 20,
                 runSpacing: 20,

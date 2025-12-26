@@ -60,7 +60,7 @@ class DoctorChatService {
     await prefs.setString(_bannedUsersKey, jsonEncode(banned.toList()));
   }
 
-  /// جلب قائمة المحظورين
+ 
   static Future<Set<String>> getBannedUsers() async {
     final prefs = await SharedPreferences.getInstance();
     final jsonStr = prefs.getString(_bannedUsersKey);
@@ -68,9 +68,7 @@ class DoctorChatService {
     final List decoded = jsonDecode(jsonStr);
     return decoded.map((e) => e.toString()).toSet();
   }
-  //  محادثات خاصة (بين الطبيب ووليّ الأمر)
-
-  ///  إنشاء محادثة جديدة بمدة زمنية محددة
+ 
 
   static Future<void> createPrivateChat({
     required String chatId,
@@ -89,7 +87,7 @@ class DoctorChatService {
       "doctorId": doctorId,
       "parentId": parentId,
       "parentName": parentName,
-      "durationMinutes": durationMinutes, //  أضفناها هون
+      "durationMinutes": durationMinutes, 
       "isClosed": false,
       "startTime": startTime.toIso8601String(),
       "endTime": endTime.toIso8601String(),
@@ -139,7 +137,7 @@ class DoctorChatService {
 
     final decoded = jsonDecode(data);
     if (decoded["isClosed"] == true) {
-      // الجلسة منتهية - لا يمكن إرسال الرسائل
+  
       return;
     }
 

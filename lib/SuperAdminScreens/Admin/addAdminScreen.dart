@@ -76,7 +76,7 @@ class _AddAdminPageState extends State<AddAdminPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('تم إضافة الأدمن بنجاح'), backgroundColor: Colors.green)
         );
-        // إرجاع true لإعادة تحميل القائمة
+        
         Navigator.pop(context, true);
       }
     } catch (e) {

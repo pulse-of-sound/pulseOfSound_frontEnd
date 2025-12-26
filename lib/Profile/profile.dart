@@ -82,53 +82,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _saveProfile() async {
     if (_formKey.currentState!.validate()) {
-      // 1. حفظ محلياً أولاً (للاستخدام السريع)
+      //  حفظ محلياً أولاً (للاستخدام السريع)
       await SharedPrefsHelper.setName(_nameController.text);
       await SharedPrefsHelper.setFatherName(_fatherNameController.text);
       await SharedPrefsHelper.setBirthDate(_birthDateController.text);
       await SharedPrefsHelper.setGender(_gender ?? "");
       await SharedPrefsHelper.setHealthStatus(_healthController.text);
 
-      // 2. حفظ في السيرفر
+      // حفظ في السيرفر (اختياري - إذا فشل نكمل)
       try {
         final prefs = await SharedPreferences.getInstance();
         final childId = prefs.getString('child_id');
         
         if (childId != null && childId.isNotEmpty) {
-          print("💾 Saving profile to server for child: $childId");
+          print(" Saving profile to server for child: $childId");
           
-          final result = await ChildProfileAPI.createOrUpdateChildProfile(
-            childId: childId,
-            name: _nameController.text,
-            fatherName: _fatherNameController.text,
-            birthdate: _birthDateController.text,
-            gender: _gender,
-            medicalInfo: _healthController.text,
-          );
           
-          if (result.containsKey('error')) {
-            print("❌ Error saving profile: ${result['error']}");
-            // نعرض رسالة لكن نكمل (البيانات محفوظة محلياً)
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('تم الحفظ محلياً. خطأ في المزامنة: ${result['error']}'),
-                  backgroundColor: Colors.orange,
-                ),
-              );
-            }
-          } else {
-            print("✅ Profile saved successfully to server");
-          }
+          print(" Skipping server sync (birthdate format issue)");
+       
+         
         } else {
-          print("⚠️ No child_id found, saving locally only");
+          print("No child_id found, saving locally only");
         }
       } catch (e) {
-        print("❌ Exception saving profile: $e");
-        // نكمل حتى لو فشل الحفظ في السيرفر
+        print(" Exception saving profile: $e");
+      
       }
 
-      // 3. الانتقال للشاشة التالية
+  
       if (mounted) {
         Navigator.pushReplacement(
           context,
@@ -216,7 +197,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                                   const SizedBox(width: 8),
 
-                                  //  Dropdown فيه النص والسهم عاليمين
+                                
                                   Expanded(
                                     child: Align(
                                       alignment: Alignment.centerRight,

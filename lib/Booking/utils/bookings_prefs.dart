@@ -35,7 +35,7 @@ class BookingsPrefs {
     await save(list);
   }
 
-  // 🔹 دالة الطبيب لقبول الحجز مع خصم الرصيد
+  //  دالة الطبيب لقبول الحجز مع خصم الرصيد
   static Future<bool> approveBooking(Booking booking) async {
     final success = await WalletPrefs.deduct(booking.price);
     if (success) {

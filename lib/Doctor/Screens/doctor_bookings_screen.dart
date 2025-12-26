@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../api/appointment_api.dart';
 import '../../utils/api_helpers.dart';
 import '../../Colors/colors.dart';
+import 'doctor_chat_room.dart';
 
 class DoctorBookingsScreen extends StatefulWidget {
   const DoctorBookingsScreen({super.key});
@@ -284,6 +285,35 @@ class _DoctorBookingsScreenState extends State<DoctorBookingsScreen> {
                                               ),
                                             ),
                                           ],
+                                        ),
+                                      ] else if ((status.toLowerCase() == "confirmed" || status.toLowerCase() == "paid") && b["chat_group_id"] != null) ...[
+                                        const SizedBox(height: 12),
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: ElevatedButton.icon(
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) => DoctorPrivateChatRoom(
+                                                    parentId: b["requestedBy"]["id"] ?? "",
+                                                    parentName: b["requestedBy"]["name"] ?? "ولي أمر",
+                                                    appointmentId: b["id"] ?? "",
+                                                    durationMinutes: plan["duration_minutes"] ?? 30,
+                                                    chatGroupId: b["chat_group_id"] ?? "",
+                                                    childName: child != null ? (child["name"] ?? "غير محدد") : "غير محدد",
+                                                    childId: child != null ? child["id"] : null,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            icon: const Icon(Icons.chat),
+                                            label: const Text("بدء المحادثة"),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: AppColors.skyBlue,
+                                              foregroundColor: Colors.white,
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     ],

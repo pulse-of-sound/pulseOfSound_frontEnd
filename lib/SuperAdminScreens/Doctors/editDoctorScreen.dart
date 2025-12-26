@@ -5,8 +5,8 @@ import '../../utils/shared_pref_helper.dart';
 
 class EditDoctorPage extends StatefulWidget {
   final Doctor doctor;
-  final String? doctorId; // ID من API
-  final String? originalUsername; // Username الأصلي من API
+  final String? doctorId; 
+  final String? originalUsername; 
   const EditDoctorPage({super.key, required this.doctor, this.doctorId, this.originalUsername});
 
   @override
@@ -68,7 +68,7 @@ class _EditDoctorPageState extends State<EditDoctorPage> {
         return;
       }
 
-      // استخدام username الأصلي من API إذا كان متوفراً
+      
       String username = widget.originalUsername ?? 
           widget.doctor.name.trim().replaceAll(' ', '_').toLowerCase();
       
@@ -76,7 +76,7 @@ class _EditDoctorPageState extends State<EditDoctorPage> {
         sessionToken,
         fullName: nameCtrl.text.trim(),
         username: username,
-        password: passwordCtrl.text.isNotEmpty ? passwordCtrl.text : "temp123", // إذا كانت فارغة، نستخدم كلمة مرور مؤقتة
+        password: passwordCtrl.text.isNotEmpty ? passwordCtrl.text : "temp123", 
         mobile: phoneCtrl.text.trim(),
         email: emailCtrl.text.trim(),
       );

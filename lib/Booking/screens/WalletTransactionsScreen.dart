@@ -217,7 +217,7 @@ class _WalletTransactionsScreenState extends State<WalletTransactionsScreen> {
             children: [
               Row(
                 children: [
-                  // أيقونة نوع المعاملة
+                  
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -233,7 +233,7 @@ class _WalletTransactionsScreenState extends State<WalletTransactionsScreen> {
                   ),
                   const SizedBox(width: 12),
 
-                  // معلومات المعاملة
+                  
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -323,7 +323,6 @@ class _WalletTransactionsScreenState extends State<WalletTransactionsScreen> {
     );
   }
 
-  /// معلومات صغيرة
   Widget _buildInfoChip(String label, String value, IconData icon) {
     return Expanded(
       child: Container(
@@ -362,7 +361,7 @@ class _WalletTransactionsScreenState extends State<WalletTransactionsScreen> {
     );
   }
 
-  /// عرض تفاصيل المعاملة
+
   void _showTransactionDetails(Map<String, dynamic> transaction) {
     showModalBottomSheet(
       context: context,
@@ -424,7 +423,7 @@ class _WalletTransactionsScreenState extends State<WalletTransactionsScreen> {
     );
   }
 
-  /// صف تفاصيل
+  
   Widget _buildDetailRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),

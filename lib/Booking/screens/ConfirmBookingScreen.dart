@@ -97,8 +97,7 @@ class _ConfirmBookingScreenState extends State<ConfirmBookingScreen> {
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(context);
-                // TODO: الانتقال لشاشة شحن الرصيد
-                // Navigator.push(context, MaterialPageRoute(...));
+              
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.skyBlue,

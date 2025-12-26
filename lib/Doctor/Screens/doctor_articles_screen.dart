@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../Colors/colors.dart';
 import '../../api/research_api.dart';
@@ -18,6 +21,10 @@ class _DoctorArticlesScreenState extends State<DoctorArticlesScreen> {
   String? selectedCategory;
   bool isLoading = true;
   bool isSubmitting = false;
+ 
+  File? selectedFile;
+  List<int>? selectedFileBytes;
+  String? selectedFileName;
 
   @override
   void initState() {
@@ -59,6 +66,33 @@ class _DoctorArticlesScreenState extends State<DoctorArticlesScreen> {
     }
   }
 
+  Future<void> _pickDocument() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx'],
+      );
+
+      if (result != null) {
+        setState(() {
+          selectedFileName = result.files.single.name;
+          if (kIsWeb) {
+            selectedFileBytes = result.files.single.bytes;
+          } else if (result.files.single.path != null) {
+            selectedFile = File(result.files.single.path!);
+          }
+        });
+      }
+    } catch (e) {
+      print("Error picking file: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(content: Text("فشل اختيار الملف: $e")),
+        );
+      }
+    }
+  }
+
   Future<void> _submitArticle() async {
     final title = titleController.text.trim();
     final content = contentController.text.trim();
@@ -75,6 +109,9 @@ class _DoctorArticlesScreenState extends State<DoctorArticlesScreen> {
         title: title,
         body: content,
         categoryName: selectedCategory!,
+        document: selectedFile,
+        fileBytes: selectedFileBytes,
+        fileName: selectedFileName,
       );
 
       if (result.containsKey('error')) {
@@ -82,6 +119,11 @@ class _DoctorArticlesScreenState extends State<DoctorArticlesScreen> {
       } else {
         titleController.clear();
         contentController.clear();
+        setState(() {
+          selectedFile = null;
+          selectedFileBytes = null;
+          selectedFileName = null;
+        });
         await _loadArticles();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -188,6 +230,61 @@ class _DoctorArticlesScreenState extends State<DoctorArticlesScreen> {
                 ),
               ),
               const SizedBox(height: 10),
+              // File Picker UI
+              Row(
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: _pickDocument,
+                    icon: const Icon(Icons.attach_file),
+                    label: const Text("إرفاق ملف"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppColors.skyBlue,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: const BorderSide(color: AppColors.skyBlue),
+                      )
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  if (selectedFileName != null)
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.description, size: 20, color: AppColors.skyBlue),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Text(
+                                selectedFileName!,
+                                style: const TextStyle(fontSize: 12),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                setState(() {
+                                  selectedFile = null;
+                                  selectedFileBytes = null;
+                                  selectedFileName = null;
+                                });
+                              },
+                              child: const Icon(Icons.close, size: 18, color: Colors.red),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: isSubmitting ? null : _submitArticle,
                 style: ElevatedButton.styleFrom(
@@ -224,6 +321,18 @@ class _DoctorArticlesScreenState extends State<DoctorArticlesScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text("الفئة: ${a["category"]}"),
+                                  if (a["document_url"] != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.attach_file, size: 16, color: Colors.grey),
+                                          const SizedBox(width: 4),
+                                          const Text("يوجد مرفق", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                                        ],
+                                      ),
+                                    ),
+                                  const SizedBox(height: 4),
                                   Text(
                                     status == "pending"
                                         ? "قيد المراجعة"

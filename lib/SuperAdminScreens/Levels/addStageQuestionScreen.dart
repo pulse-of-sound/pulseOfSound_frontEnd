@@ -29,8 +29,8 @@ class _AddStageQuestionScreenState extends State<AddStageQuestionScreen> {
   final correctAnswerCtrl = TextEditingController();
   
   String selectedType = 'choose';
-  List<String> imageUrls = []; // URLs من السيرفر
-  List<Uint8List> selectedImagesBytes = []; // bytes للصور (للويب)
+  List<String> imageUrls = []; 
+  List<Uint8List> selectedImagesBytes = [];
   List<String> options = [];
   bool _isLoading = false;
   bool _isUploadingImage = false;
@@ -72,7 +72,7 @@ class _AddStageQuestionScreenState extends State<AddStageQuestionScreen> {
     }
   }
 
-  // التقاط صورة بالكاميرا
+  
   Future<void> _takePhoto() async {
     try {
       final XFile? photo = await _picker.pickImage(
@@ -118,8 +118,8 @@ class _AddStageQuestionScreenState extends State<AddStageQuestionScreen> {
         body: imageBytes,
       );
 
-      print('📤 Upload Status: ${response.statusCode}');
-      print('📤 Upload Response: ${response.body}');
+      print(' Upload Status: ${response.statusCode}');
+      print(' Upload Response: ${response.body}');
 
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
@@ -138,7 +138,7 @@ class _AddStageQuestionScreenState extends State<AddStageQuestionScreen> {
       }
     } catch (e) {
       setState(() => _isUploadingImage = false);
-      print('❌ Upload Error: $e');
+      print(' Upload Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('خطأ في رفع الصورة: $e'), backgroundColor: Colors.red)
       );
@@ -233,17 +233,17 @@ class _AddStageQuestionScreenState extends State<AddStageQuestionScreen> {
       final question = {
         'question_type': selectedType,
         'instruction': instructionCtrl.text.trim(),
-        'images': imageUrls, // استخدام URLs من السيرفر
+        'images': imageUrls,
       };
 
-      // إضافة الخيارات والإجابة الصحيحة حسب النوع
+      
       if (selectedType == 'choose') {
-        // تحويل options من Array إلى Object
+        
         question['options'] = {
-          'labels': options,  // ✅ Object مع مفتاح labels
+          'labels': options,  
         };
         question['correct_answer'] = {
-          'index': int.tryParse(correctAnswerCtrl.text.trim()) ?? 0,  // ✅ Object مع مفتاح index
+          'index': int.tryParse(correctAnswerCtrl.text.trim()) ?? 0,  
         };
       } else if (selectedType == 'match' || selectedType == 'classify') {
         question['correct_answer'] = correctAnswerCtrl.text.trim();

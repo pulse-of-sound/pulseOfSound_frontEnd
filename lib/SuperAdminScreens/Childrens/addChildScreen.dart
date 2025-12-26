@@ -42,22 +42,11 @@ class _AddChildScreenState extends State<AddChildScreen> {
         return;
       }
 
-      // final result = await UserAPI.addEditChild(
-      //   sessionToken,
-      //   fullName: nameCtrl.text.trim(),
-      //   mobile: phoneCtrl.text.trim(),
-      //   email: emailCtrl.text.trim(),
-      //   fatherName: fatherNameCtrl.text.trim(),
-      //   birthdate: birthdateCtrl.text.trim(),
-      // );
+     
 
       setState(() => _isLoading = false);
 
-      // if (result.containsKey('error')) {
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(content: Text(result['error']), backgroundColor: Colors.red)
-      //   );
-      // } else {
+   
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('هذه الميزة معطلة حالياً'), backgroundColor: Colors.orange)
         );

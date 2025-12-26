@@ -16,7 +16,7 @@ class WalletScreen extends StatefulWidget {
 
 class _WalletScreenState extends State<WalletScreen> {
   double balance = 0.0;
-  String? _imagePath; //  بدل File image
+  String? _imagePath; 
   final TextEditingController amountController = TextEditingController();
 
   @override
@@ -30,18 +30,17 @@ class _WalletScreenState extends State<WalletScreen> {
     setState(() => balance = b);
   }
 
-  ///  اختيار صورة الإيصال (يدعم Web و Mobile)
+  
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
     if (picked != null) {
       setState(() {
-        _imagePath = picked.path; // يعمل للويب والموبايل
+        _imagePath = picked.path; 
       });
     }
   }
-
-  ///  إرسال الإيصال إلى الإدارة
+  
   Future<void> _sendReceipt() async {
     if (_imagePath == null || amountController.text.isEmpty) {
       if (!mounted) return;
@@ -62,7 +61,7 @@ class _WalletScreenState extends State<WalletScreen> {
 
     final receipt = Receipt(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      parentPhone: "0999999999", // يمكن استبدالها لاحقًا برقم المستخدم الحقيقي
+      parentPhone: "0999999999", 
       amount: amount,
       imagePath: _imagePath!,
     );
@@ -232,7 +231,7 @@ class _WalletScreenState extends State<WalletScreen> {
 
                   const SizedBox(height: 20),
 
-                  // 🧾 زر عرض الإيصالات
+                  //  زر عرض الإيصالات
                   ElevatedButton.icon(
                     onPressed: () {
                       Navigator.push(

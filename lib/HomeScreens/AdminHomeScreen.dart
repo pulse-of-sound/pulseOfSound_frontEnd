@@ -53,7 +53,7 @@ class AdminHome extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              //  شبكة الكروت
+              
               Expanded(
                 child: Builder(
                   builder: (context) {
@@ -70,13 +70,13 @@ class AdminHome extends StatelessWidget {
                           "icons/icons8-dashboard-40.png", const DashboardPage()),
                     ];
 
-                    // الأطباء - متاح لـ SuperAdmin و Admin
+                    
                     if (isAdmin) {
                       cards.add(_buildGlassCard(context, "الأطباء",
                           "icons/icons8-doctors-60.png", const DoctorsPage()));
                     }
 
-                    // الأخصائيين - متاح لـ SuperAdmin و Admin
+                    
                     if (isAdmin) {
                       cards.add(_buildGlassCard(
                           context,
@@ -85,19 +85,19 @@ class AdminHome extends StatelessWidget {
                           const Specialistscreen()));
                     }
 
-                    // الأطفال - متاح لـ SuperAdmin و Admin
+                    
                     if (isAdmin) {
                       cards.add(_buildGlassCard(context, "الأطفال",
                           "icons/icons8-children-64.png", const ChildrenPage()));
                     }
 
-                    // الأدمن - متاح فقط لـ SuperAdmin
+                    
                     if (isSuperAdmin) {
                       cards.add(_buildGlassCard(context, "الأدمن",
                           "icons/icons8-admin-50.png", const Adminscreen()));
                     }
 
-                    // إدارة المستويات - متاح لـ Admin و SuperAdmin
+                    
                     if (isAdmin) {
                       cards.add(_buildGlassCard(
                           context,
@@ -146,7 +146,7 @@ class AdminHome extends StatelessWidget {
     );
   }
 
-  //  كارد زجاجي احترافي
+  
   Widget _buildGlassCard(
       BuildContext context, String title, String iconPath, Widget page) {
     return GestureDetector(
@@ -156,7 +156,7 @@ class AdminHome extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12), //  تأثير الزجاج
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12), 
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),

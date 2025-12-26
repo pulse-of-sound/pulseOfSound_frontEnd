@@ -53,7 +53,7 @@ class _StageGameScreenState extends State<StageGameScreen> {
 
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-    //  حفظ بيانات التقدم العادية
+    
     await SharedPrefsHelper.setString(
       "lastPlayDate_Level${widget.levelNumber}_Group${widget.groupNumber}",
       today,
@@ -63,13 +63,13 @@ class _StageGameScreenState extends State<StageGameScreen> {
       widget.stageNumber,
     );
 
-    //  حفظ تقييم الطفل لليوم
+    
     await ChildProgressPrefs.addDailyEvaluation({
       "date": DateTime.now().toIso8601String(),
       "level": widget.levelNumber,
       "group": widget.groupNumber,
       "stage": widget.stageNumber,
-      "score": 10, // مؤقتًا، ممكن نحط قيمة حسب أداء الطفل
+      "score": 10,
       "feedback": "أداء رائع في هذه المرحلة ",
     });
 
@@ -115,7 +115,7 @@ class _StageGameScreenState extends State<StageGameScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                //  Placeholder للّعبة الفعلية
+                
                 Container(
                   width: double.infinity,
                   height: 250,

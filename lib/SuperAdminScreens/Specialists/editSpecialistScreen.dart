@@ -5,8 +5,8 @@ import '../../utils/shared_pref_helper.dart';
 
 class EditSpecialistPage extends StatefulWidget {
   final Specialist specialist;
-  final String? specialistId; // ID من API
-  final String? originalUsername; // Username الأصلي من API
+  final String? specialistId; 
+  final String? originalUsername; 
   const EditSpecialistPage({super.key, required this.specialist, this.specialistId, this.originalUsername});
 
   @override
@@ -70,7 +70,7 @@ class _EditDoctorPageState extends State<EditSpecialistPage> {
         return;
       }
 
-      // استخدام username الأصلي من API إذا كان متوفراً
+      
       String username = widget.originalUsername ?? 
           widget.specialist.name.trim().replaceAll(' ', '_').toLowerCase();
       

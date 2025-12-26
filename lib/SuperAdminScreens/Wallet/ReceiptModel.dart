@@ -5,7 +5,7 @@ class Receipt {
   final String parentPhone;
   final double amount;
   final String imagePath;
-  String status; // pending / approved / rejected
+  String status; 
 
   Receipt({
     required this.id,
@@ -15,7 +15,7 @@ class Receipt {
     this.status = "pending",
   });
 
-  /// تحويل الكائن إلى Map لتخزينه محليًا
+  
   Map<String, dynamic> toMap() {
     return {
       "id": id,
@@ -26,7 +26,7 @@ class Receipt {
     };
   }
 
-  /// تحويل Map إلى كائن Receipt عند القراءة
+
   factory Receipt.fromMap(Map<String, dynamic> map) {
     return Receipt(
       id: map["id"] ?? "",
@@ -39,10 +39,9 @@ class Receipt {
     );
   }
 
-  /// تحويل إلى JSON
+  
   String toJson() => json.encode(toMap());
 
-  /// إنشاء كائن من JSON
   factory Receipt.fromJson(String source) =>
       Receipt.fromMap(json.decode(source));
 }

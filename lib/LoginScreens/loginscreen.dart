@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     String normalizedPhone = completePhoneNumber!.replaceAll(" ", "");
     
-    // إزالة الصفر الإضافي إذا كان موجوداً (+9630... → +963...)
+    
     if (normalizedPhone.startsWith("+9630")) {
       normalizedPhone = "+963${normalizedPhone.substring(5)}";
     } else if (normalizedPhone.startsWith("0")) {
@@ -75,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: FadeInUp(
                   duration: const Duration(milliseconds: 700),
                   child: Container(
-                    width: width * 0.8, //  الحقول داخل الإطار
+                    width: width * 0.8, 
                     padding: const EdgeInsets.symmetric(
                         horizontal: 18, vertical: 28),
                     decoration: BoxDecoration(
@@ -144,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 15),
 
-                        // زر آخر
+                    
                         SizedBox(
                           width: width * 0.6,
                           height: 44,

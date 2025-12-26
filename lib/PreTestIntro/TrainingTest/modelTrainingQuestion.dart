@@ -1,7 +1,7 @@
 class TrainingQuestion {
-  final String questionImage; // صورة السؤال
-  final List<String> options; // صور الخيارات
-  final int correctAnswer; // رقم الجواب الصحيح (0 → 3)
+  final String questionImage;
+  final List<String> options; 
+  final int correctAnswer; 
 
   TrainingQuestion({
     required this.questionImage,

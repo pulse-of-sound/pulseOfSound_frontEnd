@@ -150,7 +150,7 @@ class ChargeRequestAPI {
   //  جلب جميع طلبات الشحن - Admin only
   static Future<List<Map<String, dynamic>>> getChargeRequests({
     required String sessionToken,
-    String? status, // "pending", "approved", "rejected"
+    String? status,
   }) async {
     try {
       print(" Fetching charge requests");

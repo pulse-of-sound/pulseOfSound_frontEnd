@@ -155,7 +155,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                 ]),
                 const SizedBox(height: 20),
 
-                // 🖼️ صورة الطبيب
+                //  صورة الطبيب
                 GestureDetector(
                   onTap: _pickImage,
                   child: CircleAvatar(
@@ -177,7 +177,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
 
                 const SizedBox(height: 20),
 
-                // 🧾 الحقول النصية
+                //  الحقول النصية
                 _buildTextField("الاسم الكامل", nameController,
                     enabled: isEditing),
                 const SizedBox(height: 10),
@@ -192,7 +192,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
 
                 const SizedBox(height: 25),
 
-                // 🔘 الأزرار
+                //  الأزرار
                 if (!isEditing)
                   ElevatedButton.icon(
                     onPressed: () => setState(() => isEditing = true),

@@ -5,7 +5,7 @@ import '../../utils/shared_pref_helper.dart';
 
 class EditChildPage extends StatefulWidget {
   final Child child;
-  final String? childId; // ID من API
+  final String? childId; 
   const EditChildPage({super.key, required this.child, this.childId});
 
   @override
@@ -63,26 +63,15 @@ class _EditChildPageState extends State<EditChildPage> {
         }
       }
 
-      // final result = await UserAPI.addEditChild(
-      //   sessionToken,
-      //   childId: widget.childId,
-      //   fullName: nameController.text.trim(),
-      //   mobile: parentPhoneController.text.trim(),
-      //   birthdate: birthdate,
-      // );
-
+     
       setState(() => _isLoading = false);
 
-      // if (result.containsKey('error')) {
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(content: Text(result['error']), backgroundColor: Colors.red)
-      //   );
-      // } else {
+   
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('هذه الميزة معطلة حالياً'), backgroundColor: Colors.orange)
         );
         Navigator.pop(context, true);
-      // }
+      
     } catch (e) {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -129,7 +118,7 @@ class _EditChildPageState extends State<EditChildPage> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    // شريط علوي فيه زر رجوع والعنوان
+                    
                     Row(
                       children: [
                         IconButton(

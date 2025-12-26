@@ -3,7 +3,8 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../Colors/colors.dart';
-import '../utils/doctor_chat_prefs.dart';
+import '../../api/chat_api.dart';
+import '../../utils/api_helpers.dart';
 
 class DoctorCommunityChatScreen extends StatefulWidget {
   const DoctorCommunityChatScreen({super.key});
@@ -17,38 +18,92 @@ class _DoctorCommunityChatScreenState extends State<DoctorCommunityChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  List<Map<String, dynamic>> messages = [];
+  List<dynamic> messages = [];
+  String? communityGroupId;
+  bool isLoading = true;
+  String? currentUserId;
 
   @override
   void initState() {
     super.initState();
-    _loadMessages();
+    _initChat();
+  }
+
+  Future<void> _initChat() async {
+    currentUserId = await APIHelpers.getUserId();
+    _initCommunityChat();
+  }
+
+  Future<void> _initCommunityChat() async {
+    try {
+      final token = await APIHelpers.getSessionToken();
+      
+      // Try to get existing groups and find Community
+      final groupsResult = await ChatAPI.getMyChatGroups(sessionToken: token);
+      final groups = groupsResult['chat_groups'] as List;
+      
+      var communityGroup = groups.firstWhere(
+        (g) => g['chat_type'] == 'community',
+        orElse: () => null,
+      );
+
+      if (communityGroup == null) {
+        // Create it if it doesn't exist
+        final createResult = await ChatAPI.createCommunityChatGroup(
+          sessionToken: token,
+          name: "المجتمع العام",
+        );
+        communityGroupId = createResult['chat_group_id'];
+      } else {
+        communityGroupId = communityGroup['objectId'];
+      }
+
+      await _loadMessages();
+    } catch (e) {
+      print("Error initializing community chat: $e");
+    } finally {
+      setState(() => isLoading = false);
+    }
   }
 
   Future<void> _loadMessages() async {
-    final data = await DoctorChatService.loadCommunity();
-    setState(() => messages = data);
-    // بعد تحميل الرسائل، انزلي تلقائياً لآخر رسالة
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-      }
-    });
+    if (communityGroupId == null) return;
+    try {
+      final token = await APIHelpers.getSessionToken();
+      final result = await ChatAPI.getChatMessages(
+        sessionToken: token,
+        chatGroupId: communityGroupId!,
+      );
+      setState(() => messages = result['messages']);
+      
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+        }
+      });
+    } catch (e) {
+      print("Error loading community messages: $e");
+    }
   }
 
   Future<void> _sendMessage({String? imagePath}) async {
     final text = _controller.text.trim();
     if (text.isEmpty && imagePath == null) return;
+    if (communityGroupId == null) return;
 
-    await DoctorChatService.addCommunity("طبيب", text, imagePath: imagePath);
-    _controller.clear();
-    await _loadMessages();
-    // بعد تحميل الرسائل، انزلي تلقائياً لآخر رسالة
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-      }
-    });
+    try {
+      final token = await APIHelpers.getSessionToken();
+      await ChatAPI.sendChatMessage(
+        sessionToken: token,
+        chatGroupId: communityGroupId!,
+        message: text,
+      );
+      
+      _controller.clear();
+      await _loadMessages();
+    } catch (e) {
+      print("Error sending message: $e");
+    }
   }
 
   Future<void> _pickImage() async {
@@ -60,7 +115,10 @@ class _DoctorCommunityChatScreenState extends State<DoctorCommunityChatScreen> {
   }
 
   Widget _buildMessageBubble(Map<String, dynamic> msg) {
-    final isMe = msg["sender"] == "طبيب";
+    // Correct me detection 
+    final senderId = msg["send_id"]["id"];
+    final isMe = senderId == currentUserId; 
+    
     final color = isMe
         ? AppColors.skyBlue.withOpacity(0.9)
         : Colors.white.withOpacity(0.95);
@@ -79,29 +137,23 @@ class _DoctorCommunityChatScreenState extends State<DoctorCommunityChatScreen> {
           crossAxisAlignment:
               isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            if (msg["sender"] != null)
-              Text(
-                msg["sender"],
-                style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: textColor.withOpacity(0.8)),
-              ),
+            Text(
+              (msg["send_id"]["fullName"] ?? 
+                      (msg["send_id"]["username"] != null && !msg["send_id"]["username"].toString().toLowerCase().startsWith("is") ? msg["send_id"]["username"] : null) ??
+                      msg["send_id"]["mobileNumber"] ??
+                      "مستخدم") + (msg["child_id"] != null && msg["child_id"]["fullName"] != null ? " (بخصوص ${msg["child_id"]["fullName"]})" : ""),
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: textColor.withOpacity(0.8)),
+            ),
             const SizedBox(
               height: 4,
             ),
-            if (msg["image"] != null && msg["image"] != "")
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: kIsWeb
-                    ? Image.network(msg["image"], height: 150)
-                    : Image.file(File(msg["image"]),
-                        height: 150, fit: BoxFit.cover),
-              ),
-            if (msg["text"] != null && msg["text"].toString().isNotEmpty)
+            if (msg["message"] != null && msg["message"].toString().isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 6.0),
-                child: Text(msg["text"], style: TextStyle(color: textColor)),
+                child: Text(msg["message"], style: TextStyle(color: textColor)),
               ),
             Text(
               msg["time"] != null
@@ -122,7 +174,7 @@ class _DoctorCommunityChatScreenState extends State<DoctorCommunityChatScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text("مجتمع الأهالي",
+        title: const Text("مجتمع النبض",
             style: TextStyle(
                 color: Colors.white,
                 fontSize: 22,
@@ -144,14 +196,16 @@ class _DoctorCommunityChatScreenState extends State<DoctorCommunityChatScreen> {
             ),
           ),
         ),
-        Column(children: [
+        isLoading 
+          ? const Center(child: CircularProgressIndicator(color: Colors.white))
+          : Column(children: [
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
               padding: EdgeInsets.only(top: topPadding, bottom: 12),
               itemCount: messages.length,
               itemBuilder: (context, index) =>
-                  _buildMessageBubble(messages[index]),
+                  _buildMessageBubble(messages[index] as Map<String, dynamic>),
             ),
           ),
           Container(

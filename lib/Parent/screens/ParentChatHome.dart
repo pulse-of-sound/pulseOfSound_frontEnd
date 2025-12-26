@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../Colors/colors.dart';
+import 'ParentPrivateChatsListScreen.dart';
 import 'ParentCommunityChat.dart';
-import 'ParentPrivateChatsList.dart';
+
 
 class ParentChatHome extends StatelessWidget {
   const ParentChatHome({super.key});

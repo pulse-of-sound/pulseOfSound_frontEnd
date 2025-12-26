@@ -1,4 +1,4 @@
-/// ملف الإعدادات المشتركة لجميع API calls
+
 library;
 import 'package:flutter/foundation.dart';
 
@@ -16,17 +16,17 @@ class ApiConfig {
     return _emulatorHost; 
   }
 
-  // Base URL
+  
   static String get baseUrl => "http://$host/api/functions";
 
   
-  // static const String baseUrl = "https://api.pulseofsound.com/api/functions";
   
-  // Parse Server Configuration
+  
+  
   static const String appId = "cDUPSpkhbmD0e1TFND3rYkw7TrrdHXqNyXgoOa3PpLPSd5NJb7";
   static const String masterKey = "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY";
 
-  // Public getters
+  
   static String get applicationId => appId;
   static String get masterKeyValue => masterKey;
 
@@ -41,7 +41,7 @@ class ApiConfig {
       return fixed;
     }
     
-    // على Android Emulator، نحول localhost إلى 10.0.2.2
+    
     if (url.contains("localhost:1337")) {
       final fixed = url.replaceAll("localhost:1337", host);
       print(" fixUrlHost: $url -> $fixed (host: $host)");
@@ -51,7 +51,7 @@ class ApiConfig {
     return url;
   }
   
-  /// Headers الأساسية لجميع الطلبات
+
   static Map<String, String> getBaseHeaders() {
     return {
       "Content-Type": "application/json",
@@ -60,7 +60,7 @@ class ApiConfig {
     };
   }
   
-  /// Headers مع Session Token
+
   static Map<String, String> getHeadersWithToken(String sessionToken) {
     return {
       "Content-Type": "application/json",
@@ -70,7 +70,7 @@ class ApiConfig {
     };
   }
   
-  /// Headers مع Master Key فقط (للمهام التي لا تحتاج Session Token)
+  
   static Map<String, String> getHeadersWithMasterKey() {
     return {
       "Content-Type": "application/json",
@@ -79,7 +79,7 @@ class ApiConfig {
     };
   }
   
-  /// Headers للرفع (Upload) - multipart/form-data
+
   static Map<String, String> getUploadHeaders(String sessionToken) {
     return {
       "X-Parse-Application-Id": appId,

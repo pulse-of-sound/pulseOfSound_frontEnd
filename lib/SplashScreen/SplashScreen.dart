@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:parse_server_sdk/parse_server_sdk.dart';
 
 import 'package:pulse_of_sound/LoginScreens/loginscreen.dart';
-import 'package:pulse_of_sound/HomeScreens/HomeScreen.dart';
+import 'package:pulse_of_sound/HomeScreens/bottomNavBar.dart';
 import 'package:pulse_of_sound/HomeScreens/AdminHomeScreen.dart';
 import 'package:pulse_of_sound/HomeScreens/DoctorHomeScreen.dart';
 import '../utils/shared_pref_helper.dart';
@@ -25,7 +25,7 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // ======= تشغيل الأنيميشن =======
+    
     _logoController =
         AnimationController(vsync: this, duration: const Duration(seconds: 3));
 
@@ -39,21 +39,19 @@ class _SplashScreenState extends State<SplashScreen>
 
     _logoController.forward();
 
-    // ======= اختبار الاتصال بـ Parse =======
+    
     _testParseConnection();
 
-    // ======= الانتقال بعد 4 ثوان =======
+    
     Timer(const Duration(seconds: 4), _navigateUser);
   }
 
-  // اختبار الاتصال بالسيرفر (Parse Health Check)
 
   void _testParseConnection() async {
     final response = await Parse().healthCheck();
     debugPrint("Parse Health Check: ${response.success}");
   }
 
-  // توجيه المستخدم حسب حالته
 
   void _navigateUser() {
     bool hasSession = SharedPrefsHelper.getSession();
@@ -73,7 +71,7 @@ class _SplashScreenState extends State<SplashScreen>
       } else {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const ParentHomeScreen()),
+          MaterialPageRoute(builder: (_) => const BottomNavScreen()),
         );
       }
     } else {
@@ -90,7 +88,7 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
-  // واجهة الـ Splash Screen
+  
 
   @override
   Widget build(BuildContext context) {

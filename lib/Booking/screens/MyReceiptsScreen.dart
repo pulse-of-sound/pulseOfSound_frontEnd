@@ -25,7 +25,7 @@ class MyReceiptsScreen extends StatelessWidget {
           SafeArea(
             child: Column(
               children: [
-                //  زر الرجوع + العنوان
+                //  زر الرجوع  العنوان
                 Row(
                   children: [
                     IconButton(
@@ -116,11 +116,11 @@ class MyReceiptsScreen extends StatelessWidget {
       final sessionToken = await APIHelpers.getSessionToken();
       final data = await ChargeRequestAPI.getChargeRequests(
         sessionToken: sessionToken,
-        status: 'all', // Fetch all for the user
+        status: 'all', 
       );
 
       return data.map<Receipt>((m) {
-        // Backend returns "receipt_image" as object {__type: File, name: ..., url: ...}
+       
         String imagePath = "";
         if (m['receipt_image'] != null && m['receipt_image']['url'] != null) {
           imagePath = m['receipt_image']['url'];
@@ -135,18 +135,18 @@ class MyReceiptsScreen extends StatelessWidget {
         );
       }).toList();
     } catch (e) {
-      debugPrint("❌ Error loading receipts: $e");
+      debugPrint(" Error loading receipts: $e");
       return [];
     }
   }
 
-  ///  عرض الصورة (ملف، أصول، أو شبكة)
+  
   Widget _buildReceiptImage(String path) {
     if (path.isEmpty) {
       return const Icon(Icons.receipt_long, color: Colors.blueAccent, size: 45);
     }
     
-    // Check if it's a network URL
+   
     if (path.startsWith('http')) {
       return Image.network(
         path,
@@ -166,7 +166,7 @@ class MyReceiptsScreen extends StatelessWidget {
     }
 
     if (path.startsWith('/')) {
-      // صورة من الجهاز
+   
       return Image.file(
         File(path),
         width: 55,
@@ -176,7 +176,7 @@ class MyReceiptsScreen extends StatelessWidget {
             const Icon(Icons.receipt, color: Colors.blueAccent, size: 40),
       );
     } else {
-      // صورة من مجلد الصور داخل المشروع
+    
       return Image.asset(
         path,
         width: 55,
@@ -187,7 +187,7 @@ class MyReceiptsScreen extends StatelessWidget {
     }
   }
 
-  ///  النصوص والألوان حسب الحالة
+   
   String _getStatusText(String status) {
     switch (status) {
       case "approved":

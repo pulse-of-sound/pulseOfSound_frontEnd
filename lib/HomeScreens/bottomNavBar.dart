@@ -60,7 +60,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
       backgroundColor: Colors.transparent,
       body: _pages[_selectedIndex],
 
-      // 🔹 الزر الدائري بالنص
+      //  الزر الدائري بالنص
       floatingActionButton: Container(
         height: 65,
         width: 65,
@@ -88,15 +88,15 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
-      // 🔹 البار السفلي
+      //  البار السفلي
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 8,
         elevation: 15,
-        color: Colors.white.withOpacity(0.85), // 🔸 مش أبيض ناصع
+        color: Colors.white.withOpacity(0.85), 
         child: Padding(
           padding:
-              const EdgeInsets.symmetric(horizontal: 28.0), // 🔹 توازن المسافات
+              const EdgeInsets.symmetric(horizontal: 28.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -124,7 +124,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     );
   }
 
-  // 🔸 بناء كل عنصر أيقونة بالـ BottomNav
+
   Widget _buildNavItem(IconData icon, int index) {
     final bool isSelected = _selectedIndex == index;
 
@@ -132,7 +132,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
       borderRadius: BorderRadius.circular(25),
       onTap: () => _onItemTapped(index),
       child: SizedBox(
-        width: 45, // 🔹 حجم متساوٍ لكل عنصر
+        width: 45, 
         height: 58,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

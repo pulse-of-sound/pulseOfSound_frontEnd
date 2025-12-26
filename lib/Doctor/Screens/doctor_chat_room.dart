@@ -3,20 +3,28 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../Colors/colors.dart';
-import '../utils/doctor_chat_prefs.dart';
-
+import '../../api/chat_api.dart';
+import '../../utils/api_helpers.dart';
 import 'doctor_reports_compose_screen.dart';
 import 'parent_profile_details.dart';
 
 class DoctorPrivateChatRoom extends StatefulWidget {
   final String parentId;
   final String parentName;
+  final String? childName;
+  final String? childId;
+  final String appointmentId;
   final int durationMinutes;
+  final String chatGroupId;
   const DoctorPrivateChatRoom({
     super.key,
     required this.parentId,
     required this.parentName,
+    this.childName,
+    this.childId,
+    required this.appointmentId,
     required this.durationMinutes,
+    required this.chatGroupId,
   });
 
   @override
@@ -25,67 +33,102 @@ class DoctorPrivateChatRoom extends StatefulWidget {
 
 class _DoctorPrivateChatRoomState extends State<DoctorPrivateChatRoom> {
   final TextEditingController _controller = TextEditingController();
-  List<Map<String, dynamic>> messages = [];
+  final ScrollController _scrollController = ScrollController();
+  List<dynamic> messages = [];
   bool _sessionEnded = false;
   Timer? _timer;
   int _remainingSeconds = 0;
-  late String chatId;
+  String? currentUserId;
 
   @override
   void initState() {
     super.initState();
-    chatId = "chat_${widget.parentId}";
     _initChat();
   }
 
   Future<void> _initChat() async {
-    final existingChat = await DoctorChatService.loadChatInfo(chatId);
-    if (existingChat == null) {
-      await DoctorChatService.createPrivateChat(
-        chatId: chatId,
-        doctorId: "doctor_1",
-        parentId: widget.parentId,
-        parentName: widget.parentName,
-        durationMinutes: widget.durationMinutes,
-      );
-    }
-    _loadMessages();
-    _startTimer();
+    currentUserId = await APIHelpers.getUserId();
+    await _loadMessages();
   }
 
   Future<void> _loadMessages() async {
-    final msgs = await DoctorChatService.loadChatMessages(chatId);
-    final closed = await DoctorChatService.isChatClosed(chatId);
-    setState(() {
-      messages = msgs;
-      _sessionEnded = closed;
-    });
+    try {
+      final token = await APIHelpers.getSessionToken();
+      final result = await ChatAPI.getChatMessages(
+        sessionToken: token,
+        chatGroupId: widget.chatGroupId,
+      );
+      
+      if (mounted) {
+        setState(() {
+          messages = result['messages'];
+          
+          if (result.containsKey('remaining_seconds')) {
+            _remainingSeconds = result['remaining_seconds'];
+            if (_timer == null) {
+              _startTimer();
+            }
+          }
+        });
+        
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_scrollController.hasClients) {
+            _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+          }
+        });
+      }
+    } catch (e) {
+      print("Error loading messages: $e");
+    }
   }
 
   void _startTimer() {
-    _remainingSeconds = widget.durationMinutes * 60;
+    if (_timer != null) return;
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_remainingSeconds <= 0) {
         timer.cancel();
-        setState(() => _sessionEnded = true);
+        if (mounted) setState(() => _sessionEnded = true);
       } else {
-        setState(() => _remainingSeconds--);
+        if (mounted) setState(() => _remainingSeconds--);
       }
     });
   }
 
   String _formatTime(int s) {
+    if (s < 0) return "00:00";
     final m = s ~/ 60;
     final sec = s % 60;
     return "${m.toString().padLeft(2, '0')}:${sec.toString().padLeft(2, '0')}";
   }
 
   Future<void> _sendMessage() async {
-    if (_controller.text.trim().isEmpty || _sessionEnded) return;
-    await DoctorChatService.addPrivateMessage(
-        chatId, "doctor", _controller.text.trim());
-    _controller.clear();
-    _loadMessages();
+    final text = _controller.text.trim();
+    if (text.isEmpty || _sessionEnded) return;
+
+    try {
+      final token = await APIHelpers.getSessionToken();
+      final result = await ChatAPI.sendChatMessage(
+        sessionToken: token,
+        chatGroupId: widget.chatGroupId,
+        message: text,
+      );
+
+      if (result.containsKey('error')) {
+         if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+             SnackBar(content: Text(result['error'])),
+           );
+           if (result['error'].toString().contains('expired')) {
+              setState(() => _sessionEnded = true);
+           }
+         }
+      } else {
+        _controller.clear();
+        await _loadMessages();
+      }
+    } catch (e) {
+      print("Error sending message: $e");
+    }
   }
 
   Future<void> _pickImage() async {
@@ -93,16 +136,22 @@ class _DoctorPrivateChatRoomState extends State<DoctorPrivateChatRoom> {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
     if (picked != null) {
-      await DoctorChatService.addPrivateMessage(chatId, "doctor", "",
-          imagePath: picked.path);
-      _loadMessages();
+      
     }
   }
 
   Widget _bubble(Map<String, dynamic> msg) {
-    final isMe = msg["sender"] == "doctor";
+    
+    final senderId = msg["send_id"]["id"];
+    final isMe = senderId == currentUserId; 
+    
     final color = isMe ? AppColors.skyBlue : Colors.white;
     final textColor = isMe ? Colors.white : Colors.black87;
+    final senderName = msg["send_id"]["fullName"] ?? 
+                      (msg["send_id"]["username"] != null && !msg["send_id"]["username"].toString().toLowerCase().startsWith("is") ? msg["send_id"]["username"] : null) ??
+                      msg["send_id"]["mobileNumber"] ??
+                      "مستخدم";
+
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -113,12 +162,17 @@ class _DoctorPrivateChatRoomState extends State<DoctorPrivateChatRoom> {
           borderRadius: BorderRadius.circular(14),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            if (msg["image"] != null && msg["image"] != "")
-              Image.file(File(msg["image"]), height: 150, fit: BoxFit.cover),
-            if (msg["text"] != null && msg["text"].toString().isNotEmpty)
-              Text(msg["text"], style: TextStyle(color: textColor)),
+            Text(
+              senderName + (msg["child_id"] != null && msg["child_id"]["fullName"] != null ? " (بخصوص ${msg["child_id"]["fullName"]})" : ""),
+              style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: textColor.withOpacity(0.7)),
+            ),
+            if (msg["message"] != null && msg["message"].toString().isNotEmpty)
+              Text(msg["message"], style: TextStyle(color: textColor)),
             Text(
               msg["time"] != null
                   ? msg["time"].toString().substring(11, 16)
@@ -134,6 +188,8 @@ class _DoctorPrivateChatRoomState extends State<DoctorPrivateChatRoom> {
   @override
   void dispose() {
     _timer?.cancel();
+    _scrollController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -156,7 +212,7 @@ class _DoctorPrivateChatRoomState extends State<DoctorPrivateChatRoom> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          // 👤 أيقونة البروفايل — جديدة
+         
           IconButton(
             icon:
                 const Icon(Icons.account_circle, color: Colors.white, size: 26),
@@ -173,7 +229,7 @@ class _DoctorPrivateChatRoomState extends State<DoctorPrivateChatRoom> {
             },
           ),
 
-          // 🩺 الأيقونة القديمة لكتابة التقرير
+        
           if (_sessionEnded)
             IconButton(
               icon: const Icon(Icons.note_alt_outlined, color: Colors.white),
@@ -184,6 +240,9 @@ class _DoctorPrivateChatRoomState extends State<DoctorPrivateChatRoom> {
                     builder: (_) => DoctorReportsComposeScreen(
                       parentId: widget.parentId,
                       parentName: widget.parentName,
+                      childName: widget.childName ?? "غير محدد",
+                      childId: widget.childId ?? "",
+                      appointmentId: widget.appointmentId,
                     ),
                   ),
                 );

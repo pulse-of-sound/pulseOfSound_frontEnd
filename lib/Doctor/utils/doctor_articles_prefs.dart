@@ -24,7 +24,7 @@ class DoctorArticlesPrefs {
     return decoded.map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
-  /// الطبيب يرسل مقال → يروح للأدمن للمراجعة
+  /// الطبيب يرسل مقال  يروح للأدمن للمراجعة
   static Future<void> submitArticle(Map<String, dynamic> article) async {
     final prefs = await SharedPreferences.getInstance();
 

@@ -1,49 +1,47 @@
 import 'package:parse_server_sdk_flutter/parse_server_sdk_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-/// دوال مساعدة مشتركة للتعامل مع APIs
 class APIHelpers {
-  /// الحصول على Session Token للمستخدم الحالي
+  
   static Future<String> getSessionToken() async {
     try {
-      // محاولة 1: الحصول من SharedPreferences (الطريقة المستخدمة في التطبيق)
+      
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       
       if (token != null && token.isNotEmpty) {
-        print('✅ Got session token from SharedPreferences: ${token.substring(0, 10)}...');
+        print(' Got session token from SharedPreferences: ${token.substring(0, 10)}...');
         return token;
       }
+    
       
-      // محاولة 2: الحصول من ParseUser (احتياطي)
       final user = await ParseUser.currentUser() as ParseUser?;
       if (user != null && user.sessionToken != null) {
-        print('✅ Got session token from ParseUser: ${user.sessionToken!.substring(0, 10)}...');
+        print('Got session token from ParseUser: ${user.sessionToken!.substring(0, 10)}...');
         return user.sessionToken!;
       }
       
-      print('❌ No session token found');
+      print('No session token found');
       throw Exception('No user logged in');
     } catch (e) {
-      print('❌ Error getting session token: $e');
+      print('Error getting session token: $e');
       rethrow;
     }
   }
 
-  /// الحصول على معرف المستخدم الحالي
+  
   static Future<String?> getUserId() async {
     try {
-      // محاولة 1: الحصول من SharedPreferences
+      
       final prefs = await SharedPreferences.getInstance();
-      // قد يكون مخزناً باسم userId أو objectId
+      
       final userId = prefs.getString('userId') ?? prefs.getString('objectId');
       
       if (userId != null && userId.isNotEmpty) {
         return userId;
       }
       
-      // محاولة 2: الحصول من ParseUser
+      
       final user = await ParseUser.currentUser() as ParseUser?;
       if (user != null && user.objectId != null) {
         return user.objectId;
@@ -51,15 +49,15 @@ class APIHelpers {
       
       return null;
     } catch (e) {
-      print('❌ Error getting user ID: $e');
+      print(' Error getting user ID: $e');
       return null;
     }
   }
 
-  /// التحقق من وجود مستخدم مسجل دخول
+
   static Future<bool> isUserLoggedIn() async {
     try {
-      // التحقق من SharedPreferences
+      
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final hasSession = prefs.getBool('hasSession') ?? false;
@@ -68,16 +66,15 @@ class APIHelpers {
         return true;
       }
       
-      // التحقق من ParseUser (احتياطي)
+      
       final user = await ParseUser.currentUser() as ParseUser?;
       return user != null;
     } catch (e) {
-      print('❌ Error checking login status: $e');
+      print(' Error checking login status: $e');
       return false;
     }
   }
 
-  /// الحصول على معلومات المستخدم الحالي
   static Future<Map<String, dynamic>?> getCurrentUser() async {
     try {
       final user = await ParseUser.currentUser() as ParseUser?;
@@ -90,12 +87,12 @@ class APIHelpers {
         'sessionToken': user.sessionToken,
       };
     } catch (e) {
-      print('❌ Error getting current user: $e');
+      print(' Error getting current user: $e');
       return null;
     }
   }
 
-  /// عرض رسالة خطأ
+  
   static void showErrorDialog(BuildContext context, String message) {
     showDialog(
       context: context,
@@ -112,7 +109,6 @@ class APIHelpers {
     );
   }
 
-  /// عرض رسالة نجاح
   static void showSuccessDialog(BuildContext context, String message,
       {VoidCallback? onDismiss}) {
     showDialog(
@@ -133,7 +129,7 @@ class APIHelpers {
     );
   }
 
-  /// عرض SnackBar للرسائل السريعة
+  
   static void showSnackBar(BuildContext context, String message,
       {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -144,8 +140,6 @@ class APIHelpers {
       ),
     );
   }
-
-  /// عرض مؤشر تحميل
   static void showLoadingDialog(BuildContext context, {String? message}) {
     showDialog(
       context: context,
@@ -162,12 +156,12 @@ class APIHelpers {
     );
   }
 
-  /// إخفاء مؤشر التحميل
+
   static void hideLoadingDialog(BuildContext context) {
     Navigator.of(context, rootNavigator: true).pop();
   }
 
-  /// معالجة استجابة API
+  
   static bool handleAPIResponse(
     BuildContext context,
     Map<String, dynamic> response, {
@@ -187,45 +181,42 @@ class APIHelpers {
     }
   }
 
-  /// تنسيق التاريخ
   static String formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
-
-  /// تنسيق التاريخ والوقت
   static String formatDateTime(DateTime dateTime) {
     return '${formatDate(dateTime)} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
-  /// تنسيق المبلغ المالي
+  
   static String formatCurrency(double amount) {
     return '${amount.toStringAsFixed(0)} ل.س';
   }
 
-  /// تحويل String إلى DateTime
+  
   static DateTime? parseDateTime(String? dateString) {
     if (dateString == null) return null;
     try {
       return DateTime.parse(dateString);
     } catch (e) {
-      print('❌ Error parsing date: $e');
+      print(' Error parsing date: $e');
       return null;
     }
   }
 
-  /// التحقق من صحة البريد الإلكتروني
+
   static bool isValidEmail(String email) {
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     return emailRegex.hasMatch(email);
   }
 
-  /// التحقق من صحة رقم الهاتف
+
   static bool isValidPhone(String phone) {
     final phoneRegex = RegExp(r'^[0-9]{10,}$');
     return phoneRegex.hasMatch(phone.replaceAll(RegExp(r'[\s\-\(\)]'), ''));
   }
 
-  /// الحصول على لون حسب حالة الموعد
+
   static Color getAppointmentStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'pending_payment':
@@ -243,7 +234,7 @@ class APIHelpers {
     }
   }
 
-  /// الحصول على نص حالة الموعد بالعربية
+  
   static String getAppointmentStatusText(String status) {
     switch (status.toLowerCase()) {
       case 'pending_payment':
@@ -261,7 +252,7 @@ class APIHelpers {
     }
   }
 
-  /// الحصول على لون حسب حالة طلب الشحن
+  
   static Color getChargeRequestStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'pending':
@@ -275,7 +266,7 @@ class APIHelpers {
     }
   }
 
-  /// الحصول على نص حالة طلب الشحن بالعربية
+  
   static String getChargeRequestStatusText(String status) {
     switch (status.toLowerCase()) {
       case 'pending':
@@ -288,8 +279,6 @@ class APIHelpers {
         return status;
     }
   }
-
-  /// الحصول على لون حسب نوع المعاملة
   static Color getTransactionTypeColor(String type) {
     switch (type.toLowerCase()) {
       case 'payment':
@@ -305,7 +294,7 @@ class APIHelpers {
     }
   }
 
-  /// الحصول على نص نوع المعاملة بالعربية
+  
   static String getTransactionTypeText(String type) {
     switch (type.toLowerCase()) {
       case 'payment':
@@ -321,12 +310,11 @@ class APIHelpers {
     }
   }
 
-  /// التحقق من كفاية الرصيد
+
   static bool hasSufficientBalance(double balance, double amount) {
     return balance >= amount;
   }
 
-  /// حساب الرصيد المتبقي
   static double calculateRemainingBalance(double balance, double amount) {
     return balance - amount;
   }

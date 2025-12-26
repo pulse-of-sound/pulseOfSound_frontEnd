@@ -5,8 +5,8 @@ import '../../utils/shared_pref_helper.dart';
 
 class EditAdminPage extends StatefulWidget {
   final Admin admin;
-  final String? adminId; // ID من API
-  final String? originalUsername; // Username الأصلي من API
+  final String? adminId; 
+  final String? originalUsername; 
   const EditAdminPage({super.key, required this.admin, this.adminId, this.originalUsername});
 
   @override
@@ -57,7 +57,7 @@ class _EdiAdminPageState extends State<EditAdminPage> {
         return;
       }
 
-      // استخدام username الأصلي من API إذا كان متوفراً
+      
       String username = widget.originalUsername ?? 
           widget.admin.name.trim().replaceAll(' ', '_').toLowerCase();
       

@@ -3,12 +3,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SharedPrefsHelper {
   static SharedPreferences? _prefs;
 
-  ///  تهيئة SharedPreferences (مناداة بـ main)
+  
   static Future init() async {
     _prefs = await SharedPreferences.getInstance();
   }
 
-  // ------------------- الجلسة -------------------
+  
   static Future setSession(bool hasSession) async {
     await _prefs?.setBool("hasSession", hasSession);
   }
@@ -17,7 +17,7 @@ class SharedPrefsHelper {
     return _prefs?.getBool("hasSession") ?? false;
   }
 
-  // ------------------- نوع المستخدم -------------------
+  
   static Future setUserType(String type) async {
     await _prefs?.setString("userType", type);
   }
@@ -26,7 +26,7 @@ class SharedPrefsHelper {
     return _prefs?.getString("userType") ?? "guest";
   }
 
-  // ------------------- بيانات المصادقة -------------------
+  
   static Future setToken(String token) async {
     print(" DEBUG SharedPrefsHelper.setToken: storing token = '$token'");
     print(" DEBUG SharedPrefsHelper.setToken: token length = ${token.length}");
@@ -50,7 +50,7 @@ class SharedPrefsHelper {
     return _prefs?.getString("userId");
   }
 
-  // ------------------- بيانات المستخدم -------------------
+  
   static Future setPhone(String phone) async {
     await _prefs?.setString("phone", phone);
   }
@@ -107,7 +107,7 @@ class SharedPrefsHelper {
     return _prefs?.getString("profileImage");
   }
 
-  // ------------------- بيانات المحفظة -------------------
+  
   static Future<void> setWalletImage(String path) async {
     await _prefs?.setString("walletImage", path);
   }
@@ -116,32 +116,31 @@ class SharedPrefsHelper {
     return _prefs?.getString("walletImage");
   }
 
-  // ------------------- مسح الكل -------------------
+
   static Future clear() async {
     await _prefs?.clear();
   }
 
-  // ------------------- التحقق من الأدوار -------------------
-  /// التحقق من أن المستخدم هو SuperAdmin
+  
   static bool isSuperAdmin() {
     final role = getUserType();
     final normalizedRole = role.toUpperCase();
     return normalizedRole == "SUPER_ADMIN" || normalizedRole == "SUPERADMIN" || role == "SuperAdmin";
   }
 
-  /// التحقق من أن المستخدم هو Admin
+  
   static bool isAdmin() {
     final role = getUserType();
     final normalizedRole = role.toUpperCase();
     return normalizedRole == "ADMIN" || normalizedRole == "SUPER_ADMIN" || normalizedRole == "SUPERADMIN" || role == "SuperAdmin";
   }
 
-  /// التحقق من أن المستخدم لديه صلاحيات SuperAdmin أو Admin
+
   static bool hasAdminPermissions() {
     return isAdmin();
   }
 
-  /// التحقق من أن المستخدم لديه صلاحيات SuperAdmin فقط
+  
   static bool hasSuperAdminPermissions() {
     return isSuperAdmin();
   }
