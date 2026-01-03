@@ -1,8 +1,72 @@
 import 'package:flutter/material.dart';
 import '../../Colors/colors.dart';
+import '../../api/user_api.dart';
+import '../../utils/shared_pref_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
+
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  int doctorCount = 0;
+  int specialistCount = 0;
+  int childCount = 0;
+  int adminCount = 0;
+  bool isLoading = true;
+  bool isSuperAdmin = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDashboardData();
+  }
+
+  Future<void> _fetchDashboardData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final sessionToken = prefs.getString('token') ?? '';
+
+      if (sessionToken.isEmpty) {
+        // Handle case where session token is missing (maybe redirect to login?)
+        print("Session token is missing");
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
+
+      bool isAdmin = SharedPrefsHelper.isAdmin();
+      isSuperAdmin = SharedPrefsHelper.isSuperAdmin();
+
+      final futures = await Future.wait([
+        UserAPI.getAllDoctors(sessionToken),
+        UserAPI.getAllSpecialists(sessionToken),
+        UserAPI.getAllChildren(sessionToken),
+        UserAPI.getAllAdmins(sessionToken),
+      ]);
+
+      if (mounted) {
+        setState(() {
+          doctorCount = futures[0].length;
+          specialistCount = futures[1].length;
+          childCount = futures[2].length;
+          adminCount = (futures[3] as List).length;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("Error fetching dashboard data: $e");
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +77,7 @@ class DashboardPage extends StatelessWidget {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("images/Admin.jpg"),
+                image: AssetImage("assets/images/Admin.jpg"),
                 fit: BoxFit.cover,
               ),
             ),
@@ -22,100 +86,76 @@ class DashboardPage extends StatelessWidget {
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  // شريط علوي
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new,
-                            color: Colors.white),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      const Expanded(
-                        child: Text(
-                          "لوحة التحكم",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              shadows: [
-                                Shadow(
-                                    color: Colors.black54,
-                                    blurRadius: 6,
-                                    offset: Offset(1, 2))
-                              ]),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // الصف الأول من الإحصائيات
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildStatCard("عدد الأطباء", "12",
-                          Icons.medical_services, AppColors.skyBlue),
-                      const SizedBox(width: 16),
-                      _buildStatCard("الأخصائيين", "8", Icons.psychology_alt,
-                          AppColors.peach),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildStatCard("الأطفال", "24", Icons.child_care,
-                          AppColors.babyPink),
-                      const SizedBox(width: 16),
-                      _buildStatCard("الأدمن", "3", Icons.admin_panel_settings,
-                          AppColors.pink),
-                    ],
-                  ),
-                  const SizedBox(height: 40),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Column(
                       children: [
-                        const Text(
-                          "نسبة التقدم العامة",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          height: 160,
-                          width: 160,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              CircularProgressIndicator(
-                                value: 0.75,
-                                strokeWidth: 10,
-                                backgroundColor: Colors.white.withOpacity(0.3),
-                                valueColor: const AlwaysStoppedAnimation<Color>(
-                                  AppColors.skyBlue,
-                                ),
-                              ),
-                              const Text(
-                                "75%",
+                        // شريط علوي
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.arrow_back_ios_new,
+                                  color: Colors.white),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                            const Expanded(
+                              child: Text(
+                                "لوحة التحكم",
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    shadows: [
+                                      Shadow(
+                                          color: Colors.black54,
+                                          blurRadius: 6,
+                                          offset: Offset(1, 2))
+                                    ]),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
+                        const SizedBox(height: 24),
+
+                        // الصف الأول من الإحصائيات
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _buildStatCard(
+                                "عدد الأطباء",
+                                "$doctorCount",
+                                Icons.medical_services,
+                                AppColors.skyBlue),
+                            const SizedBox(width: 16),
+                            _buildStatCard(
+                                "الأخصائيين",
+                                "$specialistCount",
+                                Icons.psychology_alt,
+                                AppColors.peach),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _buildStatCard(
+                                "الأطفال",
+                                "$childCount",
+                                Icons.child_care,
+                                AppColors.babyPink),
+                            const SizedBox(width: 16),
+                            _buildStatCard(
+                                "الأدمن",
+                                "$adminCount",
+                                Icons.admin_panel_settings,
+                                AppColors.pink),
+                          ],
+                        ),
+                       
                       ],
                     ),
-                  ),
-                ],
-              ),
             ),
           ),
         ],

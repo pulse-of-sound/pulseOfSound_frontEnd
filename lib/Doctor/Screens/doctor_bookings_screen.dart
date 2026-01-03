@@ -302,7 +302,9 @@ class _DoctorBookingsScreenState extends State<DoctorBookingsScreen> {
                                                     durationMinutes: plan["duration_minutes"] ?? 30,
                                                     chatGroupId: b["chat_group_id"] ?? "",
                                                     childName: child != null ? (child["name"] ?? "غير محدد") : "غير محدد",
-                                                    childId: child != null ? child["id"] : null,
+                                                    childId: (child != null && child["id"] != null) 
+                                                        ? child["id"] 
+                                                        : (b["requestedBy"] != null ? b["requestedBy"]["id"] : null),
                                                   ),
                                                 ),
                                               );

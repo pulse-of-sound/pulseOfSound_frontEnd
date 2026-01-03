@@ -26,14 +26,15 @@ class StageMapScreen extends StatefulWidget {
 
 class _StageMapScreenState extends State<StageMapScreen> {
   int currentStage = 0;
-  String? lastPlayDate;
+  String? localLastPlayDate;
+  String? globalLastPlayDate;
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     print(" StageMapScreen Initialized for Group: ${widget.groupId}, Order: ${widget.groupNumber}");
-    _loadProgressFromBackend(); // ← تغيير من _loadLocalProgress
+    _loadProgressFromBackend();
   }
 
   Future<void> _loadProgressFromBackend() async {
@@ -58,11 +59,14 @@ class _StageMapScreenState extends State<StageMapScreen> {
       
       setState(() {
         currentStage = result['current_stage'] ?? 0;
-        lastPlayDate = result['last_play_date'];
+        localLastPlayDate = _parseDate(result['last_play_date']);
+        globalLastPlayDate = _parseDate(result['global_last_play_date']);
         isLoading = false;
       });
       
-      print(' Backend Progress Loaded: Stage $currentStage, LastDate: $lastPlayDate');
+      print(' Backend Progress Loaded: Stage $currentStage');
+      print(' Last Play (Local): $localLastPlayDate');
+      print(' Last Play (Global): $globalLastPlayDate');
     } catch (e) {
       print(' Error loading progress from Backend: $e');
       if (mounted) {
@@ -71,20 +75,58 @@ class _StageMapScreenState extends State<StageMapScreen> {
     }
   }
 
+  String? _parseDate(dynamic date) {
+    if (date == null) return null;
+    if (date is String) return date;
+    if (date is Map && date.containsKey('iso')) {
+      return date['iso'] as String?;
+    }
+    return date.toString();
+  }
+
   bool _canPlayToday() {
-    if (lastPlayDate == null) return true;
-    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    print(' Checking if can play today:');
-    print('   Last Play Date: $lastPlayDate');
-    print('   Today: $today');
-    print('   Can Play: ${lastPlayDate != today}');
-    return lastPlayDate != today;
+    // نعتمد على التاريخ العام إذا وجد لفرض القيد على مستوى التطبيق
+    final dateToCheck = globalLastPlayDate ?? localLastPlayDate;
+    
+    if (dateToCheck == null) return true;
+    
+    try {
+      // تحويل dateToCheck من ISO string إلى DateTime
+      // قد يأتي التاريخ بصيغة Parse Object {__type: Date, iso: ...} أو String مباشرة
+      String dateStr;
+      if (dateToCheck is Map && (dateToCheck as dynamic)['iso'] != null) {
+         dateStr = (dateToCheck as dynamic)['iso'].toString();
+      } else {
+         dateStr = dateToCheck.toString();
+      }
+
+      final lastDate = DateTime.parse(dateStr).toLocal(); // Convert to local time
+      final today = DateTime.now();
+      
+      // مقارنة التاريخ فقط (بدون الوقت)
+      final lastDateOnly = DateFormat('yyyy-MM-dd').format(lastDate);
+      final todayOnly = DateFormat('yyyy-MM-dd').format(today);
+      
+      print('📅 Checking if can play today:');
+      print('   Last Play Date (Check): $lastDateOnly');
+      print('   Today: $todayOnly');
+      print('📅 Checking if can play today:');
+      print('   Last Play Date (Check): $lastDateOnly');
+      print('   Today: $todayOnly');
+      
+      final canPlay = lastDateOnly != todayOnly;
+      print('   Can Play: $canPlay');
+      
+      return canPlay;
+    } catch (e) {
+      print('❌ Error parsing date: $e');
+      return true; // في حالة الخطأ، اسمح باللعب
+    }
   }
 
   void _openStage(int stageNumber) async {
     print(" Tapped on Stage $stageNumber. Current: $currentStage");
-    print(" Last Play Date: $lastPlayDate");
-    
+    print(" Last Play Date: ${globalLastPlayDate ?? localLastPlayDate}");
     
     if (stageNumber > currentStage + 1) {
        ScaffoldMessenger.of(context).showSnackBar(
@@ -96,14 +138,25 @@ class _StageMapScreenState extends State<StageMapScreen> {
       return;
     }
 
-  
     if (stageNumber == currentStage + 1) {
       if (!_canPlayToday()) {
+        
+        // تحضير تواريخ للعرض للتوضيح
+        String lastDateStr = "غير معروف";
+        String todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+        
+        try {
+           final dateToCheck = globalLastPlayDate ?? localLastPlayDate;
+           if (dateToCheck != null) {
+              lastDateStr = DateFormat('yyyy-MM-dd').format(DateTime.parse(dateToCheck).toLocal());
+           }
+        } catch (_) {}
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(" مرحلة واحدة يومياً! عد غداً لمرحلة جديدة "),
+          SnackBar(
+            content: Text(" مرحلة واحدة يومياً! \n آخر لعب: $lastDateStr \n اليوم: $todayStr", textAlign: TextAlign.center),
             backgroundColor: Colors.blue,
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 4),
           ),
         );
         return;

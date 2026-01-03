@@ -96,6 +96,8 @@ class _ParentHomeScreenState extends State<ParentHomeScreen> {
         ],
       ),
       body: Container(
+        width: double.infinity,
+        height: double.infinity,
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage("images/booking.jpg"),
@@ -103,6 +105,7 @@ class _ParentHomeScreenState extends State<ParentHomeScreen> {
           ),
         ),
         child: SafeArea(
+          bottom: false, //  نسمح للخلفية بالنزول خلف البار السفلي
           child: isLoading
               ? const Center(
                   child: CircularProgressIndicator(
@@ -158,22 +161,22 @@ class _ParentHomeScreenState extends State<ParentHomeScreen> {
                           onRefresh: _loadProgress,
                           child: SingleChildScrollView(
                             physics: const AlwaysScrollableScrollPhysics(),
-                            padding: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100), //  إضافة بادينغ سفلي لتجاوز البار
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 // Stats Cards
                                 _buildStatsCards(),
                                 const SizedBox(height: 20),
-
+ 
                                 // Pie Chart
                                 _buildPieChart(),
                                 const SizedBox(height: 20),
-
+ 
                                 // Levels Progress
                                 _buildLevelsProgress(),
                                 const SizedBox(height: 20),
-
+ 
                                 // Recent Results
                                 _buildRecentResults(),
                               ],

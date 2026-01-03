@@ -64,10 +64,14 @@ class _SpecialistscreenState extends State<Specialistscreen> {
   }
 
   void _filterSpecialist(String query) {
+    final lowerQuery = query.toLowerCase();
     final filtered = specialists.where((specialist) {
-      final nameMatch = (specialist['fullName'] ?? specialist['username'] ?? '').toString().contains(query);
-      final phoneMatch = (specialist['mobile'] ?? '').toString().contains(query);
-      return nameMatch || phoneMatch;
+      final name = (specialist['fullName'] ?? specialist['username'] ?? '').toString().toLowerCase();
+      final phone = (specialist['mobile'] ?? specialist['mobileNumber'] ?? '').toString().toLowerCase();
+      final email = (specialist['email'] ?? '').toString().toLowerCase();
+      return name.contains(lowerQuery) || 
+             phone.contains(lowerQuery) || 
+             email.contains(lowerQuery);
     }).toList();
 
     setState(() => filteredSpecialists = filtered);
@@ -267,7 +271,7 @@ class _SpecialistscreenState extends State<Specialistscreen> {
                                 itemBuilder: (context, index) {
                                   final specialist = filteredSpecialists[index];
                                   final specialistName = specialist['fullName'] ?? specialist['username'] ?? 'بدون اسم';
-                                  final specialistPhone = specialist['mobile'] ?? 'بدون رقم';
+                                  final specialistPhone = specialist['mobile'] ?? specialist['mobileNumber'] ?? 'بدون رقم';
                                   
                                   return Card(
                                     color: Colors.white.withOpacity(0.9),

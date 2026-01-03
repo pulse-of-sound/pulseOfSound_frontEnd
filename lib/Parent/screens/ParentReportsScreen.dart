@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../Colors/colors.dart';
 import '../../api/reports_api.dart';
 import '../../utils/api_helpers.dart';
@@ -108,24 +109,22 @@ class _ParentReportsScreenState extends State<ParentReportsScreen> {
                   if (report['created_at'] != null) {
                     try {
                       var createdAt = report['created_at'];
-                      String dateStr;
-                      
+                      DateTime date;
                       
                       if (createdAt is Map && createdAt.containsKey('iso')) {
-                        dateStr = createdAt['iso'].toString();
+                        date = DateTime.parse(createdAt['iso']).toLocal();
+                      } else if (createdAt is String) {
+                        date = DateTime.parse(createdAt).toLocal();
+                      } else if (createdAt is DateTime) {
+                        date = createdAt;
                       } else {
-                        dateStr = createdAt.toString();
+                        throw "Unknown type";
                       }
-                    
                       
-                      if (dateStr.length >= 10) {
-                        dateText += dateStr.substring(0, 10);
-                      } else {
-                        dateText += dateStr;
-                      }
+                      dateText += DateFormat('yyyy-MM-dd').format(date);
                     } catch (e) {
                       print("Error parsing date: $e");
-                      dateText += "غير محدد";
+                      dateText += "تاريخ غير صحيح";
                     }
                   }
                   

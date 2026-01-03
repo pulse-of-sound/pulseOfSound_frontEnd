@@ -6,13 +6,17 @@ class ChildProfileAPI {
   //  جلب أو إنشاء ملف الطفل الخاص بي
   static Future<Map<String, dynamic>> getMyChildProfile({
     required String sessionToken,
+    String? childId,
   }) async {
     try {
-      print(" Fetching my child profile");
+      print(" Fetching my child profile${childId != null ? ' for $childId' : ''}");
       
-      final response = await http.get(
+      final body = childId != null ? {"child_id": childId} : {};
+      
+      final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/getMyChildProfile"),
         headers: ApiConfig.getHeadersWithToken(sessionToken),
+        body: jsonEncode(body),
       );
       
       print(" Child Profile Status: ${response.statusCode}");

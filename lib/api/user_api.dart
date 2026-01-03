@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'api_config.dart';
 
@@ -373,54 +374,6 @@ class UserAPI {
 
   
 
-  static Future<Map<String, dynamic>> updateMyAccount(
-    String sessionToken, {
-    String? fullName,
-    String? username,
-    String? fcmToken,
-    String? birthDate,
-    String? fatherName,
-    Map<String, dynamic>? profilePic,
-  }) async {
-    try {
-      print(" Updating account...");
-
-      final body = <String, dynamic>{};
-      if (fullName != null) body["fullName"] = fullName;
-      if (username != null) body["username"] = username;
-      if (fcmToken != null) body["fcm_token"] = fcmToken;
-      if (birthDate != null) body["birthDate"] = birthDate;
-      if (fatherName != null) body["fatherName"] = fatherName;
-      if (profilePic != null) body["profilePic"] = profilePic;
-
-      final response = await http.post(
-        Uri.parse("$serverUrl/updateMyAccount"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
-        body: jsonEncode(body),
-      );
-
-      print(" Update Status: ${response.statusCode}");
-      print(" Update Response: ${response.body}");
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        return {"error": "فشل تحديث الحساب"};
-      }
-    } catch (e) {
-      print(" Update Exception: $e");
-      return {"error": "تعذر تحديث الحساب: $e"};
-    }
-  }
-
-  
-
   static Future<Map<String, dynamic>> logout(String sessionToken) async {
     try {
       print(" Logging out...");
@@ -485,6 +438,10 @@ class UserAPI {
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
+        final body = jsonDecode(response.body);
+        if (body is Map && body.containsKey('error')) {
+          return {"error": body['error']};
+        }
         return {"error": "فشل إضافة/تحديث الطبيب"};
       }
     } catch (e) {
@@ -529,6 +486,10 @@ class UserAPI {
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
+        final body = jsonDecode(response.body);
+        if (body is Map && body.containsKey('error')) {
+          return {"error": body['error']};
+        }
         return {"error": "فشل إضافة/تحديث الاختصاصي"};
       }
     } catch (e) {
@@ -574,6 +535,10 @@ class UserAPI {
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
+        final body = jsonDecode(response.body);
+        if (body is Map && body.containsKey('error')) {
+          return {"error": body['error']};
+        }
         return {"error": "فشل إضافة/تحديث الإدمن"};
       }
     } catch (e) {
@@ -1427,7 +1392,7 @@ class UserAPI {
   }) async {
     try {
       print(" Fetching providers of type: $providerType");
-      
+
       final response = await http.post(
         Uri.parse("$serverUrl/getProvidersByType"),
         headers: {
@@ -1439,10 +1404,10 @@ class UserAPI {
         },
         body: jsonEncode({"provider_type": providerType}),
       );
-      
+
       print(" Providers Status: ${response.statusCode}");
       print(" Providers Response: ${response.body}");
-      
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data is List) {
@@ -1461,6 +1426,88 @@ class UserAPI {
     } catch (e) {
       print(" Get Providers Exception: $e");
       return [];
+    }
+  }
+
+  // --- Profile Update Methods ---
+
+  static Future<Map<String, dynamic>> uploadFile({
+    required Uint8List bytes,
+    required String filename,
+    required String sessionToken,
+    String contentType = 'image/jpeg',
+  }) async {
+    try {
+      final String baseUrl = serverUrl.replaceAll('/functions', '');
+      final response = await http.post(
+        Uri.parse("$baseUrl/files/$filename"),
+        headers: {
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Session-Token": sessionToken,
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+          "Content-Type": contentType,
+        },
+        body: bytes,
+      );
+
+      print(" Upload File Status: ${response.statusCode}");
+      if (response.statusCode == 201) {
+        return jsonDecode(response.body);
+      } else {
+        return {"error": "Failed to upload file: ${response.body}"};
+      }
+    } catch (e) {
+      print(" Upload File Exception: $e");
+      return {"error": "Exception during file upload: $e"};
+    }
+  }
+
+  static Future<Map<String, dynamic>> updateMyAccount({
+    required String sessionToken,
+    String? fullName,
+    String? username,
+    String? birthDate,
+    String? fatherName,
+    String? gender,
+    String? medicalInfo,
+    String? mobileNumber,
+    String? specialty,
+    Map<String, dynamic>? profilePic,
+  }) async {
+    try {
+      final Map<String, dynamic> body = {};
+      if (fullName != null) body["fullName"] = fullName;
+      if (username != null) body["username"] = username;
+      if (birthDate != null) body["birthDate"] = birthDate;
+      if (fatherName != null) body["fatherName"] = fatherName;
+      if (gender != null) body["gender"] = gender;
+      if (mobileNumber != null) body["mobileNumber"] = mobileNumber;
+      if (specialty != null) body["specialty"] = specialty;
+      if (medicalInfo != null) body["medical_info"] = medicalInfo;
+      if (profilePic != null) body["profilePic"] = profilePic;
+
+      final response = await http.post(
+        Uri.parse("$serverUrl/updateMyAccount"),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Parse-Application-Id": appId,
+          "X-Parse-Session-Token": sessionToken,
+          "X-Parse-Master-Key":
+              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
+        },
+        body: jsonEncode(body),
+      );
+
+      print(" Update Account Status: ${response.statusCode}");
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        return {"error": "Failed to update account: ${response.body}"};
+      }
+    } catch (e) {
+      print(" Update Account Exception: $e");
+      return {"error": "Exception during account update: $e"};
     }
   }
 }

@@ -227,12 +227,11 @@ class _StageDetailScreenState extends State<StageDetailScreen> {
               'answer_type': 'choose',
               'is_correct': _answeredCorrectly,
             });
-          } else if (questionType == 'match') {
             answers.add({
               'question_id': questionId,
               'answer_type': 'match',
               'is_correct': _answeredCorrectly,
-              'match_pairs': _matchPairs,
+              'match_pairs': _matchPairs.map((k, v) => MapEntry(k.toString(), v)),
             });
           } else if (questionType == 'classify') {
             answers.add({

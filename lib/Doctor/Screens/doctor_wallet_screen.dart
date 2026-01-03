@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../Colors/colors.dart';
 import '../../api/wallet_api.dart';
 import '../../utils/api_helpers.dart';
@@ -20,6 +21,35 @@ class _DoctorWalletScreenState extends State<DoctorWalletScreen> {
   void initState() {
     super.initState();
     _loadWalletData();
+  }
+
+  String _formatDate(dynamic dateValue) {
+    if (dateValue == null) return 'غير محدد';
+    
+    try {
+      DateTime date;
+      
+      // إذا كان Parse Date object
+      if (dateValue is Map && dateValue.containsKey('iso')) {
+        date = DateTime.parse(dateValue['iso']).toLocal();
+      } 
+      // إذا كان DateTime object
+      else if (dateValue is DateTime) {
+        date = dateValue.isUtc ? dateValue.toLocal() : dateValue;
+      }
+      // إذا كان String
+      else if (dateValue is String) {
+        date = DateTime.parse(dateValue).toLocal();
+      } else {
+        return dateValue.toString();
+      }
+      
+      // تنسيق التاريخ بالعربي
+      return DateFormat('yyyy/MM/dd - HH:mm', 'ar').format(date);
+    } catch (e) {
+      print('❌ Error formatting date: $e');
+      return 'تاريخ غير صحيح';
+    }
   }
 
   Future<void> _loadWalletData() async {
@@ -160,8 +190,7 @@ class _DoctorWalletScreenState extends State<DoctorWalletScreen> {
                                               Icons.monetization_on, // Generic icon
                                               color: AppColors.skyBlue),
                                           title: Text(t["description"] ?? type),
-                                          subtitle: Text(
-                                              (t["created_at"] ?? t["createdAt"] ?? "").toString().substring(0, 16)),
+                                          subtitle: Text(_formatDate(t["created_at"] ?? t["createdAt"])),
                                           trailing: Text(
                                             "${amount.toStringAsFixed(0)} ل.س",
                                             style: const TextStyle(

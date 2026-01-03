@@ -1,7 +1,11 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../api/user_api.dart';
 import '../utils/shared_pref_helper.dart';
 import '../api/child_api.dart';
 
@@ -17,9 +21,12 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
   final _nameController = TextEditingController();
   final _fatherNameController = TextEditingController();
   final _birthDateController = TextEditingController();
+
   final _healthController = TextEditingController();
   String? _gender;
   File? _profileImage;
+  Uint8List? _webImage;
+  String? _serverImageUrl;
   bool _isLoading = false;
 
   @override
@@ -31,43 +38,72 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
   Future<void> _loadProfile() async {
     //  محاولة الجلب من السيرفر أولاً
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final sessionToken = prefs.getString('session_token');
+      final sessionToken = SharedPrefsHelper.getToken();
+      final userRole = SharedPrefsHelper.getUserType();
       
       if (sessionToken != null && sessionToken.isNotEmpty) {
-        print(" Loading profile from server...");
+        print(" Loading profile from server (Role: $userRole)...");
         
-        final profile = await ChildProfileAPI.getMyChildProfile(
-          sessionToken: sessionToken,
-        );
+        dynamic profile;
+        if (userRole == "Child" || userRole == null) {
+           profile = await ChildProfileAPI.getMyChildProfile(sessionToken: sessionToken);
+        } else {
+           profile = await UserAPI.getMyProfile(sessionToken);
+        }
         
-        if (!profile.containsKey('error') && mounted) {
+        if (profile != null && !profile.containsKey('error') && mounted) {
           print(" Profile loaded from server");
           
           setState(() {
-            _nameController.text = profile['name'] ?? "";
-            _fatherNameController.text = profile['fatherName'] ?? "";
-            _birthDateController.text = profile['birthdate'] ?? "";
-            _gender = profile['gender'];
-            _healthController.text = profile['medical_info'] ?? "";
+            _nameController.text = (profile['name'] ?? profile['fullName'])?.toString() ?? "";
+            _fatherNameController.text = profile['fatherName']?.toString() ?? "";
+            
+            // التعامل مع تاريخ الميلاد
+            final dynamic bDate = profile['birthdate'] ?? profile['birthDate'];
+            if (bDate != null) {
+              if (bDate is String) {
+                _birthDateController.text = bDate;
+              } else if (bDate is Map && bDate['iso'] != null) {
+                try {
+                  DateTime dt = DateTime.parse(bDate['iso']);
+                  _birthDateController.text = "${dt.day}/${dt.month}/${dt.year}";
+                } catch (e) {
+                  _birthDateController.text = "";
+                }
+              }
+            }
+            
+            _gender = profile['gender']?.toString();
+           
+            _healthController.text = profile['medical_info']?.toString() ?? "";
+            
+            // محاولة جلب صورة البروفايل
+            if (profile['profilePic'] != null && profile['profilePic'] is Map) {
+              _serverImageUrl = profile['profilePic']['url'];
+            } else if (profile['user'] != null && profile['user'] is Map && profile['user']['profilePic'] != null) {
+              _serverImageUrl = profile['user']['profilePic']['url'];
+            }
           });
           
           // حفظ محلياً للاستخدام السريع
-          await SharedPrefsHelper.setName(profile['name'] ?? "");
-          await SharedPrefsHelper.setFatherName(profile['fatherName'] ?? "");
-          await SharedPrefsHelper.setBirthDate(profile['birthdate'] ?? "");
-          await SharedPrefsHelper.setGender(profile['gender'] ?? "");
-          await SharedPrefsHelper.setHealthStatus(profile['medical_info'] ?? "");
+          await SharedPrefsHelper.setName(_nameController.text);
+          await SharedPrefsHelper.setFatherName(_fatherNameController.text);
+          await SharedPrefsHelper.setBirthDate(_birthDateController.text);
+          if (_gender != null) await SharedPrefsHelper.setGender(_gender!);
+        
+          await SharedPrefsHelper.setHealthStatus(_healthController.text);
           
-          // تحميل الصورة المحلية
-          final imagePath = SharedPrefsHelper.getProfileImage();
-          if (imagePath != null && File(imagePath).existsSync()) {
-            setState(() => _profileImage = File(imagePath));
+          // تحميل الصورة المحلية (إذا لم توجد صورة سيرفر أو كأولوية)
+          if (_serverImageUrl == null && !kIsWeb) {
+            final imagePath = SharedPrefsHelper.getProfileImage();
+            if (imagePath != null && File(imagePath).existsSync()) {
+              setState(() => _profileImage = File(imagePath));
+            }
           }
           
           return;
         } else {
-          print(" Failed to load from server: ${profile['error']}");
+          print(" Failed to load from server: ${profile?['error']}");
         }
       }
     } catch (e) {
@@ -86,6 +122,7 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
       _fatherNameController.text = SharedPrefsHelper.getFatherName() ?? "";
       _birthDateController.text = SharedPrefsHelper.getBirthDate() ?? "";
       _gender = SharedPrefsHelper.getGender();
+   
       _healthController.text = SharedPrefsHelper.getHealthStatus() ?? "";
     });
   }
@@ -94,81 +131,140 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       
-      //  حفظ في السيرفر أولاً
       try {
-        final prefs = await SharedPreferences.getInstance();
-        final childId = prefs.getString('child_id');
+        final sessionToken = SharedPrefsHelper.getToken();
+        final childId = SharedPrefsHelper.getUserId();
+        final userRole = SharedPrefsHelper.getUserType();
         
-        if (childId != null && childId.isNotEmpty) {
-          print(" Updating profile on server for child: $childId");
+        if (sessionToken != null && childId != null && childId.isNotEmpty) {
+          print(" Updating profile on server...");
           
-          final result = await ChildProfileAPI.createOrUpdateChildProfile(
-            childId: childId,
-            name: _nameController.text,
+          // 1. رفع الصورة...
+          Map<String, dynamic>? profilePicFile;
+          if (_webImage != null || _profileImage != null) {
+            final Uint8List? bytes = kIsWeb ? _webImage : await _profileImage?.readAsBytes();
+            if (bytes != null) {
+              final String fileName = "profile_${childId}_${DateTime.now().millisecondsSinceEpoch}.jpg";
+              final uploadResult = await UserAPI.uploadFile(
+                bytes: bytes,
+                filename: fileName,
+                sessionToken: sessionToken,
+              );
+              
+              if (!uploadResult.containsKey('error')) {
+                profilePicFile = {
+                  "__type": "File",
+                  "name": uploadResult['name'],
+                  "url": uploadResult['url'],
+                };
+              } else {
+                print(" Error uploading file: ${uploadResult['error']}");
+              }
+            }
+          }
+
+          // 2. تحديث بيانات الحساب (User)
+          final accountResult = await UserAPI.updateMyAccount(
+            sessionToken: sessionToken,
+            fullName: _nameController.text,
             fatherName: _fatherNameController.text,
-            birthdate: _birthDateController.text,
+            birthDate: _birthDateController.text,
             gender: _gender,
             medicalInfo: _healthController.text,
+        
+            profilePic: profilePicFile,
           );
-          
-          if (result.containsKey('error')) {
-            print(" Error updating profile: ${result['error']}");
+
+          if (accountResult.containsKey('error')) {
+             throw accountResult['error'];
+          }
+
+          // تحديث الصورة في الواجهة إذا عادت من السيرفر
+          if (accountResult.containsKey('profilePic') && accountResult['profilePic'] != null) {
             if (mounted) {
-              setState(() => _isLoading = false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('خطأ في الحفظ: ${result['error']}'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-              return;
+              setState(() {
+                _serverImageUrl = accountResult['profilePic']['url'];
+                _profileImage = null;
+                _webImage = null;
+              });
             }
-          } else {
-            print(" Profile updated successfully on server");
+          }
+
+          // 3. تحديث بيانات ملف الطفل (إذا كان يوزر طفل)
+          if (userRole == "Child" || userRole == null) {
+            final childResult = await ChildProfileAPI.createOrUpdateChildProfile(
+              childId: childId,
+              name: _nameController.text,
+              fatherName: _fatherNameController.text,
+              birthdate: _birthDateController.text,
+              gender: _gender,
+              medicalInfo: _healthController.text,
+            );
+            if (childResult.containsKey('error')) {
+              throw childResult['error'];
+            }
+          }
+          
+          // حفظ محلياً
+          await SharedPrefsHelper.setName(_nameController.text);
+          await SharedPrefsHelper.setFatherName(_fatherNameController.text);
+          await SharedPrefsHelper.setBirthDate(_birthDateController.text);
+          if (_gender != null) await SharedPrefsHelper.setGender(_gender!);
+         
+          await SharedPrefsHelper.setHealthStatus(_healthController.text);
+          if (_profileImage != null) {
+            await SharedPrefsHelper.setProfileImage(_profileImage!.path);
+          }
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("تم حفظ التعديلات بنجاح"), backgroundColor: Colors.green),
+            );
+            
+            // العودة إذا كان من الإعدادات
+            if (Navigator.canPop(context)) {
+               Navigator.pop(context);
+            }
           }
         }
       } catch (e) {
-        print(" Exception updating profile: $e");
         if (mounted) {
-          setState(() => _isLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('خطأ في الاتصال: $e'),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text("خطأ في الحفظ: $e"), backgroundColor: Colors.red),
           );
-          return;
         }
-      }
-      
-      // حفظ محلياً
-      await SharedPrefsHelper.setName(_nameController.text);
-      await SharedPrefsHelper.setFatherName(_fatherNameController.text);
-      await SharedPrefsHelper.setBirthDate(_birthDateController.text);
-      await SharedPrefsHelper.setGender(_gender ?? "");
-      await SharedPrefsHelper.setHealthStatus(_healthController.text);
-      if (_profileImage != null) {
-        await SharedPrefsHelper.setProfileImage(_profileImage!.path);
-      }
-
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(" تم حفظ التعديلات بنجاح"),
-            backgroundColor: Colors.green,
-          ),
-        );
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
       }
     }
   }
 
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() => _profileImage = File(pickedFile.path));
-      await SharedPrefsHelper.setProfileImage(pickedFile.path);
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        if (kIsWeb) {
+          final bytes = await pickedFile.readAsBytes();
+          setState(() {
+            _webImage = bytes;
+          });
+        } else {
+          setState(() {
+            _profileImage = File(pickedFile.path);
+          });
+        }
+        await SharedPrefsHelper.setProfileImage(pickedFile.path);
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("تم اختيار الصورة بنجاح"), backgroundColor: Colors.green),
+        );
+      }
+    } catch (e) {
+      print("Error picking image: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("خطأ في اختيار الصورة: $e"), backgroundColor: Colors.red),
+      );
     }
   }
 
@@ -207,7 +303,7 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("images/profile1.jpg"),
+                image: AssetImage("assets/images/profile1.jpg"),
                 fit: BoxFit.cover,
               ),
             ),
@@ -226,10 +322,10 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
                         child: CircleAvatar(
                           radius: 60,
                           backgroundColor: Colors.pinkAccent.withOpacity(0.7),
-                          backgroundImage: _profileImage != null
-                              ? FileImage(_profileImage!)
-                              : null,
-                          child: _profileImage == null
+                          backgroundImage: kIsWeb
+                              ? (_webImage != null ? MemoryImage(_webImage!) : (_serverImageUrl != null ? NetworkImage(_serverImageUrl!) : null) as ImageProvider?)
+                              : (_profileImage != null ? FileImage(_profileImage!) : (_serverImageUrl != null ? NetworkImage(_serverImageUrl!) : null) as ImageProvider?),
+                          child: (kIsWeb ? (_webImage == null && _serverImageUrl == null) : (_profileImage == null && _serverImageUrl == null))
                               ? const Icon(Icons.camera_alt,
                                   size: 45, color: Colors.white)
                               : null,
@@ -244,6 +340,7 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
                       _buildField(_birthDateController, "تاريخ الميلاد",
                           Icons.calendar_today,
                           readOnly: true, onTap: _pickBirthDate),
+                    
 
                       // الجنس
 
@@ -362,7 +459,12 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
   }
 
   Widget _buildField(TextEditingController c, String h, IconData i,
-      {bool readOnly = false, VoidCallback? onTap, bool isRequired = true}) {
+      {bool readOnly = false,
+      VoidCallback? onTap,
+      bool isRequired = true,
+      TextInputType? keyboardType,
+      String? prefixText,
+      List<TextInputFormatter>? inputFormatters}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
       child: Center(
@@ -372,8 +474,10 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
             controller: c,
             readOnly: readOnly,
             onTap: onTap,
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
             textAlign: TextAlign.right,
-            decoration: _inputDecoration(h, i),
+            decoration: _inputDecoration(h, i, prefixText: prefixText),
             validator: (v) => isRequired && (v == null || v.isEmpty)
                 ? "هذا الحقل إجباري"
                 : null,
@@ -383,10 +487,12 @@ class _ProfileDrawerScreenState extends State<ProfileDrawerScreen> {
     );
   }
 
-  InputDecoration _inputDecoration(String hint, IconData icon) {
+  InputDecoration _inputDecoration(String hint, IconData icon, {String? prefixText}) {
     return InputDecoration(
       hintText: hint,
       prefixIcon: Icon(icon, color: Colors.pinkAccent),
+      prefixText: prefixText,
+      prefixStyle: const TextStyle(color: Colors.pinkAccent, fontWeight: FontWeight.bold),
       hintStyle: const TextStyle(color: Colors.black87, fontSize: 15),
       filled: true,
       fillColor: Colors.white.withOpacity(0.8),

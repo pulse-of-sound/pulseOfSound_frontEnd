@@ -47,14 +47,19 @@ class _GroupsScreenState extends State<GroupsScreen> {
         print(" Fetched ${fetchedGroups.length} Groups");
 
         if (sessionToken != null && childId != null) {
-          final status = await ChildLevelAPI.getCurrentStageForChild(
-             sessionToken: sessionToken,
-             childId: childId,
-          );
-           if (status.containsKey('stage')) {
-             unlockedGroupOrder = status['stage']['order'] ?? 1;
-             print(" Unlocked Group Order: $unlockedGroupOrder");
-           }
+          try {
+            final status = await ChildLevelAPI.getCurrentStageForChild(
+               sessionToken: sessionToken,
+               childId: childId,
+            );
+             if (status.containsKey('stage') && status['stage'] != null) {
+               unlockedGroupOrder = status['stage']['order'] ?? 1;
+               print(" Unlocked Group Order: $unlockedGroupOrder");
+             }
+          } catch (e) {
+            print("⚠️ Failed to fetch progress: $e");
+            // Ignore error and show groups with default unlock
+          }
         }
 
         if (mounted) {

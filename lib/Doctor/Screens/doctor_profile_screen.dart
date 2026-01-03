@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pulse_of_sound/LoginScreens/loginscreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,10 +34,12 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
   }
 
   Future<void> _loadProfile() async {
+    setState(() => _isLoading = true);
     try {
       final sessionToken = SharedPrefsHelper.getToken();
       if (sessionToken == null || sessionToken.isEmpty) {
         _loadFromLocalStorage();
+        setState(() => _isLoading = false);
         return;
       }
 
@@ -44,22 +47,39 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
       
       if (profile.containsKey('error')) {
         _loadFromLocalStorage();
+        setState(() => _isLoading = false);
         return;
       }
 
       setState(() {
-        nameController.text = profile['fullName'] ?? profile['username'] ?? '';
-        emailController.text = profile['email'] ?? '';
-        phoneController.text = profile['mobileNumber'] ?? '';
-        specialtyController.text = profile['specialty'] ?? '';
+        nameController.text = profile['fullName']?.toString() ?? profile['username']?.toString() ?? '';
+        emailController.text = profile['email']?.toString() ?? '';
+        phoneController.text = (profile['mobile'] ?? profile['mobileNumber'])?.toString() ?? '';
+        specialtyController.text = profile['specialty']?.toString() ?? '';
+        if (profile['profilePic'] != null && profile['profilePic'] is Map) {
+          _serverImageUrl = profile['profilePic']['url'];
+        }
       });
+      
+      // Save local for fallback
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('doctor_name', nameController.text);
+      await prefs.setString('doctor_phone', phoneController.text);
+      await prefs.setString('doctor_email', emailController.text);
+      if (_serverImageUrl != null) await prefs.setString('doctor_image_url', _serverImageUrl!);
+
     } catch (e) {
       _loadFromLocalStorage();
+    } finally {
+      balance = await DoctorWalletPrefs.getBalance();
+      if (mounted) setState(() => _isLoading = false);
     }
-
-    balance = await DoctorWalletPrefs.getBalance();
-    setState(() {});
   }
+
+  bool _isLoading = false;
+  String? _serverImageUrl;
+  Uint8List? _webImage;
+  File? _profileImage;
 
   Future<void> _loadFromLocalStorage() async {
     final prefs = await SharedPreferences.getInstance();
@@ -70,17 +90,94 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
       phoneController.text = prefs.getString('doctor_phone') ?? 'غير محدد';
       emailController.text = prefs.getString('doctor_email') ?? 'غير محدد';
       _imagePath = prefs.getString('doctor_image');
+      _serverImageUrl = prefs.getString('doctor_image_url');
     });
   }
 
   Future<void> _saveProfile() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('doctor_name', nameController.text.trim());
-    await prefs.setString('doctor_specialty', specialtyController.text.trim());
-    await prefs.setString('doctor_phone', phoneController.text.trim());
-    await prefs.setString('doctor_email', emailController.text.trim());
-    if (_imagePath != null) await prefs.setString('doctor_image', _imagePath!);
-    setState(() => isEditing = false);
+    if (nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('الرجاء ملء الاسم'))
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final sessionToken = SharedPrefsHelper.getToken();
+      final userId = SharedPrefsHelper.getUserId();
+      
+      if (sessionToken == null || sessionToken.isEmpty) {
+        throw 'لم يتم العثور على جلسة';
+      }
+
+      // 1. رفع الصورة إذا تم اختيار صورة جديدة
+      Map<String, dynamic>? profilePicFile;
+      if (_webImage != null || _profileImage != null) {
+        final Uint8List? bytes = kIsWeb ? _webImage : await _profileImage?.readAsBytes();
+        if (bytes != null) {
+          final String fileName = "profile_dr_${userId}_${DateTime.now().millisecondsSinceEpoch}.jpg";
+          final uploadResult = await UserAPI.uploadFile(
+            bytes: bytes,
+            filename: fileName,
+            sessionToken: sessionToken,
+          );
+          
+          if (!uploadResult.containsKey('error')) {
+            profilePicFile = {
+              "__type": "File",
+              "name": uploadResult['name'],
+              "url": uploadResult['url'],
+            };
+          }
+        }
+      }
+
+      // 2. تحديث الحساب
+      final result = await UserAPI.updateMyAccount(
+        sessionToken: sessionToken,
+        fullName: nameController.text.trim(),
+        mobileNumber: phoneController.text.trim(),
+        specialty: specialtyController.text.trim(),
+        profilePic: profilePicFile,
+      );
+
+      if (result.containsKey('error')) {
+        throw result['error'];
+      }
+
+      // 3. تحديث الحالة المحلية
+      if (result['profilePic'] != null) {
+        setState(() {
+          _serverImageUrl = result['profilePic']['url'];
+          _webImage = null;
+          _profileImage = null;
+        });
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('doctor_name', nameController.text.trim());
+      await prefs.setString('doctor_specialty', specialtyController.text.trim());
+      await prefs.setString('doctor_phone', phoneController.text.trim());
+      await prefs.setString('doctor_email', emailController.text.trim());
+      if (_serverImageUrl != null) await prefs.setString('doctor_image_url', _serverImageUrl!);
+      
+      setState(() => isEditing = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم حفظ التعديلات بنجاح'), backgroundColor: Colors.green)
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('خطأ في الحفظ: $e'), backgroundColor: Colors.red)
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _logout() async {
@@ -92,22 +189,37 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      setState(() => _imagePath = picked.path);
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      if (kIsWeb) {
+        final bytes = await pickedFile.readAsBytes();
+        setState(() {
+          _webImage = bytes;
+          _imagePath = pickedFile.path;
+        });
+      } else {
+        setState(() {
+          _profileImage = File(pickedFile.path);
+          _imagePath = pickedFile.path;
+        });
+      }
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('doctor_image', picked.path);
+      await prefs.setString('doctor_image', pickedFile.path);
     }
   }
 
   Widget _buildTextField(String label, TextEditingController controller,
-      {bool enabled = false}) {
+      {bool enabled = false, TextInputType? keyboardType, List<TextInputFormatter>? inputFormatters, String? prefixText}) {
     return TextField(
       controller: controller,
       enabled: enabled,
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       textAlign: TextAlign.right,
       decoration: InputDecoration(
         labelText: label,
+        prefixText: prefixText,
+        prefixStyle: const TextStyle(color: AppColors.skyBlue, fontWeight: FontWeight.bold),
         filled: true,
         fillColor: Colors.white.withOpacity(0.9),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
@@ -157,16 +269,14 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
 
                 //  صورة الطبيب
                 GestureDetector(
-                  onTap: _pickImage,
+                  onTap: isEditing ? _pickImage : null,
                   child: CircleAvatar(
                     radius: 55,
                     backgroundColor: Colors.white.withOpacity(0.9),
-                    backgroundImage: _imagePath != null
-                        ? (kIsWeb
-                            ? NetworkImage(_imagePath!)
-                            : FileImage(File(_imagePath!))) as ImageProvider
-                        : null,
-                    child: _imagePath == null
+                    backgroundImage: kIsWeb
+                        ? (_webImage != null ? MemoryImage(_webImage!) : (_serverImageUrl != null ? NetworkImage(_serverImageUrl!) : null) as ImageProvider?)
+                        : (_profileImage != null ? FileImage(_profileImage!) : (_serverImageUrl != null ? NetworkImage(_serverImageUrl!) : null) as ImageProvider?),
+                    child: (kIsWeb ? (_webImage == null && _serverImageUrl == null) : (_profileImage == null && _serverImageUrl == null))
                         ? const Icon(Icons.camera_alt,
                             size: 50, color: AppColors.skyBlue)
                         : null,
@@ -185,7 +295,13 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                     enabled: isEditing),
                 const SizedBox(height: 10),
                 _buildTextField("رقم الهاتف", phoneController,
-                    enabled: isEditing),
+                    enabled: isEditing,
+                    keyboardType: TextInputType.phone,
+                    prefixText: '+963 ',
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(10),
+                    ]),
                 const SizedBox(height: 10),
                 _buildTextField("البريد الإلكتروني", emailController,
                     enabled: isEditing),
@@ -208,8 +324,10 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                   )
                 else
                   ElevatedButton.icon(
-                    onPressed: _saveProfile,
-                    icon: const Icon(Icons.save_alt),
+                    onPressed: _isLoading ? null : _saveProfile,
+                    icon: _isLoading 
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : const Icon(Icons.save_alt),
                     label: const Text("حفظ التعديلات"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,

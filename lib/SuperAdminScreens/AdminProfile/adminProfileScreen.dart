@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pulse_of_sound/LoginScreens/loginscreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,10 +44,12 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
   }
 
   Future<void> _loadProfile() async {
+    setState(() => _isLoading = true);
     try {
       final sessionToken = SharedPrefsHelper.getToken();
       if (sessionToken == null || sessionToken.isEmpty) {
         _loadFromLocalStorage();
+        setState(() => _isLoading = false);
         return;
       }
 
@@ -53,19 +57,37 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
       
       if (profile.containsKey('error')) {
         _loadFromLocalStorage();
+        setState(() => _isLoading = false);
         return;
       }
 
       setState(() {
-        nameController.text = profile['fullName'] ?? profile['username'] ?? '';
-        emailController.text = profile['email'] ?? '';
-        phoneController.text = profile['mobileNumber'] ?? '';
-        specialtyController.text = profile['specialty'] ?? '';
+        nameController.text = profile['fullName']?.toString() ?? profile['username']?.toString() ?? '';
+        emailController.text = profile['email']?.toString() ?? '';
+        phoneController.text = (profile['mobile'] ?? profile['mobileNumber'])?.toString() ?? '';
+        specialtyController.text = profile['specialty']?.toString() ?? '';
+        if (profile['profilePic'] != null && profile['profilePic'] is Map) {
+          _serverImageUrl = profile['profilePic']['url'];
+        }
       });
+      
+      // Save to local for fallback
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('admin_name', nameController.text);
+      await prefs.setString('admin_phone', phoneController.text);
+      await prefs.setString('admin_email', emailController.text);
+      if (_serverImageUrl != null) await prefs.setString('admin_image_url', _serverImageUrl!);
+
     } catch (e) {
       _loadFromLocalStorage();
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
+
+  String? _serverImageUrl;
+  Uint8List? _webImage;
+  File? _profileImage;
 
   Future<void> _loadFromLocalStorage() async {
     final prefs = await SharedPreferences.getInstance();
@@ -75,13 +97,14 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
       phoneController.text = prefs.getString('admin_phone') ?? '';
       emailController.text = prefs.getString('admin_email') ?? '';
       _imagePath = prefs.getString('admin_image');
+      _serverImageUrl = prefs.getString('admin_image_url');
     });
   }
 
   Future<void> _saveProfile() async {
-    if (nameController.text.trim().isEmpty || emailController.text.trim().isEmpty) {
+    if (nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('الرجاء ملء الاسم والبريد الإلكتروني'))
+        const SnackBar(content: Text('الرجاء ملء الاسم'))
       );
       return;
     }
@@ -90,41 +113,76 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
 
     try {
       final sessionToken = SharedPrefsHelper.getToken();
+      final userId = SharedPrefsHelper.getUserId();
+      
       if (sessionToken == null || sessionToken.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('لم يتم العثور على جلسة'))
-        );
-        setState(() => _isLoading = false);
-        return;
+        throw 'لم يتم العثور على جلسة';
       }
 
+      // 1. رفع الصورة إذا تم اختيار صورة جديدة
+      Map<String, dynamic>? profilePicFile;
+      if (_webImage != null || _profileImage != null) {
+        final Uint8List? bytes = kIsWeb ? _webImage : await _profileImage?.readAsBytes();
+        if (bytes != null) {
+          final String fileName = "profile_admin_${userId}_${DateTime.now().millisecondsSinceEpoch}.jpg";
+          final uploadResult = await UserAPI.uploadFile(
+            bytes: bytes,
+            filename: fileName,
+            sessionToken: sessionToken,
+          );
+          
+          if (!uploadResult.containsKey('error')) {
+            profilePicFile = {
+              "__type": "File",
+              "name": uploadResult['name'],
+              "url": uploadResult['url'],
+            };
+          }
+        }
+      }
+
+      // 2. تحديث الحساب
       final result = await UserAPI.updateMyAccount(
-        sessionToken,
+        sessionToken: sessionToken,
         fullName: nameController.text.trim(),
+        mobileNumber: phoneController.text.trim(),
+        specialty: specialtyController.text.trim(),
+        profilePic: profilePicFile,
       );
 
-      setState(() => _isLoading = false);
-
       if (result.containsKey('error')) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['error']), backgroundColor: Colors.red)
-        );
-      } else {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('admin_name', nameController.text.trim());
-        await prefs.setString('admin_phone', phoneController.text.trim());
-        await prefs.setString('admin_email', emailController.text.trim());
-        
-        setState(() => isEditing = false);
+        throw result['error'];
+      }
+
+      // 3. تحديث الحالة المحلية
+      if (result['profilePic'] != null) {
+        setState(() {
+          _serverImageUrl = result['profilePic']['url'];
+          _webImage = null;
+          _profileImage = null;
+        });
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('admin_name', nameController.text.trim());
+      await prefs.setString('admin_phone', phoneController.text.trim());
+      await prefs.setString('admin_email', emailController.text.trim());
+      if (_serverImageUrl != null) await prefs.setString('admin_image_url', _serverImageUrl!);
+      
+      setState(() => isEditing = false);
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('تم حفظ التعديلات بنجاح'), backgroundColor: Colors.green)
         );
       }
     } catch (e) {
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('خطأ: $e'), backgroundColor: Colors.red)
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('خطأ: $e'), backgroundColor: Colors.red)
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -173,22 +231,37 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      setState(() => _imagePath = picked.path);
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      if (kIsWeb) {
+        final bytes = await pickedFile.readAsBytes();
+        setState(() {
+          _webImage = bytes;
+          _imagePath = pickedFile.path;
+        });
+      } else {
+        setState(() {
+          _profileImage = File(pickedFile.path);
+          _imagePath = pickedFile.path;
+        });
+      }
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('admin_image', picked.path);
+      await prefs.setString('admin_image', pickedFile.path);
     }
   }
 
   Widget _buildTextField(String label, TextEditingController controller,
-      {bool enabled = false}) {
+      {bool enabled = false, TextInputType? keyboardType, List<TextInputFormatter>? inputFormatters, String? prefixText}) {
     return TextField(
       controller: controller,
       enabled: enabled,
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       textAlign: TextAlign.right,
       decoration: InputDecoration(
         labelText: label,
+        prefixText: prefixText,
+        prefixStyle: const TextStyle(color: Colors.pinkAccent, fontWeight: FontWeight.bold),
         filled: true,
         fillColor: Colors.white.withOpacity(0.9),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
@@ -238,16 +311,14 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
 
                 //  صورة الطبيب
                 GestureDetector(
-                  onTap: _pickImage,
+                  onTap: isEditing ? _pickImage : null,
                   child: CircleAvatar(
                     radius: 55,
                     backgroundColor: Colors.white.withOpacity(0.9),
-                    backgroundImage: _imagePath != null
-                        ? (kIsWeb
-                            ? NetworkImage(_imagePath!)
-                            : FileImage(File(_imagePath!))) as ImageProvider
-                        : null,
-                    child: _imagePath == null
+                    backgroundImage: kIsWeb
+                        ? (_webImage != null ? MemoryImage(_webImage!) : (_serverImageUrl != null ? NetworkImage(_serverImageUrl!) : null) as ImageProvider?)
+                        : (_profileImage != null ? FileImage(_profileImage!) : (_serverImageUrl != null ? NetworkImage(_serverImageUrl!) : null) as ImageProvider?),
+                    child: (kIsWeb ? (_webImage == null && _serverImageUrl == null) : (_profileImage == null && _serverImageUrl == null))
                         ? const Icon(Icons.camera_alt,
                             size: 50, color: AppColors.skyBlue)
                         : null,
@@ -266,7 +337,13 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                     enabled: isEditing),
                 const SizedBox(height: 10),
                 _buildTextField("رقم الهاتف", phoneController,
-                    enabled: isEditing),
+                    enabled: isEditing,
+                    keyboardType: TextInputType.phone,
+                    prefixText: '+963 ',
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(10),
+                    ]),
                 const SizedBox(height: 10),
                 _buildTextField("البريد الإلكتروني", emailController,
                     enabled: isEditing),

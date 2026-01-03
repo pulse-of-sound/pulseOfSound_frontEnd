@@ -68,16 +68,24 @@ class _ChildrenPageState extends State<ChildrenPage> {
   }
 
   void _filterChildren(String query) {
-    final filtered = children.where((child) {
-      final nameMatch =
-          (child['fullName'] ?? child['name'] ?? '').toString().contains(query);
-      final phoneMatch = (child['mobile'] ?? child['parentPhone'] ?? '')
-          .toString()
-          .contains(query);
-      return nameMatch || phoneMatch;
-    }).toList();
-
-    setState(() => filteredChildren = filtered);
+    setState(() {
+      searchQuery = query.toLowerCase();
+      if (searchQuery.isEmpty) {
+        filteredChildren = children;
+      } else {
+        filteredChildren = children.where((child) {
+          final fullName = (child['fullName'] ?? '').toString().toLowerCase();
+          final name = (child['name'] ?? '').toString().toLowerCase();
+          final username = (child['username'] ?? '').toString().toLowerCase();
+          final mobile = (child['mobileNumber'] ?? child['mobile'] ?? child['parentPhone'] ?? child['phone'] ?? '').toString().toLowerCase();
+          
+          return fullName.contains(searchQuery) || 
+                 name.contains(searchQuery) ||
+                 username.contains(searchQuery) || 
+                 mobile.contains(searchQuery);
+        }).toList();
+      }
+    });
   }
 
   void _editChild(int index, dynamic updated) {
@@ -276,14 +284,18 @@ class _ChildrenPageState extends State<ChildrenPage> {
                                     color: Colors.white, size: 28),
                               ),
                               title: Text(
-                                child['fullName'] ??
-                                    child['name'] ??
-                                    'بدون اسم',
+                                (child['fullName'] != null && child['fullName'].toString().isNotEmpty)
+                                    ? child['fullName']
+                                    : (child['name'] != null && child['name'].toString().isNotEmpty)
+                                        ? child['name']
+                                        : (child['username'] != null && child['username'].toString().isNotEmpty)
+                                            ? child['username']
+                                            : 'بدون اسم',
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 17),
                               ),
                               subtitle: Text(
-                                "هاتف ولي الأمر: ${child['mobile'] ?? child['parentPhone'] ?? 'غير محدد'}",
+                                "هاتف ولي الأمر: ${child['mobileNumber'] ?? child['mobile'] ?? child['parentPhone'] ?? child['phone'] ?? 'غير محدد'}",
                                 style: const TextStyle(
                                     color: Colors.black54,
                                     fontSize: 13.5,

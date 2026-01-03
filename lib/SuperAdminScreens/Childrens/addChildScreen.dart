@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../utils/shared_pref_helper.dart';
 
 class AddChildScreen extends StatefulWidget {
@@ -36,27 +37,22 @@ class _AddChildScreenState extends State<AddChildScreen> {
       final sessionToken = SharedPrefsHelper.getToken();
       if (sessionToken == null || sessionToken.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('لم يتم العثور على جلسة'))
-        );
+            const SnackBar(content: Text('لم يتم العثور على جلسة')));
         setState(() => _isLoading = false);
         return;
       }
 
-     
-
       setState(() => _isLoading = false);
 
-   
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('هذه الميزة معطلة حالياً'), backgroundColor: Colors.orange)
-        );
-        Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('هذه الميزة معطلة حالياً'),
+          backgroundColor: Colors.orange));
+      Navigator.pop(context);
       // }
     } catch (e) {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('خطأ: $e'), backgroundColor: Colors.red)
-      );
+          SnackBar(content: Text('خطأ: $e'), backgroundColor: Colors.red));
     }
   }
 
@@ -69,7 +65,8 @@ class _AddChildScreenState extends State<AddChildScreen> {
     );
     if (picked != null) {
       setState(() {
-        birthdateCtrl.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+        birthdateCtrl.text =
+            "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
       });
     }
   }
@@ -87,7 +84,6 @@ class _AddChildScreenState extends State<AddChildScreen> {
               ),
             ),
           ),
-
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -123,17 +119,29 @@ class _AddChildScreenState extends State<AddChildScreen> {
                       ],
                     ),
                     const SizedBox(height: 25),
-
                     _buildField("اسم الطفل", nameCtrl, required: true),
                     _buildField("رقم هاتف ولي الأمر", phoneCtrl,
-                        required: true, keyboard: TextInputType.phone),
+                        required: true,
+                        keyboard: TextInputType.phone,
+                        prefixText: '+963 ',
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(10),
+                        ]),
                     _buildField("البريد الإلكتروني", emailCtrl,
-                        keyboard: TextInputType.emailAddress),
+                        keyboard: TextInputType.emailAddress,
+                        validator: (value) {
+                      if (value != null && value.isNotEmpty) {
+                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                            .hasMatch(value)) {
+                          return "الرجاء إدخال بريد إلكتروني صحيح";
+                        }
+                      }
+                      return null;
+                    }),
                     _buildField("اسم الأب", fatherNameCtrl),
                     _buildDateField("تاريخ الميلاد", birthdateCtrl),
-
                     const SizedBox(height: 30),
-
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blueAccent,
@@ -150,7 +158,8 @@ class _AddChildScreenState extends State<AddChildScreen> {
                               height: 24,
                               width: 24,
                               child: CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             )
                           : const Text(
@@ -199,14 +208,22 @@ class _AddChildScreenState extends State<AddChildScreen> {
   }
 
   Widget _buildField(String label, TextEditingController controller,
-      {bool required = false, TextInputType keyboard = TextInputType.text}) {
+      {bool required = false,
+      TextInputType keyboard = TextInputType.text,
+      String? prefixText,
+      List<TextInputFormatter>? inputFormatters,
+      String? Function(String?)? validator}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboard,
+        inputFormatters: inputFormatters,
         decoration: InputDecoration(
           labelText: label,
+          prefixText: prefixText,
+          prefixStyle: const TextStyle(
+              color: Colors.blueAccent, fontWeight: FontWeight.bold),
           filled: true,
           fillColor: Colors.white.withOpacity(0.9),
           border: OutlineInputBorder(
@@ -220,10 +237,12 @@ class _AddChildScreenState extends State<AddChildScreen> {
               borderSide:
                   const BorderSide(color: Colors.blueAccent, width: 1.5)),
         ),
-        validator: required
-            ? (value) =>
-                (value == null || value.isEmpty) ? "الرجاء إدخال $label" : null
-            : null,
+        validator: validator ??
+            (required
+                ? (value) => (value == null || value.isEmpty)
+                    ? "الرجاء إدخال $label"
+                    : null
+                : null),
       ),
     );
   }

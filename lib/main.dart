@@ -9,9 +9,16 @@ import 'TEST/SuperAdminPermissionsTest.dart';
 
 import 'utils/shared_pref_helper.dart';
 
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SharedPrefsHelper.init();
+  
+  // Initialize date formatting for Arabic
+  await initializeDateFormatting('ar', null);
+  Intl.defaultLocale = 'ar';
 
   const String appId = "cDUPSpkhbmD0e1TFND3rYkw7TrrdHXqNyXgoOa3PpLPSd5NJb7";
   const String serverUrl = "http://localhost:1337/api";

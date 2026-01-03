@@ -97,7 +97,24 @@ class _OtpScreenState extends State<OtpScreen> {
       await SharedPrefsHelper.setFatherName(login["fatherName"]);
     }
     if (login["birthDate"] != null) {
-      await SharedPrefsHelper.setBirthDate(login["birthDate"]);
+      final dynamic bDate = login["birthDate"];
+      if (bDate is String) {
+        await SharedPrefsHelper.setBirthDate(bDate);
+      } else if (bDate is Map && bDate['iso'] != null) {
+        try {
+          DateTime dt = DateTime.parse(bDate['iso']);
+          await SharedPrefsHelper.setBirthDate("${dt.day}/${dt.month}/${dt.year}");
+        } catch (e) {
+          print(" Error parsing birthDate Map: $e");
+        }
+      } else if (bDate is Map && bDate['__type'] == 'Date' && bDate['iso'] != null) {
+          try {
+          DateTime dt = DateTime.parse(bDate['iso']);
+          await SharedPrefsHelper.setBirthDate("${dt.day}/${dt.month}/${dt.year}");
+        } catch (e) {
+          print(" Error parsing birthDate Map: $e");
+        }
+      }
     }
 
     

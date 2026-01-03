@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'modelDoctor.dart';
 import '../../api/user_api.dart';
 import '../../utils/shared_pref_helper.dart';
@@ -168,11 +169,36 @@ class _EditDoctorPageState extends State<EditDoctorPage> {
                     _buildField("الاسم الكامل", nameCtrl, required: true),
                     _buildDateField("تاريخ الميلاد", birthDateCtrl),
                     _buildField("رقم الموبايل", phoneCtrl,
-                        required: true, keyboard: TextInputType.phone),
+                        required: true,
+                        keyboard: TextInputType.phone,
+                        prefixText: '+963 ',
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(10),
+                        ]),
                     _buildField("كلمة المرور", passwordCtrl,
-                        required: true, obscure: true),
+                        required: true,
+                        obscure: true,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "الرجاء إدخال كلمة المرور";
+                          }
+                          if (value.length < 6) {
+                            return "كلمة المرور يجب أن تكون 6 أحرف على الأقل";
+                          }
+                          return null;
+                        }),
                     _buildField("البريد الإلكتروني", emailCtrl,
-                        keyboard: TextInputType.emailAddress),
+                        keyboard: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value != null && value.isNotEmpty) {
+                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                .hasMatch(value)) {
+                              return "الرجاء إدخال بريد إلكتروني صحيح";
+                            }
+                          }
+                          return null;
+                        }),
                     _buildField("الشهادات", certificatesCtrl),
                     _buildField("سنوات الخبرة", experienceCtrl),
                     _buildField("مكان العمل", workplaceCtrl),
@@ -248,7 +274,10 @@ class _EditDoctorPageState extends State<EditDoctorPage> {
   Widget _buildField(String label, TextEditingController controller,
       {bool required = false,
       bool obscure = false,
-      TextInputType keyboard = TextInputType.text}) {
+      TextInputType keyboard = TextInputType.text,
+      String? prefixText,
+      List<TextInputFormatter>? inputFormatters,
+      String? Function(String?)? validator}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: Container(
@@ -257,9 +286,12 @@ class _EditDoctorPageState extends State<EditDoctorPage> {
           controller: controller,
           obscureText: obscure,
           keyboardType: keyboard,
+          inputFormatters: inputFormatters,
           style: const TextStyle(color: Colors.black87),
           decoration: InputDecoration(
             labelText: label,
+            prefixText: prefixText,
+            prefixStyle: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold),
             filled: true,
             fillColor: Colors.white.withOpacity(0.85),
             border: OutlineInputBorder(
@@ -274,11 +306,12 @@ class _EditDoctorPageState extends State<EditDoctorPage> {
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
-          validator: required
-              ? (value) => (value == null || value.isEmpty)
-                  ? "الرجاء إدخال $label"
-                  : null
-              : null,
+          validator: validator ??
+              (required
+                  ? (value) => (value == null || value.isEmpty)
+                      ? "الرجاء إدخال $label"
+                      : null
+                  : null),
         ),
       ),
     );

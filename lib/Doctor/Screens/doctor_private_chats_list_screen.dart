@@ -151,20 +151,27 @@ class _DoctorPrivateChatsListScreenState extends State<DoctorPrivateChatsListScr
                                   : "مجهول";
                               
                               final childName = child != null ? (child['fullName'] ?? "غير محدد") : "غير محدد";
-                              final childObjectId = child != null ? (child['objectId'] ?? "") : "";
                               
+                              // Fallback to parent ID if child ID is missing (assuming parent is the user playing)
+                              String childIdToUse = "";
+                              if (child != null && (child['objectId'] != null || child['id'] != null)) {
+                                childIdToUse = child['objectId'] ?? child['id'];
+                              } else if (parent != null) {
+                                childIdToUse = parent['objectId'] ?? parent['id'] ?? "";
+                              }
+
                               print("Chat Group ${group['objectId']}: child = $child");
-                              print("  childName: $childName, childObjectId: $childObjectId");
+                              print("  childName: $childName, childObjectId: $childIdToUse");
                               
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) => DoctorPrivateChatRoom(
-                                    parentId: parent != null ? parent['id'] : '',
+                                    parentId: parent != null ? (parent['id'] ?? parent['objectId']) : '',
                                     parentName: pName,
                                     childName: childName,
-                                    childId: childObjectId,
-                                    appointmentId: appointment != null ? appointment['objectId'] : '',
+                                    childId: childIdToUse,
+                                    appointmentId: appointment != null ? (appointment['objectId'] ?? appointment['id']) : '',
                                     durationMinutes: 30,
                                     chatGroupId: group['objectId'],
                                   ),

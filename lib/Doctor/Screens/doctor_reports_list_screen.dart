@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../Colors/colors.dart';
 import '../../api/reports_api.dart';
 import '../../utils/api_helpers.dart';
@@ -158,28 +159,25 @@ class _DoctorReportsListScreenState extends State<DoctorReportsListScreen> {
                               : "استشارة";
 
                           // Format date
-                          String dateText = "";
+                          String dateText = "غير محدد";
                           if (report['created_at'] != null) {
                             try {
                               var createdAt = report['created_at'];
-                              String dateStr;
-
-                              // Handle Parse Date object
-                              if (createdAt is Map &&
-                                  createdAt.containsKey('iso')) {
-                                dateStr = createdAt['iso'].toString();
-                              } else {
-                                dateStr = createdAt.toString();
-                              }
-
+                              DateTime date;
                               
-                              if (dateStr.length >= 10) {
-                                dateText = dateStr.substring(0, 10);
+                              if (createdAt is Map && createdAt.containsKey('iso')) {
+                                date = DateTime.parse(createdAt['iso']).toLocal();
+                              } else if (createdAt is String) {
+                                date = DateTime.parse(createdAt).toLocal();
+                              } else if (createdAt is DateTime) {
+                                date = createdAt;
                               } else {
-                                dateText = dateStr;
+                                throw "Unknown type";
                               }
+                              
+                              dateText = DateFormat('yyyy-MM-dd').format(date);
                             } catch (e) {
-                              dateText = "غير محدد";
+                              dateText = "تاريخ غير صحيح";
                             }
                           }
 

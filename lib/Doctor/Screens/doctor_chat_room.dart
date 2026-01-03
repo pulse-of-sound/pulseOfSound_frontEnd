@@ -7,6 +7,7 @@ import '../../api/chat_api.dart';
 import '../../utils/api_helpers.dart';
 import 'doctor_reports_compose_screen.dart';
 import 'parent_profile_details.dart';
+import 'child_progress_screen.dart';
 
 class DoctorPrivateChatRoom extends StatefulWidget {
   final String parentId;
@@ -216,16 +217,23 @@ class _DoctorPrivateChatRoomState extends State<DoctorPrivateChatRoom> {
           IconButton(
             icon:
                 const Icon(Icons.account_circle, color: Colors.white, size: 26),
-            tooltip: "عرض بروفايل وليّ الأمر",
+            tooltip: "عرض تقدم الطفل",
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ParentProfileDetailsScreen(
-                    parentId: widget.parentId,
+              if (widget.childId != null && widget.childId!.isNotEmpty) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChildProgressScreen(
+                      childId: widget.childId!,
+                      childName: widget.childName ?? "المريض",
+                    ),
                   ),
-                ),
-              );
+                );
+              } else {
+                 ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("لا يوجد طفل مرتبط بهذه المحادثة")),
+                 );
+              }
             },
           ),
 

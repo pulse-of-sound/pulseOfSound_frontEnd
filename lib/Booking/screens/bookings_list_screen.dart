@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../api/appointment_api.dart';
 import '../../utils/api_helpers.dart';
 import '../../Colors/colors.dart';
+import 'consultation_flow.dart';
 
 class BookingsListScreen extends StatefulWidget {
   const BookingsListScreen({super.key});
@@ -187,7 +188,7 @@ class _BookingsListScreenState extends State<BookingsListScreen> {
                           ),
                           const SizedBox(height: 10),
                           ElevatedButton(
-                            onPressed: () => Navigator.pop(context),
+                            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) =>  ConsultationFlowScreen(childId: _childId)),),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.skyBlue,
                             ),

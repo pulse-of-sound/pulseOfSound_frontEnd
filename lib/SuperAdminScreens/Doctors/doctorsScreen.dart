@@ -65,10 +65,14 @@ class _DoctorsPageState extends State<DoctorsPage> {
   }
 
   void _filterDoctors(String query) {
+    final lowerQuery = query.toLowerCase();
     final filtered = doctors.where((doctor) {
-      final nameMatch = (doctor['fullName'] ?? doctor['username'] ?? '').toString().contains(query);
-      final phoneMatch = (doctor['mobile'] ?? '').toString().contains(query);
-      return nameMatch || phoneMatch;
+      final name = (doctor['fullName'] ?? doctor['username'] ?? '').toString().toLowerCase();
+      final phone = (doctor['mobile'] ?? doctor['mobileNumber'] ?? '').toString().toLowerCase();
+      final email = (doctor['email'] ?? '').toString().toLowerCase();
+      return name.contains(lowerQuery) || 
+             phone.contains(lowerQuery) || 
+             email.contains(lowerQuery);
     }).toList();
 
     setState(() => filteredDoctors = filtered);
@@ -272,7 +276,7 @@ class _DoctorsPageState extends State<DoctorsPage> {
                                 itemBuilder: (context, index) {
                                   final doctor = filteredDoctors[index];
                                   final doctorName = doctor['fullName'] ?? doctor['username'] ?? 'بدون اسم';
-                                  final doctorPhone = doctor['mobile'] ?? 'بدون رقم';
+                                  final doctorPhone = doctor['mobile'] ?? doctor['mobileNumber'] ?? 'بدون رقم';
                                   
                                   return Card(
                                     color: Colors.white.withOpacity(0.9),

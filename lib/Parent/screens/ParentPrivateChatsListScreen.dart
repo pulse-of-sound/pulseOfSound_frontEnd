@@ -70,7 +70,12 @@ class _ParentPrivateChatsListScreenState extends State<ParentPrivateChatsListScr
         : chatGroups.isEmpty 
           ? const Center(child: Text("لا توجد محادثات خاصة حالياً", style: TextStyle(color: Colors.black54, fontSize: 16)))
           : ListView.builder(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top + kToolbarHeight + 10,
+                left: 12,
+                right: 12,
+                bottom: 12,
+              ),
               itemCount: chatGroups.length,
               itemBuilder: (context, index) {
                 final group = chatGroups[index];

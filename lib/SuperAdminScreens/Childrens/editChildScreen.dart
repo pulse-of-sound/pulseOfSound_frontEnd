@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'modelChild.dart';
 import '../../api/user_api.dart';
 import '../../utils/shared_pref_helper.dart';
@@ -151,7 +152,24 @@ class _EditChildPageState extends State<EditChildPage> {
                     _buildField("اسم الطفل", nameController, required: true),
                     _buildDateField("تاريخ الميلاد", birthDateController),
                     _buildField("هاتف ولي الأمر", parentPhoneController,
-                        required: true, keyboard: TextInputType.phone),
+                        required: true,
+                        keyboard: TextInputType.phone,
+                        prefixText: '+963 ',
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(10),
+                        ]),
+                    _buildField("البريد الإلكتروني", TextEditingController(text: ""), // Child might have email
+                        keyboard: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value != null && value.isNotEmpty) {
+                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                .hasMatch(value)) {
+                              return "الرجاء إدخال بريد إلكتروني صحيح";
+                            }
+                          }
+                          return null;
+                        }),
                     const SizedBox(height: 30),
 
                     ElevatedButton(
@@ -219,14 +237,21 @@ class _EditChildPageState extends State<EditChildPage> {
   }
 
   Widget _buildField(String label, TextEditingController controller,
-      {bool required = false, TextInputType keyboard = TextInputType.text}) {
+      {bool required = false,
+      TextInputType keyboard = TextInputType.text,
+      String? prefixText,
+      List<TextInputFormatter>? inputFormatters,
+      String? Function(String?)? validator}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboard,
+        inputFormatters: inputFormatters,
         decoration: InputDecoration(
           labelText: label,
+          prefixText: prefixText,
+          prefixStyle: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold),
           filled: true,
           fillColor: Colors.white.withOpacity(0.9),
           border: OutlineInputBorder(
@@ -240,10 +265,10 @@ class _EditChildPageState extends State<EditChildPage> {
               borderSide:
                   const BorderSide(color: Colors.blueAccent, width: 1.5)),
         ),
-        validator: required
+        validator: validator ?? (required
             ? (value) =>
                 (value == null || value.isEmpty) ? "الرجاء إدخال $label" : null
-            : null,
+            : null),
       ),
     );
   }
