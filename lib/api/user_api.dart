@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
+import '../utils/error_logger.dart';
 import 'api_config.dart';
 
 class UserAPI {
   static final String serverUrl = ApiConfig.baseUrl;
-  static const String appId = ApiConfig.appId;
+  static final String appId = ApiConfig.appId;
 
   //  LOGIN FUNCTIONS
 
@@ -13,19 +14,18 @@ class UserAPI {
       String username, String password) async {
     try {
       print(" Logging in Admin/Doctor: $username");
+      ErrorLogger.addBreadcrumb(
+        message: 'Login attempt',
+        category: 'auth',
+        data: {'username': username},
+      );
 
       final response = await http.post(
         Uri.parse("$serverUrl/loginUser"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Client-Key": "null",
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getBaseHeaders(),
         body: jsonEncode({
           "username": username,
-          "password": password,
+          "password": password, // Sensitive, do not log
           "platform": "flutter",
           "locale": "ar",
         }),
@@ -60,11 +60,19 @@ class UserAPI {
           }
         }
 
-        // محاولة جلب  role
-        var roleData = await _fetchUserRole(userId, sessionToken);
-        var role = roleData["role"] ?? "User";
+        // التحقق من وجود الدور في الاستجابة أولاً
+        String role = "User";
+        if (data.containsKey("role")) {
+          role = _extractRole(data);
+          print(" DEBUG loginUser: Role from response = '$role'");
+        }
 
-        print(" DEBUG loginUser: Role from _fetchUserRole = '$role'");
+        // إذا لم يتم العثور على الدور أو إذا كان "User"، حاول جلبه
+        if (role == "User") {
+          var roleData = await _fetchUserRole(userId, sessionToken);
+          role = roleData["role"] ?? "User";
+          print(" DEBUG loginUser: Role from _fetchUserRole = '$role'");
+        }
 
         // إذا كان role لا يزال "User"، حاول استنتاجها من username أو userId
         if (role == "User") {
@@ -105,6 +113,21 @@ class UserAPI {
         print(
             " DEBUG loginUser: returning data with sessionToken = '$sessionToken'");
 
+        // ---------------------------------------------------------
+        // SENTRY: Set user context on successful login
+        // ---------------------------------------------------------
+        await ErrorLogger.setUser(
+          id: userId,
+          username: usernameFromResponse,
+          email: data['email'],
+        );
+        
+        ErrorLogger.addBreadcrumb(
+          message: 'Login successful',
+          category: 'auth',
+          data: {'role': role},
+        );
+
         return {
           ...data,
           "sessionToken": sessionToken,
@@ -112,6 +135,13 @@ class UserAPI {
           "fullName": fullName,
         };
       } else {
+        await ErrorLogger.logApiError(
+          endpoint: 'loginUser',
+          statusCode: response.statusCode,
+          error: Exception('Login failed'),
+          requestData: {'username': username},
+        );
+        
         try {
           final errorData = jsonDecode(response.body);
           return {"error": errorData["error"] ?? "خطأ في تسجيل الدخول"};
@@ -119,8 +149,14 @@ class UserAPI {
           return {"error": "خطأ: ${response.statusCode}"};
         }
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       print(" Login Exception: $e");
+      await ErrorLogger.logError(
+        e, 
+        stackTrace, 
+        context: 'loginUser',
+        extra: {'username': username}
+      );
       return {"error": "تعذر الاتصال بالسيرفر: $e"};
     }
   }
@@ -133,10 +169,7 @@ class UserAPI {
       
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/../login"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-        },
+        headers: ApiConfig.getBaseHeaders(),
         body: jsonEncode({
           "username": username,
           "password": password,
@@ -173,13 +206,7 @@ class UserAPI {
 
       final response = await http.get(
         url,
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
       );
 
       print(" Role fetch status: ${response.statusCode}");
@@ -206,12 +233,7 @@ class UserAPI {
 
         final rolesResponse = await http.get(
           rolesUrl,
-          headers: {
-            "Content-Type": "application/json",
-            "X-Parse-Application-Id": appId,
-            "X-Parse-Master-Key":
-                "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-          },
+          headers: ApiConfig.getBaseHeaders(),
         );
 
         if (rolesResponse.statusCode == 200) {
@@ -252,13 +274,7 @@ class UserAPI {
         final userUrl = Uri.parse("$serverUrl/../classes/_User/$userId");
         final userResponse = await http.get(
           userUrl,
-          headers: {
-            "Content-Type": "application/json",
-            "X-Parse-Application-Id": appId,
-            "X-Parse-Session-Token": sessionToken,
-            "X-Parse-Master-Key":
-                "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-          },
+          headers: ApiConfig.getHeadersWithToken(sessionToken),
         );
 
         if (userResponse.statusCode == 200) {
@@ -319,7 +335,7 @@ class UserAPI {
           return roleName;
         }
         if (role.containsKey("className") && role["className"] == "_Role") {
-          final roleName = role["name"] ?? "Doctor";
+          final roleName = role["name"] ?? "User";
           if (roleName.toUpperCase() == "SUPER_ADMIN" ||
               roleName == "SuperAdmin") {
             return "SUPER_ADMIN";
@@ -348,13 +364,7 @@ class UserAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/getMyProfile"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
         body: jsonEncode({}),
       );
 
@@ -380,13 +390,7 @@ class UserAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/logout"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
         body: jsonEncode({}),
       );
       print(" Logout Status: ${response.statusCode}");
@@ -416,13 +420,7 @@ class UserAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/addEditDoctor"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
         body: jsonEncode({
           "fullName": fullName,
           "username": username,
@@ -464,13 +462,7 @@ class UserAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/addEditSpecialist"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
         body: jsonEncode({
           "fullName": fullName,
           "username": username,
@@ -513,13 +505,7 @@ class UserAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/addEditAdmin"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
         body: jsonEncode({
           "fullName": fullName,
           "username": username,
@@ -549,27 +535,37 @@ class UserAPI {
 
   
 
-  static Future<List<Map<String, dynamic>>> getAllDoctors(
-      String sessionToken) async {
+  static Future<dynamic> getAllDoctors(
+      String sessionToken, {int skip = 0, int limit = 1000}) async {
     try {
-      print(" Fetching all doctors...");
+      print(" Fetching all doctors (skip: $skip, limit: $limit)...");
 
-      final response = await http.get(
+      // Use POST to send params, or query params if GET is supported
+      final response = await http.post(
         Uri.parse("$serverUrl/getAllDoctors"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
+        body: jsonEncode({
+          "skip": skip,
+          "limit": limit,
+        }),
       );
 
       print(" Doctors Status: ${response.statusCode}");
-      print(" Doctors Response: ${response.body}");
+      // print(" Doctors Response: ${response.body}"); // Verbose
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        
+        // Handle paginated response
+        if (data is Map && data.containsKey('results')) {
+          return {
+            "results": List<Map<String, dynamic>>.from(data['results']),
+            "total": data['total'],
+            "hasMore": data['hasMore']
+          };
+        }
+        
+        // Handle legacy response (direct list)
         if (data is List) {
           return List<Map<String, dynamic>>.from(data);
         }
@@ -592,13 +588,7 @@ class UserAPI {
 
       final response = await http.get(
         Uri.parse("$serverUrl/getAllSpecialists"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
       );
 
       print(" Specialists Status: ${response.statusCode}");
@@ -629,13 +619,7 @@ class UserAPI {
       print(
           " DEBUG getAllAdmins: sessionToken length = ${sessionToken.length}");
 
-      final headers = {
-        "Content-Type": "application/json",
-        "X-Parse-Application-Id": appId,
-        "X-Parse-Session-Token": sessionToken,
-        "X-Parse-Master-Key":
-            "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-      };
+      final headers = ApiConfig.getHeadersWithToken(sessionToken);
 
       print(" DEBUG getAllAdmins: headers = $headers");
 
@@ -671,13 +655,7 @@ class UserAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/createSystemRolesIfMissing"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
         body: jsonEncode({}),
       );
 
@@ -704,13 +682,7 @@ class UserAPI {
       print(
           " DEBUG deleteDoctor: sessionToken length = ${sessionToken.length}");
 
-      final headers = {
-        "Content-Type": "application/json",
-        "X-Parse-Application-Id": appId,
-        "X-Parse-Session-Token": sessionToken,
-        "X-Parse-Master-Key":
-            "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-      };
+      final headers = ApiConfig.getHeadersWithToken(sessionToken);
 
       print(" DEBUG deleteDoctor: headers = $headers");
 
@@ -747,13 +719,7 @@ class UserAPI {
 
       final response = await http.delete(
         Uri.parse("$serverUrl/deleteSpecialist"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
         body: jsonEncode({"specialistId": specialistId}),
       );
 
@@ -804,13 +770,7 @@ class UserAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/addEditChild"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
         body: jsonEncode(body),
       );
 
@@ -842,13 +802,7 @@ class UserAPI {
 
       final response = await http.get(
         Uri.parse("$serverUrl/getAllChildren"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
       );
 
       print(" Children Status: ${response.statusCode}");
@@ -879,13 +833,7 @@ class UserAPI {
 
       final response = await http.delete(
         Uri.parse("$serverUrl/deleteChild"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
         body: jsonEncode({"childId": childId}),
       );
 
@@ -915,13 +863,7 @@ class UserAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/loginWithMobile"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Client-Key": "null",
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getBaseHeaders(),
         body: jsonEncode({
           "mobileNumber": mobileNumber,
           "OTP": otp,
@@ -971,13 +913,7 @@ class UserAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/addSystemUser"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
         body: jsonEncode(body),
       );
 
@@ -1008,13 +944,7 @@ class UserAPI {
 
       final response = await http.delete(
         Uri.parse("$serverUrl/deleteAdmin"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
         body: jsonEncode({"adminId": adminId}),
       );
 
@@ -1045,13 +975,7 @@ class UserAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/createRole"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
         body: jsonEncode({
           "name": roleName,
         }),
@@ -1084,13 +1008,7 @@ class UserAPI {
 
       final response = await http.get(
         Uri.parse("$serverUrl/getMyChildProfile"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
       );
 
       print(" Get My Child Profile Status: ${response.statusCode}");
@@ -1137,12 +1055,7 @@ class UserAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/createOrUpdateChildProfile"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getBaseHeaders(),
         body: jsonEncode(body),
       );
 
@@ -1172,12 +1085,7 @@ class UserAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/generateOTP"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getBaseHeaders(),
         body: jsonEncode({
           "mobileNumber": mobileNumber,
         }),
@@ -1209,12 +1117,7 @@ class UserAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/resendOTP"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getBaseHeaders(),
         body: jsonEncode({
           "mobileNumber": mobileNumber,
         }),
@@ -1247,13 +1150,7 @@ class UserAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/muteChild"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
         body: jsonEncode({"childId": childId}),
       );
 
@@ -1282,13 +1179,7 @@ class UserAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/unmuteChild"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
         body: jsonEncode({"childId": childId}),
       );
 
@@ -1319,12 +1210,7 @@ class UserAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/verifyOTP"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getBaseHeaders(),
         body: jsonEncode({
           "mobileNumber": mobileNumber,
           "OTP": otp,
@@ -1357,12 +1243,7 @@ class UserAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/loginAfterOTP"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getBaseHeaders(),
         body: jsonEncode({
           "mobileNumber": mobileNumber,
         }),
@@ -1395,13 +1276,7 @@ class UserAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/getProvidersByType"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
         body: jsonEncode({"provider_type": providerType}),
       );
 
@@ -1441,13 +1316,7 @@ class UserAPI {
       final String baseUrl = serverUrl.replaceAll('/functions', '');
       final response = await http.post(
         Uri.parse("$baseUrl/files/$filename"),
-        headers: {
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-          "Content-Type": contentType,
-        },
+        headers: ApiConfig.getUploadHeaders(sessionToken)..addAll({"Content-Type": contentType}),
         body: bytes,
       );
 
@@ -1489,13 +1358,7 @@ class UserAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/updateMyAccount"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Session-Token": sessionToken,
-          "X-Parse-Master-Key":
-              "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getHeadersWithToken(sessionToken),
         body: jsonEncode(body),
       );
 

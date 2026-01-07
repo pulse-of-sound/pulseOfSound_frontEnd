@@ -45,7 +45,16 @@ class _DoctorsPageState extends State<DoctorsPage> {
     try {
       final sessionToken = SharedPrefsHelper.getToken();
       if (sessionToken != null && sessionToken.isNotEmpty) {
-        final doctorsList = await UserAPI.getAllDoctors(sessionToken);
+        final response = await UserAPI.getAllDoctors(sessionToken);
+        
+        List<Map<String, dynamic>> doctorsList = [];
+
+        if (response is Map && response.containsKey('results')) {
+           doctorsList = List<Map<String, dynamic>>.from(response['results']);
+        } else if (response is List) {
+           doctorsList = List<Map<String, dynamic>>.from(response);
+        }
+
         setState(() {
           doctors = doctorsList;
           filteredDoctors = doctorsList;

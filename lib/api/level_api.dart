@@ -14,7 +14,7 @@ class LevelAPI {
       
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/addLevelByAdmin"),
-        headers: ApiConfig.getHeadersWithMasterKey(),
+        headers: ApiConfig.getHeaders(),
         body: jsonEncode({
           "name": name,
           if (description != null) "description": description,
@@ -47,7 +47,7 @@ class LevelAPI {
       
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/getAllLevels"),
-        headers: ApiConfig.getHeadersWithMasterKey(),
+        headers: ApiConfig.getHeaders(),
         body: jsonEncode({}),
       );
       
@@ -190,7 +190,7 @@ class LevelGameAPI {
       
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/getLevelGamesForLevel"),
-        headers: ApiConfig.getHeadersWithMasterKey(),
+        headers: ApiConfig.getHeaders(),
         body: jsonEncode({"level_id": levelId}),
       );
       

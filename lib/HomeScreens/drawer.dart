@@ -1,16 +1,16 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../api/api_helpers.dart';
 import '../Booking/screens/WalletScreenUpdated.dart';
 import '../Booking/screens/bookings_list_screen.dart';
-import '../Booking/utils/bookings_prefs.dart';
 import '../Colors/colors.dart';
 import '../LoginScreens/loginscreen.dart';
-
 import '../Profile/profile_drawer_screen.dart';
 import '../Parent/screens/ParentReportsScreen.dart';
 import '../api/appointment_api.dart';
 import '../utils/api_helpers.dart' as utils_api;
+import '../utils/shared_pref_helper.dart';
 
 class DrawerScreen extends StatefulWidget {
   const DrawerScreen({super.key});
@@ -22,19 +22,42 @@ class DrawerScreen extends StatefulWidget {
 class _DrawerScreenState extends State<DrawerScreen> {
   int pendingCount = 0;
   int newReportsCount = 0;
-  final String parentId = "parent_001"; 
+  final String parentId = "parent_001";
+  
+  String userName = "مستخدم";
+  String userContact = ""; // Email or Phone
+  String? profileImagePath;
 
   @override
   void initState() {
     super.initState();
+    _loadUserData();
     _loadPendingCount();
     _loadNewReportsCount();
   }
 
+  Future<void> _loadUserData() async {
+    final name = SharedPrefsHelper.getName();
+    final phone = SharedPrefsHelper.getPhone();
+    final image = SharedPrefsHelper.getProfileImage();
+    
+    // We don't have getEmail in SharedPrefsHelper explicitly shown, but we can try to get it
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('email');
+
+    setState(() {
+      userName = (name != null && name.isNotEmpty) ? name : "مستخدم";
+      userContact = (email != null && email.isNotEmpty) 
+          ? email 
+          : (phone ?? "");
+      profileImagePath = image;
+    });
+  }
+
   Future<void> _loadPendingCount() async {
     try {
-      final sessionToken = await APIHelpers.getSessionToken();
-      final userId = await utils_api.APIHelpers.getUserId();
+      final sessionToken = SharedPrefsHelper.getToken();
+      final userId = SharedPrefsHelper.getUserId();
       if (sessionToken == null || userId == null) return;
       
       final appointments = await AppointmentAPI.getChildAppointments(
@@ -65,25 +88,10 @@ class _DrawerScreenState extends State<DrawerScreen> {
   }
 
   Future<void> _logout(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    
-    
-    await prefs.remove('session_token');
-    await prefs.remove('userId');
-    await prefs.remove('child_id');
-    await prefs.remove('user_type');
-    await prefs.remove('phone');
-    await prefs.remove('name');
-    await prefs.remove('father_name');
-    await prefs.remove('birth_date');
-    await prefs.remove('gender');
-    await prefs.remove('health_status');
-    await prefs.remove('profile_image');
-    
-    
+    await SharedPrefsHelper.clear(); // Use helper to clear all
     await APIHelpers.clearSessionToken();
     
-    print(' Logged out - session cleared, game progress preserved');
+    print(' Logged out - session cleared');
     
     if (!mounted) return;
     Navigator.pushAndRemoveUntil(
@@ -95,18 +103,33 @@ class _DrawerScreenState extends State<DrawerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ImageProvider? imageProvider;
+    if (profileImagePath != null && profileImagePath!.isNotEmpty) {
+      if (profileImagePath!.startsWith('http')) {
+        imageProvider = NetworkImage(profileImagePath!);
+      } else {
+         final file = File(profileImagePath!);
+         if (file.existsSync()) {
+           imageProvider = FileImage(file);
+         }
+      }
+    }
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          const UserAccountsDrawerHeader(
-            accountName: Text("اسم المستخدم"),
-            accountEmail: Text("example@email.com"),
+          UserAccountsDrawerHeader(
+            accountName: Text(userName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            accountEmail: Text(userContact),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
-              child: Icon(Icons.person, size: 40, color: Colors.grey),
+              backgroundImage: imageProvider,
+              child: imageProvider == null 
+                  ? const Icon(Icons.person, size: 40, color: Colors.grey) 
+                  : null,
             ),
-            decoration: BoxDecoration(color: AppColors.pink),
+            decoration: const BoxDecoration(color: AppColors.pink),
           ),
           ListTile(
             leading: const Icon(Icons.person),
@@ -115,7 +138,7 @@ class _DrawerScreenState extends State<DrawerScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const ProfileDrawerScreen()),
-              );
+              ).then((_) => _loadUserData()); // Reload data after returning
             },
           ),
           ListTile(

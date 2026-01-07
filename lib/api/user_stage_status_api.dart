@@ -13,7 +13,7 @@ class UserStageStatusAPI {
       
       final response = await http.post(
         Uri.parse('${ApiConfig.baseUrl}/getStageProgressForGroup'),
-        headers: ApiConfig.getHeadersWithMasterKey(),
+        headers: ApiConfig.getHeaders(),
         body: jsonEncode({
           'child_id': childId,
           'level_game_id': levelGameId,

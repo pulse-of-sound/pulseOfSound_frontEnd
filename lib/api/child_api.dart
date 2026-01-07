@@ -51,7 +51,7 @@ class ChildProfileAPI {
       
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/createOrUpdateChildProfile"),
-        headers: ApiConfig.getHeadersWithMasterKey(),
+        headers: ApiConfig.getHeaders(),
         body: jsonEncode({
           "childId": childId,
           if (name != null) "name": name,

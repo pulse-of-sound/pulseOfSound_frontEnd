@@ -81,6 +81,14 @@ class _LoginForAdminAndDrState extends State<LoginForAdminAndDr> {
         context,
         MaterialPageRoute(builder: (_) => const DoctorDashboard()),
       );
+    } else if (role == "User") {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("هذا الحساب غير مخصص للإدمن أو الطبيب. يرجى التواصل مع الإدارة لتعيين الصلاحيات."),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 5),
+        ),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("دور المستخدم غير مدعوم: $role")),

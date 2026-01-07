@@ -118,7 +118,7 @@ class StageResultAPI {
       print(" Submitting stage answers: $levelGameId, ${answers.length} answers");
       print(" Child ID: $childId");
       
-      final headers = ApiConfig.getHeadersWithMasterKey();
+      final headers = ApiConfig.getHeaders();
       print(" Headers: $headers");
       
       final response = await http.post(

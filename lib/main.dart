@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:parse_server_sdk/parse_server_sdk.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'package:pulse_of_sound/Colors/theme.dart';
 import 'package:pulse_of_sound/SplashScreen/SplashScreen.dart';
@@ -12,26 +13,54 @@ import 'utils/shared_pref_helper.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await SharedPrefsHelper.init();
-  
-  // Initialize date formatting for Arabic
-  await initializeDateFormatting('ar', null);
-  Intl.defaultLocale = 'ar';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:pulse_of_sound/api/api_config.dart';
 
-  const String appId = "cDUPSpkhbmD0e1TFND3rYkw7TrrdHXqNyXgoOa3PpLPSd5NJb7";
-  const String serverUrl = "http://localhost:1337/api";
+// ... other imports ...
 
-  await Parse().initialize(
-    appId,
-    serverUrl,
-    clientKey: null,
-    autoSendSessionId: true,
-    debug: true,
+Future<void> main() async {
+  // Load environment variables strictly
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    print("Warning: .env file not found, using fallback values.");
+  }
+
+  // Initialize Sentry for error tracking
+  await SentryFlutter.init(
+    (options) {
+      options.dsn = ''; // TODO: Add DSN
+      options.environment = dotenv.env['ENVIRONMENT'] ?? 'development';
+      options.release = 'pulse_of_sound@1.0.0';
+      options.tracesSampleRate = 1.0;
+      options.attachScreenshot = true;
+      options.attachViewHierarchy = true;
+      options.beforeSend = (event, hint) {
+        event.request?.headers?.remove('X-Parse-Session-Token');
+        event.request?.headers?.remove('Authorization');
+        return event;
+      };
+    },
+    appRunner: () async {
+      WidgetsFlutterBinding.ensureInitialized();
+      await SharedPrefsHelper.init();
+
+      // Initialize date formatting for Arabic
+      await initializeDateFormatting('ar', null);
+      Intl.defaultLocale = 'ar';
+
+      // Use ApiConfig which will read from .env (with fallback)
+      await Parse().initialize(
+        ApiConfig.appId,
+        ApiConfig.parseApiUrl,
+        clientKey: null,
+        autoSendSessionId: true,
+        debug: true,
+      );
+
+      runApp(const MyApp());
+    },
   );
-
-  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {

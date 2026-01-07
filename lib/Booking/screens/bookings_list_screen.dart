@@ -141,6 +141,32 @@ class _BookingsListScreenState extends State<BookingsListScreen> {
     }
   }
 
+  String _formatDate(dynamic dateObj) {
+    if (dateObj == null) return '';
+    try {
+      String dateStr = '';
+      if (dateObj is Map && dateObj.containsKey('iso')) {
+        dateStr = dateObj['iso'];
+      } else if (dateObj is String) {
+        dateStr = dateObj;
+      }
+      
+      if (dateStr.isEmpty) return '';
+
+      final dateTime = DateTime.parse(dateStr).toLocal();
+      // Simple custom format: YYYY-MM-DD HH:MM
+      final year = dateTime.year;
+      final month = dateTime.month.toString().padLeft(2, '0');
+      final day = dateTime.day.toString().padLeft(2, '0');
+      final hour = dateTime.hour.toString().padLeft(2, '0');
+      final minute = dateTime.minute.toString().padLeft(2, '0');
+      
+      return "$year-$month-$day $hour:$minute";
+    } catch (e) {
+      return dateObj.toString();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -303,7 +329,7 @@ class _BookingsListScreenState extends State<BookingsListScreen> {
                     const Icon(Icons.calendar_today, size: 18, color: Colors.grey),
                     const SizedBox(width: 8),
                     Text(
-                      date.toString().substring(0, 10), // Show date only
+                      _formatDate(date),
                       style: const TextStyle(
                         fontSize: 14,
                         color: Colors.grey,

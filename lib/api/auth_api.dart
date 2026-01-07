@@ -1,14 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'api_config.dart';
 
 class AuthAPI {
   static const String serverUrl = "http://localhost:1337/api/functions";
-  static const String appId = "cDUPSpkhbmD0e1TFND3rYkw7TrrdHXqNyXgoOa3PpLPSd5NJb7";
-
-  static const Map<String, String> headers = {
-    "Content-Type": "application/json",
-    "X-Parse-Application-Id": appId,
-  };
+  static final String appId = ApiConfig.appId;
 
 // إرسال OTP
 
@@ -22,12 +18,7 @@ class AuthAPI {
 
       final response = await http.post(
         url,
-        headers: {
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Client-Key": "null",
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-          "Content-Type": "application/json"
-        },
+        headers: ApiConfig.getBaseHeaders(),
         body: jsonEncode({"mobileNumber": mobile}),
       );
 
@@ -55,12 +46,7 @@ class AuthAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/resendOTP"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Client-Key": "null",
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getBaseHeaders(),
         body: jsonEncode({"mobileNumber": mobile}),
       );
 
@@ -89,12 +75,7 @@ class AuthAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/verifyOTP"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Client-Key": "null",
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getBaseHeaders(),
         body: jsonEncode({
           "mobileNumber": mobile,
           "OTP": otp,
@@ -132,12 +113,7 @@ class AuthAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/loginWithMobile"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Client-Key": "null",
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getBaseHeaders(),
         body: jsonEncode({
           "mobileNumber": mobile,
           "OTP": otp,
@@ -169,12 +145,7 @@ class AuthAPI {
 
       final response = await http.post(
         Uri.parse("$serverUrl/loginAfterOTP"),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": appId,
-          "X-Parse-Client-Key": "null",
-          "X-Parse-Master-Key": "He98Mcsc7cTEjut5eE59Oy2gs2dowaNoGWv5QhpzvA7GC3NShY",
-        },
+        headers: ApiConfig.getBaseHeaders(),
         body: jsonEncode({
           "mobileNumber": mobile,
           "platform": "flutter",

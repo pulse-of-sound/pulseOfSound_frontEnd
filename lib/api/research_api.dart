@@ -93,11 +93,7 @@ class ResearchPostsAPI {
         
         final uploadResponse = await http.post(
           uploadUri,
-          headers: {
-             "X-Parse-Application-Id": ApiConfig.appId,
-             "X-Parse-Master-Key": ApiConfig.masterKey,
-             "Content-Type": "application/pdf", // Adjust if needed
-          },
+          headers: ApiConfig.getUploadHeaders(sessionToken)..addAll({"Content-Type": "application/pdf"}),
           body: fileBytes ?? await document!.readAsBytes(),
         );
 

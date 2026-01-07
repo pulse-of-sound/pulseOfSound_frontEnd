@@ -107,12 +107,14 @@ class _AddStageQuestionScreenState extends State<AddStageQuestionScreen> {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final uniqueFilename = '${timestamp}_$filename';
       
+      final sessionToken = SharedPrefsHelper.getToken() ?? "";
+      
       // رفع الصورة باستخدام Parse REST API
       final response = await http.post(
         Uri.parse('${ApiConfig.baseUrl.replaceAll('/functions', '')}/files/$uniqueFilename'),
         headers: {
           'X-Parse-Application-Id': ApiConfig.applicationId,
-          'X-Parse-Master-Key': ApiConfig.masterKeyValue,
+          'X-Parse-Session-Token': sessionToken,
           'Content-Type': 'image/jpeg',
         },
         body: imageBytes,
